@@ -3,7 +3,7 @@
 # Load configuration file.
 . ./configuration.sh
 
-# Load constants used by log funcionts..
+# Load constants used by log functions.
 . ./log_constants.sh
 
 # Load general functions.
@@ -15,17 +15,68 @@ log_file_location="";
 # Indicates if the log file creation was successful.
 log_file_creation_result=${not_executed};
 
-# Writes a warning message on stderr using "echo" program.
+# Writes a message on "stderr".
 #
-# Parameters:
-#   1 - Message to be written.
+# Parameters
+#  1. Message to be written.
 #
-# Returns:
-#   The output code returned from "echo".
-echo_warn() {
-    local readonly result=$(>&2 echo "$warn_preffix $@");
-    return ${result};
+# Returns
+#  Code returned from "echo" writing on "stderr".
+write_stderr(){
+
+    local message="";
+    for parameter in "$@"
+    do
+        message=$message$parameter" ";
+    done;
+
+    $(>&2 echo $message)
+    local result=$?;
+
+    return $result;
 }
+
+# Writes a message on a file.
+#
+# Parameters
+#  1. File path to write the message.
+#  2. Message to be written.
+#
+# Returns
+#    0. If message was successfully written.
+#   -1. Otherwise.
+write_on_file(){
+
+    if [ $# -ne 2 ];
+    then
+        local file_path="$1";
+        local message="$2";
+    fi;
+
+    # If the file does not exists.
+    if [ ! -f ${file_path} ];
+    then
+        write_stderr "[${FUNCNAME[0]}, ${BASH_LINENO[0]}] ${error_preffix}: Could not find file \"${file_path}\".";
+        return ${general_failure};
+    fi;
+
+    # Check if user was write permission on file.
+    if [ ! -w ${file_path} ];
+    then
+        write_stderr "[${FUNCNAME[0]}, ${BASH_LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on  \"${file_path}\".";
+        return ${general_failure};
+    fi;
+       
+    # Write message on file.
+    echo $message >> ${file_path};
+    local echo_result=$?;
+    if [ $echo_result -ne 0 ];
+    then
+        write_stderr "[${FUNCNAME[0]}, ${BASH_LINENO[0]}] ${error_preffix}: Error writing message on \"${file_path}\" (${echo_result}).";
+        return ${general_failure};
+    fi; 
+}
+
 
 # Writes an error message on stderr using "echo" program.
 #
