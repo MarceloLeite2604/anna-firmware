@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load configuration file.
-. ./configuration.sh
+source $(dirname $BASH_SOURCE)/configuration.sh
 
 # Suffix to identify log files.
 if [ -z ${log_file_suffix+x} ]; then

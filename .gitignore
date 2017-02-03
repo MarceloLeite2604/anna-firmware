@@ -1,2 +1,2 @@
 # Do not upload "tests" folder.
-tests/
+./tests/

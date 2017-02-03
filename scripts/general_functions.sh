@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load configurations file
-. ./configuration.sh
+source $(dirname $BASH_SOURCE)/configuration.sh
 
 # Return current time formatted as a string
 #
