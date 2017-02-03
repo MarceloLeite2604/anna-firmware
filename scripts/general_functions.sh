@@ -14,3 +14,15 @@ get_current_time_formatted() {
     echo "$(date +"%Y%m%d_%H%M%S")";
     return ${success};
 };
+
+# Returns current time.
+#
+# Parameters
+#   None
+#
+# Returns
+#    The current time.
+get_current_time(){
+    echo "$(date +"%Y/%m/%d %H:%M:%S")";
+    return ${success};
+}

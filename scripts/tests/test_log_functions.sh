@@ -97,8 +97,28 @@ test_write_log_message(){
 
 } 
 
+# Test "log" function
+test_log(){
+
+    #Executes function with invalid parameters.
+    log;
+    log 0;
+    log $type_error;
+    log $type_error "a";
+    log $type_error "test" 1;
+
+    # Executes function with valid parameters.
+    log $type_trace "${FUNCNAME[0]}" 1;
+    log $type_trace "${FUNCNAME[0]}" 2 "This message should be written on log file."
+    log $type_warning "${FUNCNAME[0]}" 3 "This warning message should be written on log file."
+    log $type_error "${FUNCNAME[0]}" 4 "This error message should be written on log file."
+    cat ${log_file_location};
+
+}
+
 test_write_stderr;
 test_write_on_file;
 test_create_log_file_name;
 test_create_log_file;
 test_write_log_message;
+test_log;

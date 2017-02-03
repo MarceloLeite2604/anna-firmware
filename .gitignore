@@ -1,2 +1,5 @@
 # Do not upload "tests" folder.
 ./tests/
+
+# Do not upload log files.
+*.log

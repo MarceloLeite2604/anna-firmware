@@ -13,24 +13,34 @@ fi;
 #    readonly log_path="${root_path}log/";
 #fi;
 
-# Preffix used to identify error messages.
-if [ -z ${error_preffix+x} ]; then
-    readonly error_preffix="ERROR";
+# Code to identify trace messages.
+if [ -z ${type_trace+x} ]; then
+    readonly type_trace=105;
 fi;
 
-# Preffix used to identify information messages.
-if [ -z ${info_preffix+x} ]; then
-    readonly info_preffix="INFO";
+# Code to identify warning messages.
+if [ -z ${type_warning+x} ]; then
+    readonly type_warning=110;
 fi;
 
-# Preffix used to identify warning messages.
-if [ -z ${warn_preffix+x} ]; then
-    readonly warn_preffix="WARN";
+# Code to identify error messages.
+if [ -z ${type_error+x} ]; then
+    readonly type_error=115;
 fi;
 
 # Preffix used to identify trace messages.
 if [ -z ${trace_preffix+x} ]; then
     readonly trace_preffix="TRACE";
+fi;
+
+# Preffix used to identify warning messages.
+if [ -z ${warn_preffix+x} ]; then
+    readonly warning_preffix="WARN";
+fi;
+
+# Preffix used to identify error messages.
+if [ -z ${error_preffix+x} ]; then
+    readonly error_preffix="ERROR";
 fi;
 
 

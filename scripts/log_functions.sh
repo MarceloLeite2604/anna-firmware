@@ -232,154 +232,62 @@ write_log_message() {
     fi;
 }
 
-# Register a warning message on log file.
+# Writes a log message.
 #
-# Parameters:
-#   1 - Message identification.
-#   2 - Message index (e. g. line number).
-#   3 - Message to be registered.
+# Parameters
+#   1. Message type (trace, info, warning, error).
+#   2. Message tag.
+#   3. Message index.
+#   2. Message content. (optional for trace messages).
 #
-# Results:
-#   This function retuns the result obtained from "log" function.
-log_warn() {
-
-    if [ $# -lt 3 ];
-    then
-        echo_error "Not enough parameters to execute \"${FUNCNAME[0]}\" function.";
-        return ${general_failure};
-    fi;
-
-    local readonly message_identification=$1;
-    local readonly message_index=$2;
-    shift 2;
-    local readonly message=$(format_log_message ${message_identification} ${message_index} ${warn_preffix} $@);
-    local result="";
-
-    if [ $? -ne ${success} ];
-    then
-        result=$?;
-        echo_warn "${message_identification} ${message_index} $@";
-    else
-        write_log_message "${message}";    
-        result=$?;
-    fi;
-
-    return ${result};
-};
-
-# Register an error message on log file.
-#
-# Parameters:
-#   1 - Message identification.
-#   2 - Message index (e. g. line number).
-#   3 - Message to be registered.
-#
-# Results:
-#   This function retuns the result obtained from "log" function.
-log_error() {
-
-    if [ $# -lt 3 ];
-    then
-        echo_error "Not enough parameters to execute \"${FUNCNAME[0]}\" function.";
-        return ${general_failure};
-    fi;
-
-    local readonly message_identification=$1;
-    local readonly message_index=$2;
-    shift 2;
-    local readonly message=$(format_log_message ${message_identification} ${message_index} ${error_preffix} $@);
-    local result="";
-
-    if [ $? -ne ${success} ];
-    then
-        result=$?;
-        echo_error "${message_identification} ${message_index} $@";
-    else
-        write_log_message "${message}";    
-        result=$?;
-    fi;
-
-    return ${result};
-};
-
-# Register an error message on log file.
-#
-# Parameters:
-#   1 - Message identification.
-#   2 - Message index (e. g. line number).
-#   3 - Message to be registered.
-#
-# Returns:
-#   This function retuns the result obtained from "log" function.
+# Returns
+#   0. If message was successfully logged.
+#  -1. Otherwise.
 log() {
 
-    if [ $# -lt 3 ];
+    # Check function parameters.
+    if [ $# -lt 3 -o $# -gt 4 ];
     then
-        echo_error "Not enough parameters to execute \"${FUNCNAME[0]}\" function.";
-        return ${general_failure};
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
     fi;
 
-    local readonly message_identification=$1;
-    local readonly message_index=$2;
-    shift 2;
-    local readonly message=$(format_log_message ${message_identification} ${message_index} ${info_preffix} $@);
-    local result="";
+    local readonly message_type=$1;
+    local readonly message_tag="$2";
+    local readonly message_index=$3;
+    local readonly message_content="$4";
 
-    if [ $? -ne ${success} ];
-    then
-        result=$?;
-        echo_info "${message_identification} ${message_index} $@";
-    else
-        write_log_message "${message}";    
-        result=$?;
-    fi;
+    case $message_type in
+        $type_trace)
+            local readonly preffix=$trace_preffix;
+            ;;
+        $type_warning)
+            local readonly preffix=$warning_preffix;
+            ;;
+        $type_error)
+            local readonly preffix=$error_preffix;
+            ;;
+        *)
+            write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log message type (${message_type}).";
+            return ${general_error};
+            ;;
+        esac;
 
-    return ${result};
-};
+        if [ $message_type -ne $type_trace -a -z "$message_content" ];
+        then
+            write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Only trace log messages are allowed to be written without content.";
+            return ${general_failure};
+        fi;
 
-# Formats a message to be registered.
-#
-# Parameters:
-#   1     - Message identification.
-#   2     - Message index (e. g. line number).
-#   3     - Message preffix type.
-#   4 ... - Message to be registered.
-#
-# Returns:
-#   Returns the message formatted to be registered on log.
-format_log_message() {
+        local log_message="[$(get_current_time)] ${preffix}: ${message_tag} (${message_index})";
 
-    if [ $# -lt 3 ];
-    then
-        error_echo "Not enough parameters to execute function \"${FUNCNAME[0]}\".";
-        return ${general_failure};
-    fi;
+        if [ -n "$message_content" ];
+        then
+            local log_message=${log_message}": ${message_content}";
+        fi;
 
-    local readonly message_identification=$1;
-    local readonly message_index=$2;
-    local readonly message_preffix=$3
-    shift 3;
-    local readonly message="[$message_identification, $message_index] $message_preffix $@";
+        write_log_message "${log_message}";
 
-    echo ${message};
-    return ${success};
-}
-
-# Check is a log file is defined.
-#
-# Parameters:
-#   None.
-#
-# Result:
-#  0 - If the is no log file defined.
-#  1 - If the log file is defined.
-check_log_file(){
-    local result=0;
-
-    if [ ! -z ${log_file_location} ] && [ ${log_file_creation_result} -eq ${success} ];
-    then
-        result=1;
-    fi;
-
-    return ${result};
-};
+        local result=$?
+        return ${result};
+    }
