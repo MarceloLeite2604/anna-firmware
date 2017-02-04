@@ -197,7 +197,7 @@ write_log_message() {
         return ${general_failure};
     fi;
 
-    local message="$1";
+    local log_message="$1";
     local write_on_stderr="false";
 
     # If log file location is not specified.
@@ -225,10 +225,10 @@ write_log_message() {
 
     if [ "$write_on_stderr" = "true" ];
     then
-        write_stderr ${message};
+        write_stderr ${log_message};
     else
         # Print message on log file.    
-        echo "${message}" >> ${log_file_location};
+        echo "${log_message}" >> ${log_file_location};
     fi;
 }
 
@@ -271,23 +271,52 @@ log() {
             write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log message type (${message_type}).";
             return ${general_error};
             ;;
-        esac;
+    esac;
 
-        if [ $message_type -ne $type_trace -a -z "$message_content" ];
-        then
-            write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Only trace log messages are allowed to be written without content.";
-            return ${general_failure};
-        fi;
+    if [ $message_type -ne $type_trace -a -z "$message_content" ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Only trace log messages are allowed to be written without content.";
+        return ${general_failure};
+    fi;
 
-        local log_message="[$(get_current_time)] ${preffix}: ${message_tag} (${message_index})";
+    local log_message="[$(get_current_time)] ${preffix}: ${message_tag} (${message_index})";
 
-        if [ -n "$message_content" ];
-        then
-            local log_message=${log_message}": ${message_content}";
-        fi;
+    if [ -n "$message_content" ];
+    then
+        local log_message=${log_message}": ${message_content}";
+    fi;
 
-        write_log_message "${log_message}";
+    write_log_message "${log_message}";
 
-        local result=$?
-        return ${result};
-    }
+    local result=$?
+    return ${result};
+}
+
+# This function register a trace point on log file.
+#
+# Parameters
+#   1. Message (optional). 
+#
+# Returns
+#   0. If trace was logged correctly.
+#  -1. Otherwise.
+trace(){
+
+    if [ $# -gt 1 ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
+    fi;
+
+    local readonly trace_tag=${FUNCNAME[1]};
+    local readonly trace_index=${BASH_LINENO[0]};
+    
+    if [ $# -eq 1 ];
+    then
+        local readonly trace_message="$1";
+    fi;
+    
+    log ${type_trace} ${trace_tag} ${trace_index} "${trace_message}";
+
+    return $?;
+}

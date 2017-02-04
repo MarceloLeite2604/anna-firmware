@@ -3,3 +3,6 @@
 
 # Do not upload log files.
 *.log
+
+# Do not upload swap files.
+*.swp

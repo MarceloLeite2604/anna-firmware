@@ -112,8 +112,24 @@ test_log(){
     log $type_trace "${FUNCNAME[0]}" 2 "This message should be written on log file."
     log $type_warning "${FUNCNAME[0]}" 3 "This warning message should be written on log file."
     log $type_error "${FUNCNAME[0]}" 4 "This error message should be written on log file."
+    echo -e "\n\"${log_file_location}\" content:";
     cat ${log_file_location};
+    echo -e "End of content.\n";
 
+}
+
+# Tests "trace" function.
+test_trace(){
+    # Executes function with invalid parameters.
+    trace "invalid" "parameters";
+
+    # Executes function with valid parameters.
+    trace;
+    trace "This trace message should be logged.";
+
+    echo -e "\n\"${log_file_location}\" content:";
+    cat ${log_file_location};
+    echo -e "End of content.\n";
 }
 
 test_write_stderr;
@@ -122,3 +138,4 @@ test_create_log_file_name;
 test_create_log_file;
 test_write_log_message;
 test_log;
+test_trace;
