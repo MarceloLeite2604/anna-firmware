@@ -15,6 +15,9 @@ log_file_location="";
 # Indicates if the log file creation was successful.
 log_file_creation_result=${not_executed};
 
+# Indicates the log level.
+log_level=${type_warning};
+
 # Writes a message on "stderr".
 #
 # Parameters
@@ -176,9 +179,46 @@ create_log_file() {
     fi;
 
     log_file_location=${temporary_log_file_location};
-    log_file_creation_result=${success}
+    log_file_creation_result=${success};
+
+    write_on_file ${log_file_location} "[$(get_current_time)] Log started.";
     return ${success};
 
+}
+
+# Finishes log file.
+#
+# Parameters
+#  None.
+#
+# Returns
+#   0. If log was finished successfully.
+#  -1. Otherwise.
+finish_log_file(){
+
+    if [ $# -ne 0 ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
+    fi;
+    if [ -z "${log_file_location}" -o ${log_file_creation_result} -ne ${success} ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: No log file to finish.";
+        return ${general_failure};
+    fi;
+    local readonly finish_message="[$(get_current_time)] Log finished.";
+
+    write_on_file ${log_file_location} "${finish_message}";
+
+    if [ $? -ne ${success} ];
+    then
+        return ${general_failure};
+    fi;
+
+    unset log_file_location;
+    log_file_creation_result=${not_executed};
+
+    return ${success};
 }
 
 # Writes a message on log file.
@@ -197,7 +237,7 @@ write_log_message() {
         return ${general_failure};
     fi;
 
-    local log_message="$1";
+    local message_content="[$(get_current_time)] $1";
     local write_on_stderr="false";
 
     # If log file location is not specified.
@@ -214,8 +254,8 @@ write_log_message() {
             then
                 local $write_on_stderr="true";
             else
-                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: No log file was prevously specificated.";
-                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Created new log file \"${log_file_location}\".";
+                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${warning_preffix}: No log file was prevously specificated.";
+                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${warning_preffix}: Created new log file \"${log_file_location}\".";
             fi;
 
         else
@@ -225,20 +265,18 @@ write_log_message() {
 
     if [ "$write_on_stderr" = "true" ];
     then
-        write_stderr ${log_message};
+        write_stderr ${message_content};
     else
         # Print message on log file.    
-        echo "${log_message}" >> ${log_file_location};
+        echo "${message_content}" >> ${log_file_location};
     fi;
 }
 
-# Writes a log message.
+# Log a message.
 #
 # Parameters
 #   1. Message type (trace, info, warning, error).
-#   2. Message tag.
-#   3. Message index.
-#   2. Message content. (optional for trace messages).
+#   2. Message content. (optional for trace messages, mandatory for other message types).
 #
 # Returns
 #   0. If message was successfully logged.
@@ -246,16 +284,14 @@ write_log_message() {
 log() {
 
     # Check function parameters.
-    if [ $# -lt 3 -o $# -gt 4 ];
+    if [ $# -lt 1 -o $# -gt 2 ];
     then
         write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_error};
     fi;
 
     local readonly message_type=$1;
-    local readonly message_tag="$2";
-    local readonly message_index=$3;
-    local readonly message_content="$4";
+    local readonly message_content="$2";
 
     case $message_type in
         $type_trace)
@@ -273,15 +309,25 @@ log() {
             ;;
     esac;
 
+    local readonly message_tag="${FUNCNAME[1]}";
+    local readonly message_index=${BASH_LINENO[0]};
+
     if [ $message_type -ne $type_trace -a -z "$message_content" ];
     then
         write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Only trace log messages are allowed to be written without content.";
         return ${general_failure};
     fi;
 
-    local log_message="[$(get_current_time)] ${preffix}: ${message_tag} (${message_index})";
+    # If message level is lower than current log level.
+    if [ ${message_type} -le ${log_level} ];
+    then
+        # Then the message should not be logged.
+        return ${success};
+    fi;
 
-    if [ -n "$message_content" ];
+    local log_message="${preffix}: ${message_tag} (${message_index})";
+
+    if [ -n "${message_content}" ];
     then
         local log_message=${log_message}": ${message_content}";
     fi;
@@ -310,13 +356,55 @@ trace(){
 
     local readonly trace_tag=${FUNCNAME[1]};
     local readonly trace_index=${BASH_LINENO[0]};
-    
+
     if [ $# -eq 1 ];
     then
         local readonly trace_message="$1";
     fi;
-    
+
+    # TODO: Log funtion does not expect four parameters. How to inform "tag" and "index"? Also, how to avoid to inform "tag" and "trace" everytime log function is called?
     log ${type_trace} ${trace_tag} ${trace_index} "${trace_message}";
 
     return $?;
+}
+
+# Set the log level.
+#
+# Parameters
+#   1. The log level to be defined.
+#
+# Returns
+#   0. If log level was defined correctly.
+#  -1. Otherwise.
+#
+# Observation
+#   To define correctly the log level, use the constants defines on
+# "log_constants.sh".
+set_log_level(){
+
+    local readonly numeric_regex="^[0-9]+$";
+
+    if [ $# -ne 1 ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
+    fi;
+
+    local readonly temporary_log_level=$1;
+
+    if ! [[ ${temporary_log_level} =~ ${numeric_regex} ]];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log level value (${temporary_log_level}).";
+        return ${general_failure};
+    fi;
+
+    if [ ${temporary_log_level} -ne ${type_trace} -a ${temporary_log_level} -ne ${type_warning} -a ${temporary_log_level} -ne ${type_error} ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log level value (${temporary_log_level}).";
+        return ${general_failure};
+    fi;
+
+    log_level=${temporary_log_level};
+
+    return ${success};
 }
