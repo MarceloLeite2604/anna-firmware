@@ -6,25 +6,25 @@
 # Author: Marcelo Leite
 
 # Load configuration file.
-source $(dirname $BASH_SOURCE)/configuration.sh
+source $(dirname ${BASH_SOURCE})/configuration.sh
 
 # Load constants used by log functions.
-source $(dirname $BASH_SOURCE)/log_constants.sh
+source $(dirname ${BASH_SOURCE})/log_constants.sh
 
 # Load general functions.
-source $(dirname $BASH_SOURCE)/general_functions.sh
+source $(dirname ${BASH_SOURCE})/general_functions.sh
 
 # Log directory.
-log_directory="log/";
+_log_directory="log/";
 
 # Log file location.
-log_file_location="";
+_log_file_location="";
 
 # Indicates if the log file creation was successful.
-log_file_creation_result=${not_executed};
+_log_file_creation_result=${not_executed};
 
 # Indicates the log level.
-log_level=${type_warning};
+_log_level=${log_message_type_warning};
 
 # Writes a message on "stderr".
 #
@@ -33,20 +33,20 @@ log_level=${type_warning};
 #
 # Returns
 #  Code returned from "echo" writing on "stderr".
-write_stderr(){
+_log_write_stderr(){
 
     for parameter in "$@"
     do
         local stderr_message=${stderr_message}${parameter}" ";
     done;
 
-    local result=$success;
+    local result=${success};
     if [ -n "${stderr_message}" ]; then
         $(>&2 echo ${stderr_message})
         local result=$?;
     fi;
 
-    return $result;
+    return ${result};
 }
 
 # Writes a message on a file.
@@ -58,37 +58,37 @@ write_stderr(){
 # Returns
 #    0. If message was successfully written.
 #   -1. Otherwise.
-write_on_file(){
+_log_write_on_file(){
 
     if [ $# -ne 2 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Not enough parameters to execute \"${FUNCNAME[O]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Not enough parameters to execute \"${FUNCNAME[O]}\".";
         return ${general_failure};
     fi;
 
-    local file_path="$1";
-    local message="$2";
+    local readonly file_path="$1";
+    local readonly message="$2";
 
     # If the file does not exists.
     if [ ! -f ${file_path} ];
     then
-        write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Could not find file \"${file_path}\".";
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Could not find file \"${file_path}\".";
         return ${general_failure};
     fi;
 
     # Check if user was write permission on file.
     if [ ! -w ${file_path} ];
     then
-        write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on  \"${file_path}\".";
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on  \"${file_path}\".";
         return ${general_failure};
     fi;
 
     # Write message on file.
     echo "${message}" >> ${file_path};
     local echo_result=$?;
-    if [ $echo_result -ne 0 ];
+    if [ ${echo_result} -ne 0 ];
     then
-        write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Error writing message on \"${file_path}\" (${echo_result}).";
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Error writing message on \"${file_path}\" (${echo_result}).";
         return ${general_failure};
     fi; 
 }
@@ -104,19 +104,19 @@ write_on_file(){
 #  -1. Otherwise
 #
 #	It also returns the log file name created trough "echo".
-create_log_file_name() {
+_log_create_log_file_name() {
 
     if [ $# -ne 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_failure};
     fi;
 
-    local log_file_preffix="$1";
+    local readonly log_file_preffix="$1";
 
-    local log_file_name="${log_file_preffix}_$(get_current_time_formatted).${log_file_suffix}";
+    local readonly log_file_name="${log_file_preffix}_$(get_current_time_formatted).${_log_file_suffix}";
 
-    echo "$log_file_name";
+    echo "${log_file_name}";
 
     return ${success};
 }
@@ -133,35 +133,36 @@ create_log_file() {
 
     if [ $# -ne 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
-        log_file_location="";
-        log_file_creation_result=${general_failure};
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_file_location="";
+        _log_file_creation_result=${general_failure};
         return ${general_failure};
     fi;
-    local readonly log_file_preffix="$1";
-    local readonly log_file_name=$(create_log_file_name $log_file_preffix);
 
-    local readonly temporary_log_file_location=${log_directory}${log_file_name};
+    local readonly log_file_preffix="$1";
+    local readonly log_file_name=$(_log_create_log_file_name ${log_file_preffix});
+
+    local readonly temporary_log_file_location=$(get_log_directory)${log_file_name};
 
     # If log file does not exist.
     if [ ! -f ${temporary_log_file_location} ];
     then
 
         # If log directory does not exist.
-        if [ ! -d "${log_directory}" ];
+        if [ ! -d "$(get_log_directory)" ];
         then
-            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Invalid log directory \"${log_directory}\".";
-            log_file_location="";
-            log_file_creation_result=${general_failure};
+            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Invalid log directory \"$(get_log_directory)\".";
+            _log_file_location="";
+            _log_file_creation_result=${general_failure};
             return ${general_failure};
         fi;
 
         # If user does not have write permission on log directory.
-        if [ ! -w "${log_directory}" ];
+        if [ ! -w "${_log_directory}" ];
         then
-            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on directory. \"${log_directory}\".";
-            log_file_location="";
-            log_file_creation_result=${general_failure};
+            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on directory. \"${_log_directory}\".";
+            _log_file_location="";
+            _log_file_creation_result=${general_failure};
             return ${general_failure};
         fi;
 
@@ -171,10 +172,10 @@ create_log_file() {
         # If, after creation, the file is still missing.
         if [ ! -f "${temporary_log_file_location}" ];
         then
-            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Could not create file \"${temporary_log_file_location}\".";
-            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Log messages will be redirected to \"stderr\".";
-            log_file_location="";
-            log_file_creation_result=${general_failure};
+            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Could not create file \"${temporary_log_file_location}\".";
+            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Log messages will be redirected to \"stderr\".";
+            _log_file_location="";
+            _log_file_creation_result=${general_failure};
             return ${general_failure};
         fi;
     fi;
@@ -182,16 +183,16 @@ create_log_file() {
     # If user does not have write permission on log file.
     if [ ! -w "${temporary_log_file_location}" ];
     then
-        write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write access on \"${temporary_log_file_location}.";
-        write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Log messages will be redirected to \"stderr\".";
-        log_file_location="";
-        log_file_creation_result=${general_failure};
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write access on \"${temporary_log_file_location}.";
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Log messages will be redirected to \"stderr\".";
+        _log_file_location="";
+        _log_file_creation_result=${general_failure};
     fi;
 
-    log_file_location=${temporary_log_file_location};
-    log_file_creation_result=${success};
+    _log_file_location=${temporary_log_file_location};
+    _log_file_creation_result=${success};
 
-    write_on_file ${log_file_location} "[$(get_current_time)] Log started.";
+    _log_write_on_file ${_log_file_location} "[$(get_current_time)] Log started.";
     return ${success};
 
 }
@@ -208,25 +209,25 @@ finish_log_file(){
 
     if [ $# -ne 0 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_failure};
     fi;
-    if [ -z "${log_file_location}" -o ${log_file_creation_result} -ne ${success} ];
+    if [ -z "${_log_file_location}" -o ${_log_file_creation_result} -ne ${success} ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: No log file to finish.";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: No log file to finish.";
         return ${general_failure};
     fi;
     local readonly finish_message="[$(get_current_time)] Log finished.";
 
-    write_on_file ${log_file_location} "${finish_message}";
+    _log_write_on_file ${_log_file_location} "${finish_message}";
 
     if [ $? -ne ${success} ];
     then
         return ${general_failure};
     fi;
 
-    unset log_file_location;
-    log_file_creation_result=${not_executed};
+    unset _log_file_location;
+    _log_file_creation_result=${not_executed};
 
     return ${success};
 }
@@ -239,46 +240,46 @@ finish_log_file(){
 # Returns
 #    0. If message was correctly written.
 #   -1. Otherwise.
-write_log_message() {
+_log_write_log_message() {
 
     if [ $# -ne 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_failure};
     fi;
 
-    local message_content="[$(get_current_time)] $1";
+    local readonly message_content="[$(get_current_time)] $1";
     local write_on_stderr="false";
 
     # If log file location is not specified.
-    if [ -z ${log_file_location+x} ];
+    if [ -z ${_log_file_location+x} ];
     then
         # If log file creation was not executed.
-        if [ $log_file_creation_result -eq $not_executed ];
+        if [ ${_log_file_creation_result} -eq ${not_executed} ];
         then
             # Creates log file.
             create_log_file "log";
 
             # If there was an error on log creation.
-            if [ $? -ne $success ];
+            if [ $? -ne ${success} ];
             then
-                local $write_on_stderr="true";
+                local ${write_on_stderr}="true";
             else
-                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${warning_preffix}: No log file was prevously specificated.";
-                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${warning_preffix}: Created new log file \"${log_file_location}\".";
+                _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_warning_message_preffix}: No log file was prevously specificated.";
+                _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_warning_message_preffix}: Created new log file \"${_log_file_location}\".";
             fi;
 
         else
-            local $write_on_stderr="true";
+            write_on_stderr="true";
         fi;
     fi;
 
-    if [ "$write_on_stderr" = "true" ];
+    if [ "${write_on_stderr}" == "true" ];
     then
-        write_stderr ${message_content};
+        _log_write_stderr ${message_content};
     else
         # Print message on log file.    
-        echo "${message_content}" >> ${log_file_location};
+        echo "${message_content}" >> ${_log_file_location};
     fi;
 }
 
@@ -296,46 +297,46 @@ log() {
     # Check function parameters.
     if [ $# -lt 1 -o $# -gt 2 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_error};
     fi;
 
     local readonly message_type=$1;
     local readonly message_content="$2";
 
-    case $message_type in
-        $type_trace)
-            local readonly preffix=$trace_preffix;
+    case ${message_type} in
+        ${log_message_type_trace})
+            local readonly preffix=${_log_trace_message_preffix};
             ;;
-        $type_warning)
-            local readonly preffix=$warning_preffix;
+        ${log_message_type_warning})
+            local readonly preffix=${_log_warning_message_preffix};
             ;;
-        $type_error)
-            local readonly preffix=$error_preffix;
+        ${log_message_type_error})
+            local readonly preffix=${_log_error_message_preffix};
             ;;
         *)
-            write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log message type (${message_type}).";
+            _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log message type (${message_type}).";
             return ${general_error};
             ;;
     esac;
 
-    local message_tag="${FUNCNAME[1]}";
-    local message_index=${BASH_LINENO[0]};
-
-    if [ "${message_tag}" == "${trace_function_name}" ];
+    if [ "${FUNCNAME[1]}" == "${_log_trace_function_name}" ];
     then
-        message_tag=${FUNCNAME[2]};
-        message_index=${BASH_LINENO[1]};
+        local readonly message_tag=${FUNCNAME[2]};
+        local readonly message_index=${BASH_LINENO[1]};
+    else
+        local readonly message_tag="${FUNCNAME[1]}";
+        local readonly message_index=${BASH_LINENO[0]};
     fi;
 
-    if [ $message_type -ne $type_trace -a -z "$message_content" ];
+    if [ ${message_type} -ne ${log_message_type_trace} -a -z "${message_content}" ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Only trace log messages are allowed to be written without content.";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Only trace log messages are allowed to be written without content.";
         return ${general_failure};
     fi;
 
     # If message level is lower than current log level.
-    if [ ${message_type} -lt ${log_level} ];
+    if [ ${message_type} -lt ${_log_level} ];
     then
         # Then the message should not be logged.
         return ${success};
@@ -348,9 +349,9 @@ log() {
         local log_message=${log_message}": ${message_content}";
     fi;
 
-    write_log_message "${log_message}";
+    _log_write_log_message "${log_message}";
 
-    local result=$?
+    local result=$?;
     return ${result};
 }
 
@@ -366,7 +367,7 @@ trace(){
 
     if [ $# -gt 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_failure};
     fi;
 
@@ -375,7 +376,7 @@ trace(){
         local readonly trace_message="$1";
     fi;
 
-    log ${type_trace} "${trace_message}";
+    log ${log_message_type_trace} "${trace_message}";
 
     return $?;
 }
@@ -398,7 +399,7 @@ set_log_level(){
 
     if [ $# -ne 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_failure};
     fi;
 
@@ -406,18 +407,30 @@ set_log_level(){
 
     if ! [[ ${temporary_log_level} =~ ${numeric_regex} ]];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log level value (${temporary_log_level}).";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log level value (${temporary_log_level}).";
         return ${general_failure};
     fi;
 
-    if [ ${temporary_log_level} -ne ${type_trace} -a ${temporary_log_level} -ne ${type_warning} -a ${temporary_log_level} -ne ${type_error} ];
+    if [ ${temporary_log_level} -ne ${log_message_type_trace} -a ${temporary_log_level} -ne ${log_message_type_warning} -a ${temporary_log_level} -ne ${log_message_type_error} ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid log level value (${temporary_log_level}).";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log level value (${temporary_log_level}).";
         return ${general_failure};
     fi;
 
-    log_level=${temporary_log_level};
+    _log_level=${temporary_log_level};
 
+    return ${success};
+}
+
+# Returns the log level.
+#
+# Parameters
+#   None.
+#
+# Returns
+#    The current log level through echo.
+get_log_level(){
+    echo "${_log_level}";
     return ${success};
 }
 
@@ -437,7 +450,7 @@ set_log_directory(){
 
     if [ $# -ne 1 ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_error};
     fi;
 
@@ -445,16 +458,40 @@ set_log_directory(){
 
     if [ ! -d "${temporary_log_directory}" ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Unknown or invalid directory \"${temporary_log_directory}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Unknown or invalid directory \"${temporary_log_directory}\".";
         return ${general_error};
     fi;
 
     if [ ! -w "${temporary_log_directory}" ];
     then
-        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on directory \"${temporary_log_directory}\".";
+        _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on directory \"${temporary_log_directory}\".";
         return ${general_error};
     fi;
 
-    log_directory=${temporary_log_directory};
+    _log_directory=${temporary_log_directory};
+    return ${success};
+}
+
+# Returns the log directory.
+#
+# Parametes
+#    None.
+#
+# Returns
+#    The current log directory through echo.
+get_log_directory(){
+    echo ${_log_directory};
+    return ${success};
+}
+
+# Return the path to the log file.
+#
+# Parameters
+#   None.
+#
+# Returns
+#    The path to the current log file through echo.
+get_log_path(){
+    echo "${_log_file_location}";
     return ${success};
 }

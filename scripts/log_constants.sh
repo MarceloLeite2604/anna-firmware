@@ -9,49 +9,50 @@
 source $(dirname $BASH_SOURCE)/configuration.sh
 
 # Suffix to identify log files.
-if [ -z ${log_file_suffix+x} ]; 
+if [ -z ${_log_file_suffix+x} ]; 
 then
-    readonly log_file_suffix="log";
+    readonly _log_file_suffix="log";
 fi;
 
 # Code to identify trace messages.
-if [ -z ${type_trace+x} ]; 
+if [ -z ${log_message_type_trace+x} ]; 
 then
-    readonly type_trace=105;
+    readonly log_message_type_trace=105;
 fi;
 
 # Code to identify warning messages.
-if [ -z ${type_warning+x} ]; 
+if [ -z ${log_message_type_warning+x} ]; 
 then
-    readonly type_warning=110;
+    readonly log_message_type_warning=110;
 fi;
 
 # Code to identify error messages.
-if [ -z ${type_error+x} ]; 
+if [ -z ${log_message_type_error+x} ]; 
 then
-    readonly type_error=115;
+    readonly log_message_type_error=115;
 fi;
 
 # Preffix used to identify trace messages.
-if [ -z ${trace_preffix+x} ]; 
+if [ -z ${_log_trace_message_preffix+x} ]; 
 then
-    readonly trace_preffix="TRACE";
+    readonly _log_trace_message_preffix="TRACE";
 fi;
 
 # Preffix used to identify warning messages.
-if [ -z ${warn_preffix+x} ]; 
+if [ -z ${_log_warning_message_preffix+x} ]; 
 then
-    readonly warning_preffix="WARN";
+    readonly _log_warning_message_preffix="WARN";
 fi;
 
 # Preffix used to identify error messages.
-if [ -z ${error_preffix+x} ]; 
+if [ -z ${_log_error_message_preffix+x} ]; 
 then
-    readonly error_preffix="ERROR";
+    readonly _log_error_message_preffix="ERROR";
 fi;
 
 # Name of trace function.
-if [ -z ${trace_function_name+x} ]; 
+if [ -z ${_log_trace_function_name+x} ]; 
 then
-    readonly trace_function_name="trace";
+    readonly _log_trace_function_name="trace";
 fi;
+
