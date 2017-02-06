@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This script contains all functions and variables required to log and trace functions.
+#
+# Version: 0.1
+# Author: Marcelo Leite
+
 # Load configuration file.
 source $(dirname $BASH_SOURCE)/configuration.sh
 
@@ -8,6 +13,9 @@ source $(dirname $BASH_SOURCE)/log_constants.sh
 
 # Load general functions.
 source $(dirname $BASH_SOURCE)/general_functions.sh
+
+# Log directory.
+log_directory="log/";
 
 # Log file location.
 log_file_location="";
@@ -133,33 +141,35 @@ create_log_file() {
     local readonly log_file_preffix="$1";
     local readonly log_file_name=$(create_log_file_name $log_file_preffix);
 
-    local readonly temporary_log_file_location=${log_path}${log_file_name};
+    local readonly temporary_log_file_location=${log_directory}${log_file_name};
 
     # If log file does not exist.
     if [ ! -f ${temporary_log_file_location} ];
     then
-        # If log folder path does not exists.
-        if [ ! -d ${log_path} ];
+
+        # If log directory does not exist.
+        if [ ! -d "${log_directory}" ];
         then
+            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Invalid log directory \"${log_directory}\".";
+            log_file_location="";
+            log_file_creation_result=${general_failure};
+            return ${general_failure};
+        fi;
 
-            # Creates log folder path.
-            mkdir -p ${log_path};
-
-            # If, after the creaton command, the folder does not exists.
-            if [ ! -d ${log_path} ];
-            then
-                write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Could not create directory path \"${log_path}\".";
-                log_file_location="";
-                log_file_creation_result=${general_failure};
-                return ${general_failure};
-            fi;
+        # If user does not have write permission on log directory.
+        if [ ! -w "${log_directory}" ];
+        then
+            write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on directory. \"${log_directory}\".";
+            log_file_location="";
+            log_file_creation_result=${general_failure};
+            return ${general_failure};
         fi;
 
         # Creates the log file.
         touch ${temporary_log_file_location};
 
         # If, after creation, the file is still missing.
-        if [ ! -f ${temporary_log_file_location} ];
+        if [ ! -f "${temporary_log_file_location}" ];
         then
             write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Could not create file \"${temporary_log_file_location}\".";
             write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Log messages will be redirected to \"stderr\".";
@@ -170,7 +180,7 @@ create_log_file() {
     fi;
 
     # If user does not have write permission on log file.
-    if [ ! -w ${temporary_log_file_location} ];
+    if [ ! -w "${temporary_log_file_location}" ];
     then
         write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write access on \"${temporary_log_file_location}.";
         write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${error_preffix}: Log messages will be redirected to \"stderr\".";
@@ -309,8 +319,14 @@ log() {
             ;;
     esac;
 
-    local readonly message_tag="${FUNCNAME[1]}";
-    local readonly message_index=${BASH_LINENO[0]};
+    local message_tag="${FUNCNAME[1]}";
+    local message_index=${BASH_LINENO[0]};
+
+    if [ "${message_tag}" == "${trace_function_name}" ];
+    then
+        message_tag=${FUNCNAME[2]};
+        message_index=${BASH_LINENO[1]};
+    fi;
 
     if [ $message_type -ne $type_trace -a -z "$message_content" ];
     then
@@ -319,7 +335,7 @@ log() {
     fi;
 
     # If message level is lower than current log level.
-    if [ ${message_type} -le ${log_level} ];
+    if [ ${message_type} -lt ${log_level} ];
     then
         # Then the message should not be logged.
         return ${success};
@@ -354,16 +370,12 @@ trace(){
         return ${general_failure};
     fi;
 
-    local readonly trace_tag=${FUNCNAME[1]};
-    local readonly trace_index=${BASH_LINENO[0]};
-
     if [ $# -eq 1 ];
     then
         local readonly trace_message="$1";
     fi;
 
-    # TODO: Log funtion does not expect four parameters. How to inform "tag" and "index"? Also, how to avoid to inform "tag" and "trace" everytime log function is called?
-    log ${type_trace} ${trace_tag} ${trace_index} "${trace_message}";
+    log ${type_trace} "${trace_message}";
 
     return $?;
 }
@@ -406,5 +418,43 @@ set_log_level(){
 
     log_level=${temporary_log_level};
 
+    return ${success};
+}
+
+# Set the directory to write log files.
+#
+# Parameters
+#   1. Relative or complete path to directory to store log files.
+#
+# Returns
+#   0. If log directory was updated correctly.
+#  -1. Otherwise.
+#
+# Observations
+#   If the directory does not exists, this function willi not create it. 
+# It will return and error and log directory will not be updated.
+set_log_directory(){
+
+    if [ $# -ne 1 ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
+    fi;
+
+    local readonly temporary_log_directory="$1";
+
+    if [ ! -d "${temporary_log_directory}" ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: Unknown or invalid directory \"${temporary_log_directory}\".";
+        return ${general_error};
+    fi;
+
+    if [ ! -w "${temporary_log_directory}" ];
+    then
+        write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${error_preffix}: User \"$(whoami)\" does not have write permission on directory \"${temporary_log_directory}\".";
+        return ${general_error};
+    fi;
+
+    log_directory=${temporary_log_directory};
     return ${success};
 }

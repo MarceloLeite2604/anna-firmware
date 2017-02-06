@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This script contains general functions used by other scripts.
+#
+# Version: 0.1
+# Author: Marcelo Leite
+
 # Load configurations file
 source $(dirname $BASH_SOURCE)/configuration.sh
 

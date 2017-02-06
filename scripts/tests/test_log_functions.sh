@@ -1,9 +1,15 @@
 #!/bin/bash
 
-# The objective os this script is to teste functions created on "log_functions.sh" file.
+# This objective os this script is to test all log and trace functions.
+#
+# Version: 0.1
+# Author: Marcelo Leite
 
 # Load "log_functions.sh" file.
 . ../log_functions.sh
+
+# Directory to store log files.
+readonly test_log_directory="../../tests/log/";
 
 # Test function "write_stderr".
 test_write_stderr(){
@@ -27,9 +33,9 @@ test_write_stderr(){
 test_write_on_file(){
     echo "Testing function \"write_on_file\".";
 
-    local valid_test_file_path="../../tests/log/test_log_file.log";
-    local invalid_test_file_path="../../tests/log/invalid_test_log_file.log";
-    local no_access_test_file_path="/tmp/unaccessable_test_log_file.log";
+    local valid_test_file_path="../../tests/log/test_write_on_file.log";
+    local invalid_test_file_path="../../tests/log/invalid_test_write_on_file.log";
+    local no_access_test_file_path="/tmp/unaccessable_test_write_on_file.log";
 
     if [ -f ${valid_test_file_path} ];
     then
@@ -66,6 +72,64 @@ test_write_on_file(){
     write_on_file ${no_access_test_file_path} "This message also should not be written.";
 
     echo -e "Tests of function \"write_on_file\" concluded.\n";
+}
+
+# Tests "set_log_directory" function.
+test_set_log_directory(){
+    echo "Testing function \"set_log_directory\".";
+
+    local readonly unaccessible_directory="/tmp/projeto-anna/tests/log/unaccessible_directory";
+    local readonly valid_directory="/tmp/projeto-anna/tests/log";
+    local readonly invalid_directory="/tmp/projeto-anna/tests/log/invalid_directory";
+
+    if [ -d ${unaccessible_directory} ];
+    then
+        echo "Directory \"${unaccessible_directory}\" already exists.";
+    else
+        echo "Creating directory \"${unaccessible_directory}\".";
+        mkdir -p "${unaccessible_directory}";
+    fi;
+
+    chmod u-w ${unaccessible_directory};
+
+    if [ -d ${valid_directory} ];
+    then
+        echo "Directory \"${valid_directory}\" already exists.";
+    else
+        echo "Creating directory \"${valid_directory}\".";
+        mkdir -p "${valid_directory}";
+    fi;
+
+    if [ -d ${test_log_directory} ];
+    then
+        echo "Directory \"${test_log_directory}\" already exists.";
+    else
+        echo "Creating directory \"${test_log_directory}\".";
+        mkdir -p "${test_log_directory}";
+    fi;
+    # Executes function with invalid parameters
+    set_log_directory;
+    set_log_directory "invalid" "parameter";
+
+    # Executes function to define an invalid directory.
+    set_log_directory "this is not a directory";
+    
+    local readonly original_log_directory=${log_directory};
+    echo "Original log directory: \"${original_log_directory}\".";
+
+    # Executes function on a directory wich user does not have write permission.
+    set_log_directory "${unaccessible_directory}";
+    echo "Current log directory: \"${log_directory}\".";
+
+    # Executes function defining an unexistent directory.
+    set_log_directory "${invalid_directory}";
+    echo "Current log directory: \"${log_directory}\".";
+
+    # Defines log directory to path specified on this script.
+    set_log_directory "${test_log_directory}";
+    echo "Current log directory: \"${test_log_directory}\".";
+
+    echo -e "Tests of function \"set_log_directory\" concluded.\n";
 }
 
 # Test "create_log_file_name" function.
@@ -142,9 +206,9 @@ test_write_log_message(){
     echo -e "Tests of functions \"write_log_message\" concluded.\n";
 }
 
-# Test "set_log_level" function.
+# Test functions "set_log_level", "log" and "trace".
 test_set_log_level(){
-    echo "Testing function \"set_log_level\".";
+    echo "Testing function \"set_log_level\", \"log\" and \"trace\".";
 
     create_log_file "test_set_log_level";
 
@@ -181,34 +245,7 @@ test_set_log_level(){
 
     echo "Returning to original log level.";
     set_log_level ${original_log_level};
-
-    finish_log_file;
-
-    echo -e "Tests of functions \"write_log_message\" concluded.\n";
-}
-# Test "log" function
-test_log(){
-    echo "Testing function \"log\".";
-
-    create_log_file "test_log";
-
-    echo "Original log level: ${log_level}.";
-    set_log_level ${type_trace};
-    echo "New log level: ${log_level}.";
-
-    #Executes function with invalid parameters.
-    log;
-    log 0;
-    log $type_error;
-    log $type_warning;
-    log $type_error "test" 1;
-
-    # Executes function with valid parameters.
-    log $type_trace;
-    log $type_trace "This message should be written on log file."
-    log $type_warning "This warning message should be written on log file."
-    log $type_error "This error message should be written on log file."
-
+    
     local readonly temporary_log_file_location=${log_file_location};
 
     finish_log_file;
@@ -217,32 +254,13 @@ test_log(){
     cat ${temporary_log_file_location};
     echo -e "End of content.\n";
 
-    echo -e "Tests of functions \"write_log_message\" concluded.\n";
+    echo -e "Tests of functions \"set_log_level\", \"log\" and \"trace\" concluded.\n";
 }
 
-# Tests "trace" function.
-test_trace(){
-    echo "Testing function \"trace\".";
-
-    # Executes function with invalid parameters.
-    trace "invalid" "parameters";
-
-    # Executes function with valid parameters.
-    trace;
-    trace "This trace message should be logged.";
-
-    echo -e "\n\"${log_file_location}\" content:";
-    cat ${log_file_location};
-    echo -e "End of content.\n";
-
-    echo -e "Tests of function \"trace\" concluded.\n";
-}
-
+# Executes test functions.
 test_write_stderr;
+test_set_log_directory;
 test_write_on_file;
 test_create_log_file_name;
 test_create_log_file;
 test_set_log_level;
-#test_write_log_message;
-#test_log;
-#test_trace;
