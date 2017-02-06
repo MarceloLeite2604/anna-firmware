@@ -250,7 +250,6 @@ finish_log_file(){
 #   0. If message was correctly written.
 #   1. Otherwise.
 _log_write_log_message() {
-    set -x;
     if [ $# -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
@@ -290,7 +289,6 @@ _log_write_log_message() {
         # Print message on log file.    
         echo "${message_content}" >> ${_log_file_location};
     fi;
-    set +x;
 }
 
 # Log a message.
