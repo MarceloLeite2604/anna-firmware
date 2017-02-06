@@ -65,8 +65,8 @@ _log_write_stderr(){
 #  2. Message to be written.
 #
 # Returns
-#    0. If message was successfully written.
-#   -1. Otherwise.
+#   0. If message was successfully written.
+#   1. Otherwise.
 _log_write_on_file(){
 
     if [ $# -ne 2 ];
@@ -110,7 +110,7 @@ _log_write_on_file(){
 #
 # Returns
 #   0. If log filename was created sucessfully.
-#  -1. Otherwise
+#   1. Otherwise
 #
 #	It also returns the log file name created trough "echo".
 _log_create_log_file_name() {
@@ -137,7 +137,7 @@ _log_create_log_file_name() {
 #
 # Returns
 #	0. If log file was created.
-#  -1. Otherwise.
+#   1. Otherwise.
 create_log_file() {
 
     if [ $# -ne 1 ];
@@ -213,7 +213,7 @@ create_log_file() {
 #
 # Returns
 #   0. If log was finished successfully.
-#  -1. Otherwise.
+#   1. Otherwise.
 finish_log_file(){
 
     if [ $# -ne 0 ];
@@ -247,8 +247,8 @@ finish_log_file(){
 #   1. Message to be written.
 #
 # Returns
-#    0. If message was correctly written.
-#   -1. Otherwise.
+#   0. If message was correctly written.
+#   1. Otherwise.
 _log_write_log_message() {
     if [ $# -ne 1 ];
     then
@@ -299,7 +299,7 @@ _log_write_log_message() {
 #
 # Returns
 #   0. If message was successfully logged.
-#  -1. Otherwise.
+#   1. Otherwise.
 log() {
 
     # Check function parameters.
@@ -370,7 +370,7 @@ log() {
 #
 # Returns
 #   0. If trace was logged correctly.
-#  -1. Otherwise.
+#   1. Otherwise.
 trace(){
 
     if [ $# -gt 1 ];
@@ -396,7 +396,7 @@ trace(){
 #
 # Returns
 #   0. If log level was defined correctly.
-#  -1. Otherwise.
+#   1. Otherwise.
 #
 # Observation
 #   To define correctly the log level, use the constants defines on
