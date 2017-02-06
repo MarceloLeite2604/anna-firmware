@@ -11,9 +11,6 @@ source $(dirname ${BASH_SOURCE})/configuration.sh
 # Load constants used by log functions.
 source $(dirname ${BASH_SOURCE})/log_constants.sh
 
-# Load general functions.
-source $(dirname ${BASH_SOURCE})/general_functions.sh
-
 # Log directory.
 _log_directory="log/";
 
@@ -25,6 +22,18 @@ _log_file_creation_result=${not_executed};
 
 # Indicates the log level.
 _log_level=${log_message_type_warning};
+
+# Returns the current time formatted.
+#
+# Parameters
+#   None.
+#
+# Returns
+#    The current time formatted through "echo".
+_log_get_current_time(){
+    echo $(date +"%Y/%m/%d %H:%M:%S");
+    return ${success};
+}
 
 # Writes a message on "stderr".
 #
@@ -114,7 +123,7 @@ _log_create_log_file_name() {
 
     local readonly log_file_preffix="$1";
 
-    local readonly log_file_name="${log_file_preffix}_$(get_current_time_formatted).${_log_file_suffix}";
+    local readonly log_file_name="${log_file_preffix}_$(date +"%Y%m%d_%H%M%S").${_log_file_suffix}";
 
     echo "${log_file_name}";
 
@@ -192,7 +201,7 @@ create_log_file() {
     _log_file_location=${temporary_log_file_location};
     _log_file_creation_result=${success};
 
-    _log_write_on_file ${_log_file_location} "[$(get_current_time)] Log started.";
+    _log_write_on_file ${_log_file_location} "[$(_log_get_current_time)] Log started.";
     return ${success};
 
 }
@@ -217,7 +226,7 @@ finish_log_file(){
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: No log file to finish.";
         return ${general_failure};
     fi;
-    local readonly finish_message="[$(get_current_time)] Log finished.";
+    local readonly finish_message="[$(_log_get_current_time)] Log finished.";
 
     _log_write_on_file ${_log_file_location} "${finish_message}";
 
@@ -248,7 +257,7 @@ _log_write_log_message() {
         return ${general_failure};
     fi;
 
-    local readonly message_content="[$(get_current_time)] $1";
+    local readonly message_content="[$(_log_get_current_time)] $1";
     local write_on_stderr="false";
 
     # If log file location is not specified.
