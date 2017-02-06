@@ -250,7 +250,6 @@ finish_log_file(){
 #    0. If message was correctly written.
 #   -1. Otherwise.
 _log_write_log_message() {
-
     if [ $# -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
@@ -261,7 +260,7 @@ _log_write_log_message() {
     local write_on_stderr="false";
 
     # If log file location is not specified.
-    if [ -z ${_log_file_location+x} ];
+    if [ -z ${_log_file_location} ];
     then
         # If log file creation was not executed.
         if [ ${_log_file_creation_result} -eq ${not_executed} ];
