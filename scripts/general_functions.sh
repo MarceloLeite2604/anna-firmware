@@ -23,6 +23,7 @@ get_current_time(){
     if [ ${#} -ne 0 ];
     then
         log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
     fi;
 
     echo "$(date +"%Y/%m/%d %H:%M:%S")";
@@ -41,6 +42,7 @@ get_current_time_formatted() {
     if [ ${#} -ne 0 ];
     then
         log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
     fi;
 
     echo "$(date +"%Y%m%d_%H%M%S")";
