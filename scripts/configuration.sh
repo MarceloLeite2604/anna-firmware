@@ -33,11 +33,17 @@ fi;
 # Indicates general failure on function/script execution.
 if [ -z ${general_failure} ]; 
 then
-    readonly general_failure=-1;
+    readonly general_failure=1;
 fi;
 
 # Main directory structure used by the scripts.
 if [ -z ${directory_structure+x} ]; 
 then
 	readonly directory_structure="./${company}/${project}/";
+fi;
+
+# Default audio directory.
+if [ -z ${default_audio_directory+x} ];
+then
+    readonly default_audio_directory="${root_path}${directory_structure}/audio/";
 fi;
