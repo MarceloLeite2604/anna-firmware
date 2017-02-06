@@ -154,7 +154,7 @@ create_log_file() {
     local readonly temporary_log_file_location=$(get_log_directory)${log_file_name};
 
     # If log file does not exist.
-    if [ ! -f ${temporary_log_file_location} ];
+    if [ ! -f "${temporary_log_file_location}" ];
     then
 
         # If log directory does not exist.
@@ -167,7 +167,7 @@ create_log_file() {
         fi;
 
         # If user does not have write permission on log directory.
-        if [ ! -w "${_log_directory}" ];
+        if [ ! -w "$(get_log_directory)" ];
         then
             _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on directory. \"${_log_directory}\".";
             _log_file_location="";
