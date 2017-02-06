@@ -10,3 +10,4 @@ fi;
 if [ -z ${audio_file_suffix+x} ]; 
 then
 	readonly audio_file_suffix="mp3";
+fi;
