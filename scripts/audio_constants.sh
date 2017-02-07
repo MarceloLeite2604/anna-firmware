@@ -23,4 +23,5 @@ fi;
 # Path to audio configuration directory.
 if [ -z ${audio_configuration_directory+x} ];
 then
-    readonly audio_configuration_directory=
+    readonly audio_configuration_directory="${root_directory}config/";
+fi;

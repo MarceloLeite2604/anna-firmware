@@ -48,5 +48,6 @@ create_audio_file_name() {
 #   Nothing.
 record_audio(){
     local record_command="arecord -Dhw:sndrpiwsp  ~/teste.raw";
+    # TODO: Conclude
 }
 
