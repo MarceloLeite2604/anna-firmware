@@ -262,24 +262,7 @@ _log_write_log_message() {
     # If log file location is not specified.
     if [ -z ${_log_file_location} ];
     then
-        # If log file creation was not executed.
-        if [ ${_log_file_creation_result} -eq ${not_executed} ];
-        then
-            # Creates log file.
-            create_log_file "log";
-
-            # If there was an error on log creation.
-            if [ $? -ne ${success} ];
-            then
-                local ${write_on_stderr}="true";
-            else
-                _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_warning_message_preffix}: No log file was prevously specificated.";
-                _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_warning_message_preffix}: Created new log file \"${_log_file_location}\".";
-            fi;
-
-        else
-            write_on_stderr="true";
-        fi;
+        write_on_stderr="true";
     fi;
 
     if [ "${write_on_stderr}" == "true" ];
