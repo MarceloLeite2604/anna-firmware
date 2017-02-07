@@ -229,6 +229,54 @@ test_check_file_is_directory(){
     echo -e "Tests of function \"check_file_is_directory\" concluded.\n";
 }
 
+# Tests "read_file" function.
+test_read_file(){
+    echo "Testing function \"read_file\".";
+
+    local readonly root_test_directory="/tmp/projeto-anna/tests/read_file/";
+    local readonly file="${root_test_directory}file_to_read";
+
+    if [ ! -d "${root_test_directory}" ];
+    then
+        echo "Directory \"${root_test_directory}\" does not exist.";
+        mkdir -p "${root_test_directory}";
+        echo "Directory \"${root_test_directory}\" created.";
+    else
+        echo "Directory \"${root_test_directory}\" already exists.";
+    fi;
+
+    if [ ! -f "${file}" ];
+    then
+        echo "File \"${file}\" does not exist.";
+        touch "${file}";
+        echo "File \"${file}\" created.";
+    else
+        echo "File \"${file}\" already exists.";
+    fi;
+
+    echo "This content should be read." > "${file}";
+
+    # Executes function with invalid parameters.
+    read_file;
+    read_file invalid parameters;
+
+    # Executes function with valid parameters.
+    read_file "invalid file path";
+    local result=$?;
+    echo "Result returned when an invalid file was read: ${result}";
+
+    read_file "${root_test_directory}";
+    echo "Result returned when a directory was informed: ${result}";
+
+    local readonly content_read=$(read_file "${file}");
+    local result=$?;
+    echo "Result returned when an valid file was read: ${result}";
+    echo "Content read from \"${file}\" is \"${content_read}\".";
+
+
+    echo -e "Tests of function \"check_file_is_directory\" concluded.\n";
+}
+
 set_log_level ${log_message_type_trace};
 
 test_get_current_time;
@@ -237,3 +285,4 @@ test_check_file_exists;
 test_check_write_permission;
 test_check_read_permission;
 test_check_file_is_directory;
+test_read_file;

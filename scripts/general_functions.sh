@@ -174,3 +174,51 @@ check_file_is_directory(){
 
     return ${success};
 }
+
+# Reads a file.
+#
+# Parameters
+#    1. File to be read.
+#
+# Returns
+#    0. If file was read correctly.
+#    1. Otherwise
+#    It also returns the file content through "echo".
+read_file(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
+    fi;
+
+    local readonly file="$1";
+
+    check_file_exists "${file}";
+
+    if [ $? -ne ${success} ];
+    then
+        return ${general_failure};
+    fi;
+
+    check_file_is_directory "${file}";
+
+    if [ $? -ne ${general_failure} ];
+    then
+        log ${log_message_type_error} "File \"${file}\" is a directory and can't be read.";
+        return ${general_failure};
+    fi;
+
+    check_read_permission "${file}";
+
+    if [ $? -ne ${success} ];
+    then
+        return ${general_failure};
+    fi;
+
+    local readonly file_content=$(cat "${file}");
+
+    echo "${file_content}";
+
+    return ${success};
+}
