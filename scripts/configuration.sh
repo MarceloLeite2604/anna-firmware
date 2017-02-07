@@ -51,5 +51,5 @@ fi;
 # Default audio directory.
 if [ -z ${default_audio_directory+x} ];
 then
-    readonly default_audio_directory="${root_path}audio/";
+    readonly default_audio_directory="${root_directory}audio/";
 fi;
