@@ -62,26 +62,27 @@ check_directory_permissions(){
 
     if [ ${#} -ne 1 ];
     then
-        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[1]}\".";
+        return ${general_failure};
     fi;
 
     local readonly directory_path="$1";
 
-    if [ ! -d ${directory_path} ];
+    if [ ! -d "${directory_path}" ];
     then
-        log ${log_message_type_error} "Path \"${directory_path}\" is invalid or is not a directory.";
+        log ${log_message_type_trace} "Path \"${directory_path}\" is invalid or is not a directory.";
         return ${general_failure};
     fi;
 
     if [ ! -r ${directory_path} ];
     then
-        log ${log_message_type_error} "User \"$(whoami)\" does not have read permission on directory \"${directory_path}\".";
+        log ${log_message_type_trace} "User \"$(whoami)\" does not have read permission on directory \"${directory_path}\".";
         return ${general_failure};
     fi;
 
     if [ ! -w ${directory_path} ];
     then
-        log ${log_message_type_error} "User \"$(whoami)\" does not have write permission on directory \"${directory_path}\".";
+        log ${log_message_type_trace} "User \"$(whoami)\" does not have write permission on directory \"${directory_path}\".";
         return ${general_failure};
     fi;
 
