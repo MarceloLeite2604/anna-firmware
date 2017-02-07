@@ -12,16 +12,16 @@ then
 	readonly project="projeto_anna";
 fi;
 
-# Root path.
-if [ -z ${root_path+x} ]; 
+# Root directory.
+if [ -z ${root_directory+x} ]; 
 then
-    readonly root_path="../tests/";
+    readonly root_directory="$(dirname ${BASH_SOURCE})/../";
 fi;
 
 # Indicates that the process was not executed.
 if [ -z ${not_executed+v} ]; 
 then
-    readonly not_executed=7;
+    readonly not_executed=255;
 fi;
 
 # Indicates success on function/script execution.
