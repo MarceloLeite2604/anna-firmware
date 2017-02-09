@@ -289,4 +289,4 @@ test_read_file;
 
 # TODO: Create "test_find_program" function.
 # TODO: Create "test_check_file_is_pipe" function.
-# TODO: Create "create_pipe_file" function.
+# TODO: Create "test_create_pipe_file" function.
