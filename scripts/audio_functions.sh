@@ -137,8 +137,17 @@ record_audio(){
         return ${general_failure};
     fi;
 
-    local readonly command="arecord -v -D \"${record_device}\" -c \"${channels}\" -r \"${sampling_rate}\" -f \"${sample_format}\" -t raw | lame -r  - \"${default_audio_directory}${output_file}\"";
+    # Check if output folder exists.
+    check_file_is_directory "${audio_directory}";
 
-    echo "${command}";
+    if [ $? -ne ${success} ];
+    then
+        log ${log_message_type_error} "Audio directory \"${audio_directory}\" does not exist.";
+        return ${general_failure};
+    fi;
+
+    local readonly command="arecord -v -D ${record_device} -c ${channels} -r ${sampling_rate} -f ${sample_format} | lame -r - \"${audio_directory}${output_file}\"";
+
+    eval ${command};
 }
 
