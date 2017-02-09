@@ -53,3 +53,9 @@ if [ -z ${default_audio_directory+x} ];
 then
     readonly default_audio_directory="${root_directory}audio/";
 fi;
+
+# Temporary directory.
+if [ -z ${temporary_directory+x} ];
+then
+    readonly temporary_directory="${root_directory}/temporary/";
+fi;
