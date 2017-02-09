@@ -20,32 +20,44 @@ then
 	readonly audio_file_suffix="mp3";
 fi;
 
-# Path to audio configuration directory.
+# Path to audio confguration directory.
 if [ -z ${audio_configuration_directory+x} ];
 then
     readonly audio_configuration_directory="${configuration_directory}audio/";
 fi;
 
-# Path to audio channels configuration.
-if [ -z ${audio_channels_configuration_file+x} ];
+# Path to audio capture configuration directory.
+if [ -z ${audio_capture_configuration_directory+x} ];
 then
-    readonly audio_channels_configuration_file="${audio_configuration_directory}channels";
+    readonly audio_capture_configuration_directory="${audio_configuration_directory}audio/";
+fi;
+
+# Path to audio channels configuration.
+if [ -z ${audio_capture_channels_configuration_file+x} ];
+then
+    readonly audio_capture_channels_configuration_file="${audio_capture_configuration_directory}channels";
 fi;
 
 # Path to audio sampling rate configuration.
-if [ -z ${audio_sampling_rate_configuration_file+x} ];
+if [ -z ${audio_capture_sampling_rate_configuration_file+x} ];
 then
-    readonly audio_sampling_rate_configuration_file="${audio_configuration_directory}sampling_rate";
+    readonly audio_capture_sampling_rate_configuration_file="${audio_capture_configuration_directory}sampling_rate";
 fi;
 
 # Path to audio sample format configuration.
-if [ -z ${audio_sample_format_configuration_file+x} ];
+if [ -z ${audio_capture_sample_format_configuration_file+x} ];
 then
-    readonly audio_sample_format_configuration_file="${audio_configuration_directory}sample_format";
+    readonly audio_capture_sample_format_configuration_file="${audio_capture_configuration_directory}sample_format";
 fi;
 
 # Path to audio record device configuration.
-if [ -z ${audio_record_device_configuration_file+x} ];
+if [ -z ${audio_capture_record_device_configuration_file+x} ];
 then
-    readonly audio_record_device_configuration_file="${audio_configuration_directory}record_device";
+    readonly audio_capture_record_device_configuration_file="${audio_capture_configuration_directory}record_device";
+fi;
+
+# Pipe file connecting audio capture and audio coding process.
+if [ -z ${audio_pipe_file} ];
+then
+    readonly audio_file_pipe=${temporary_directory}audio_pipe;
 fi;

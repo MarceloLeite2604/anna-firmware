@@ -68,7 +68,7 @@ read_audio_configuration_file(){
 
     if [ -z "${file_content}" ];
     then
-        log ${log_message_type_error} "File \"${audio_channels_configuration_file}\" is empty.";
+        log ${log_message_type_error} "File \"${audio_capture_channels_configuration_file}\" is empty.";
         return ${general_failure};
     fi;
 
@@ -89,7 +89,7 @@ record_audio(){
 
     # Reads input channels configuration file.
     local channels;
-    channels=$(read_audio_configuration_file "${audio_channels_configuration_file}");
+    channels=$(read_audio_configuration_file "${audio_capture_channels_configuration_file}");
 
     if [ $? -ne ${success} -o -z "${channels}" ];
     then
@@ -99,7 +99,7 @@ record_audio(){
 
     # Reads sample format configuration file.
     local sample_format;
-    sample_format=$(read_audio_configuration_file "${audio_sample_format_configuration_file}");
+    sample_format=$(read_audio_configuration_file "${audio_capture_sample_format_configuration_file}");
 
     if [ $? -ne ${success} -o -z "${sample_format}" ];
     then
@@ -109,7 +109,7 @@ record_audio(){
 
     # Reads sampling rate configuration file.
     local sampling_rate;
-    sampling_rate=$(read_audio_configuration_file "${audio_sampling_rate_configuration_file}");
+    sampling_rate=$(read_audio_configuration_file "${audio_capture_sampling_rate_configuration_file}");
 
     if [ $? -ne ${success} -o -z "${sampling_rate}" ];
     then
@@ -119,7 +119,7 @@ record_audio(){
 
     # Reads sampling rate configuration file.
     local record_device;
-    record_device=$(read_audio_configuration_file "${audio_record_device_configuration_file}");
+    record_device=$(read_audio_configuration_file "${audio_capture_record_device_configuration_file}");
 
     if [ $? -ne ${success} -o -z "${record_device}" ];
     then
