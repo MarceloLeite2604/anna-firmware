@@ -286,3 +286,7 @@ test_check_write_permission;
 test_check_read_permission;
 test_check_file_is_directory;
 test_read_file;
+
+# TODO: Create "test_find_program" function.
+# TODO: Create "test_check_file_is_pipe" function.
+# TODO: Create "create_pipe_file" function.

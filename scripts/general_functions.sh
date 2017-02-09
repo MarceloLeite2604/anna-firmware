@@ -142,14 +142,14 @@ check_read_permission(){
     return ${success};
 }
 
-# Check if a file is a directory
+# Check if a file is a directory.
 #
 # Parameters
 #    1. File to be checked.
 #
 # Returns
 #    0. If file is a directory.
-#    1. Otherwise
+#    1. Otherwise.
 check_file_is_directory(){
 
     if [ ${#} -ne 1 ];
@@ -169,6 +169,39 @@ check_file_is_directory(){
     if [ ! -d "${file_path}" ];
     then
         log ${log_message_type_trace} "File \"${file_path}\" is not a directory.";
+        return ${general_failure};
+    fi;
+
+    return ${success};
+}
+
+# Check if a file is a pipe.
+#
+# Parameters
+#    1. File to be checked.
+#
+# Returns
+#    0. If file is a pipe.
+#    1. Otherwise.
+check_file_is_pipe() {
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_failure};
+    fi;
+
+    local readonly file_path="$1";
+
+    check_file_exists "${file_path}";
+    if [ $? -ne ${success} ];
+    then
+        return ${general_failure};
+    fi;
+
+    if [ ! -p "${file_path}" ];
+    then
+        log ${log_message_type_trace} "File \"${file_path}\" is not a pipe.";
         return ${general_failure};
     fi;
 
@@ -219,6 +252,68 @@ read_file(){
     local readonly file_content=$(cat "${file}");
 
     echo "${file_content}";
+
+    return ${success};
+}
+
+# Creates a pipe file.
+#
+# Parameters
+#   1. Path to pipe file.
+#
+# Returns
+#   0. If pipe was created successfully.
+#   1. Otherwise.
+create_pipe_file() {
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
+    fi;
+
+    local readonly file="${1}";
+
+    mkfifo "${file}";
+    local readonly mkfifo_result=${?};
+
+    if [ ${mkfifo_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Error creating pipe file \"${file}\" (${mkfifo_result}).";
+        return ${general_error};
+    fi;
+
+    return ${success};
+}
+
+# Finds a program location.
+#
+# Parameters
+#   1. Program to be searched.
+#
+# Returns
+#   0. If the program was located.
+#   1. Otherwise.
+#   It also returns the program location through "echo".
+find_program(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
+    fi;
+
+    local program="${1}";
+
+    local program_location;
+    program_location=$(command -v "${program}");
+    if [ ${?} -ne ${success} -o -z "${program_location}" ];
+    then
+        log ${log_message_type_trace} "Could not find program \"${program}\".";
+        return  ${general_failure};
+    fi;
+
+    echo "${program_location}";
 
     return ${success};
 }
