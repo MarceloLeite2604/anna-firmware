@@ -401,6 +401,32 @@ test_check_file_is_pipe() {
     echo -e "Tests of function \"check_file_is_pipe\" concluded.\n";
 }
 
+# Tests "start_process" function.
+test_start_process() {
+    echo "Testing function \"start_process\".";
+
+    # Executes function with invalid paramters.
+    start_process;
+    start_process invalid arguments;
+
+    # Executes function with valid parameters.
+    local process_id;
+    local result;
+
+    local process_command="ls -la > /dev/null";
+    process_id=$(start_process "${process_command}");
+    result=${?};
+    echo "Function \"start_process\" executing command \"${process_command}\" returned \"${process_id}\" and its result is \"${result}\".";
+
+    
+    local process_command="invalid command";
+    process_id=$(start_process "${process_command}");
+    result=${?};
+    echo "Function \"start_process\" executing command \"${process_command}\" returned \"${process_id}\" and its result is \"${result}\".";
+
+    echo -e "Tests of function \"start_process\" concluded.\n";
+}
+
 set_log_level ${log_message_type_trace};
 
 test_get_current_time;
@@ -413,3 +439,4 @@ test_read_file;
 test_find_program;
 test_create_pipe_file;
 test_check_file_is_pipe;
+test_start_process;

@@ -339,3 +339,38 @@ find_program(){
 
     return ${success};
 }
+
+# Starts a new process.
+#
+# Parameters
+#   1. Command to start the new process.
+#
+# Returns
+#   0. If process was started successfully.
+#   1. Otherwise.
+#   It also returns the new process id through "echo".
+start_process(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${general_error};
+    fi;
+
+    local readonly new_process_command="${1}";
+    local process_id;
+
+    local eval_result;
+    log ${log_message_type_trace} "Starting a new process with command \"${new_process_command}\".";
+
+    eval "${new_process_command} &";
+    eval_result=${?};
+    if [ ${eval_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Error starting the new process (${eval_result}).";
+    fi;
+    local new_process_id=${!};
+    log ${log_message_type_trace} "New process id: ${new_process_id}";
+
+    echo ${new_process_id};
+}
