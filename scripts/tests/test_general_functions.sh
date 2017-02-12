@@ -277,6 +277,130 @@ test_read_file(){
     echo -e "Tests of function \"check_file_is_directory\" concluded.\n";
 }
 
+# Tests "find_program" function.
+test_find_program(){
+    echo "Testing function \"find_program\".";
+
+    # Executes function with invalid parameters.
+    find_program;
+    find_program invalid parameters;
+
+    # Executes function with valid parameters.
+    local program="vim";
+    local result;
+    path_to_program=$(find_program "${program}");
+    result=${?};
+    echo "Program \"${program}\" returned the path \"${path_to_program}\" and it's result was \"${result}\".";
+
+    local program="invalid_program";
+    path_to_program=$(find_program "${program}");
+    result=${?};
+    echo "Program \"${program}\" returned the path \"${path_to_program}\" and it's result was \"${result}\".";
+
+    echo -e "Tests of function \"find_program\" concluded.\n";
+}
+
+# Tests "create_pipe_file" function.
+test_create_pipe_file(){
+    echo "Testing function \"create_pipe_file\".";
+
+    local readonly root_test_directory="/tmp/projeto-anna/tests/create_pipe_file/";
+    local readonly pipe_file="${root_test_directory}pipe_file";
+    local readonly invalid_pipe_file="${root_test_directory}invalid_path/invalid_pipe_file";
+
+    if [ ! -d "${root_test_directory}" ];
+    then
+        echo "Directory \"${root_test_directory}\" does not exist.";
+        mkdir -p "${root_test_directory}";
+        echo "Directory \"${root_test_directory}\" created.";
+    else
+        echo "Directory \"${root_test_directory}\" already exists.";
+    fi;
+
+    local check_file_exists_result;
+    check_file_exists "${pipe_file}";
+    check_file_exists_result=${?};
+
+    if [ ${check_file_exists_result} -eq ${success}  ];
+    then
+        echo "Pipe file \"${pipe_file}\" already exists.";
+        rm -rf "${pipe_file}";
+        echo "Pipe file \"${pipe_file}\" removed.";
+    fi;
+
+    # Executes function with invalid paramters.
+    create_pipe_file;
+    create_pipe_file invalid parameters;
+
+    # Executes function with valid parameters.
+    local result;
+    create_pipe_file "${pipe_file}";
+    result=${?};
+    echo "Creation of pipe file \"${pipe_file}\" returned with value \"${result}\".";
+
+    create_pipe_file "${pipe_file}";
+    result=${?};
+    echo "Recreation of pipe file \"${pipe_file}\" returned with value \"${result}\".";
+
+    create_pipe_file "${invalid_pipe_file}";
+    result=${?};
+    echo "Creation of invalid pipe file \"${invalid_pipe_file}\" returned with value \"${result}\".";
+
+    echo -e "Tests of function \"create_pipe_file\" concluded.\n";
+}
+
+# Tests "check_file_is_pipe" function.
+test_check_file_is_pipe() {
+    echo "Testing function \"check_file_is_pipe\".";
+
+    local readonly root_test_directory="/tmp/projeto-anna/tests/check_file_is_pipe/";
+    local readonly pipe_file="${root_test_directory}pipe_file";
+    local readonly common_file="${root_test_directory}common_file";
+
+    if [ ! -d "${root_test_directory}" ];
+    then
+        echo "Directory \"${root_test_directory}\" does not exist.";
+        mkdir -p "${root_test_directory}";
+        echo "Directory \"${root_test_directory}\" created.";
+    else
+        echo "Directory \"${root_test_directory}\" already exists.";
+    fi;
+
+    if [ ! -f "${pipe_file}" ];
+    then
+        echo "Pipe file \"${pipe_file}\" does not exist.";
+        create_pipe_file "${pipe_file}";
+        echo "Pipe file \"${pipe_file}\" created.";
+    else
+        echo "Pipe file \"${pipe_file}\" already exists.";
+    fi;
+
+    if [ ! -f "${common_file}" ];
+    then
+        echo "File \"${common_file}\" does not exist.";
+        touch "${common_file}";
+        echo "File \"${common_file}\" created.";
+    else
+        echo "File \"${common_file}\" already exists.";
+    fi;
+
+    # Executes function with invalid parameters.
+    check_file_is_pipe;
+    check_file_is_pipe invalid parameters;
+
+    # Executes function with valid parameters.
+    local result;
+    check_file_is_pipe "${pipe_file}";
+    result=${?};
+    echo "Check if pipe file \"${pipe_file}\" is a pipe returned \"${result}\".";
+
+    check_file_is_pipe "${common_file}";
+    result=${?};
+    echo "Check if pipe file \"${common_file}\" is a pipe returned \"${result}\".";
+
+    echo -e "Tests of function \"check_file_is_pipe\" concluded.\n";
+}
+
 set_log_level ${log_message_type_trace};
 
 test_get_current_time;
@@ -286,7 +410,6 @@ test_check_write_permission;
 test_check_read_permission;
 test_check_file_is_directory;
 test_read_file;
-
-# TODO: Create "test_find_program" function.
-# TODO: Create "test_check_file_is_pipe" function.
-# TODO: Create "test_create_pipe_file" function.
+test_find_program;
+test_create_pipe_file;
+test_check_file_is_pipe;

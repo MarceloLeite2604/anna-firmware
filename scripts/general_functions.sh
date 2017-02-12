@@ -67,7 +67,7 @@ check_file_exists(){
 
     local readonly file_path="$1";
 
-    if [ ! -d "${file_path}" -a ! -f "${file_path}" ];
+    if [ ! -d "${file_path}" -a ! -f "${file_path}" -a ! -p "${file_path}" ];
     then
         log ${log_message_type_trace} "File \"${file_path}\" does not exist.";
         return ${general_failure};
@@ -194,7 +194,7 @@ check_file_is_pipe() {
     local readonly file_path="$1";
 
     check_file_exists "${file_path}";
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${general_failure};
     fi;
@@ -274,8 +274,30 @@ create_pipe_file() {
 
     local readonly file="${1}";
 
+    local check_file_exists_result;
+    check_file_exists "${file}";
+    check_file_exists_result=${?};
+
+    if [ ${check_file_exists_result} -eq ${success} ];
+    then
+        log ${log_message_type_trace} "File \"${file}\" already exists.";
+        return ${general_failure};
+    fi;
+
+    local check_file_is_directory_result;
+    local pipe_directory=$(dirname "${file}");
+    check_file_is_directory ${pipe_directory};
+    check_file_is_directory_result=${?};
+
+    if [ ${check_file_is_directory_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Directory \"${pipe_directory}\" to create pipe file does not exist.";
+        return ${general_failure};
+    fi;        
+
+    local mkfifo_result;
     mkfifo "${file}";
-    local readonly mkfifo_result=${?};
+    mkfifo_result=${?};
 
     if [ ${mkfifo_result} -ne ${success} ];
     then
