@@ -36,10 +36,10 @@ then
     readonly success=0;
 fi;
 
-# Indicates general failure on function/script execution.
-if [ -z ${general_failure} ]; 
+# Indicates a generic error on function/script execution.
+if [ -z ${generic_error} ]; 
 then
-    readonly general_failure=1;
+    readonly generic_error=1;
 fi;
 
 # Main directory structure used by the scripts.
@@ -57,5 +57,17 @@ fi;
 # Temporary directory.
 if [ -z ${temporary_directory+x} ];
 then
-    readonly temporary_directory="${root_directory}/temporary/";
+    readonly temporary_directory="${root_directory}temporary/";
+fi;
+
+# Suffix to identity a process id file.
+if [ -z ${process_id_file_suffix+x} ];
+then
+    readonly process_id_file_suffix=".pid";
+fi;
+
+# Directory to store the process id files.
+if [ -z ${process_id_files_directory} ];
+then
+    readonly process_id_files_directory="${root_directory}pids/";
 fi;
