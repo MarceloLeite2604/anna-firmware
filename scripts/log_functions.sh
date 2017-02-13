@@ -31,7 +31,7 @@ _log_level=${log_message_type_warning};
 # Returns
 #    The current time formatted through "echo".
 _log_get_current_time(){
-    echo $(date +"%Y/%m/%d %H:%M:%S");
+    echo "$(date +"%Y/%m/%d %H:%M:%S.%N" | awk '{print $1" "substr($2, 1, 12)}')";
     return ${success};
 }
 
