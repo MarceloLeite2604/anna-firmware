@@ -508,20 +508,10 @@ start_process(){
     fi;
 
     local readonly new_process_command="${1}";
-    local process_id_file_preffix="${2}";
-    local input_file="${3}";
-    local output_file="${4}";
-    local error_file="${5}";
-
-    if [ -z "${output_file}" ];
-    then
-        output_file=1;
-    fi;
-
-    if [ -z "${error_file}" ];
-    then
-        error_file="2";
-    fi;
+    local readonly process_id_file_preffix="${2}";
+    local readonly input_file="${3}";
+    local readonly output_file="${4}";
+    local readonly error_file="${5}";
 
     local create_process_id_file_path_result;
     process_id_file_path=$(create_process_id_file_path "${process_id_file_preffix}");
@@ -563,11 +553,47 @@ start_process(){
 
     if [ -n "${input_file}" ];
     then
-        ${new_process_command} <${input_file} 1>${output_file} 2>${error_file} &
-        new_process_result=${?};
+        if [ -n "${output_file}" ];
+        then
+            if [ -n "${error_file}" ];
+            then
+                ${new_process_command} <${input_file} 1>${output_file} 2>${error_file} &
+                new_process_result=${?};
+            else
+                ${new_process_command} <${input_file} 1>${output_file} &
+                new_process_result=${?};
+            fi;
+        else
+            if [ -n "${error_file}" ];
+            then 
+                ${new_process_command} <${input_file} 2>${error_file} &
+                new_process_result=${?};
+            else
+                ${new_process_command} <${input_file} &
+                new_process_result=${?};
+            fi;
+        fi;
     else
-        ${new_process_command} 1>${output_file} 2>${error_file} &
-        new_process_result=${?};
+        if [ -n "${output_file}" ];
+        then
+            if [ -n "${error_file}" ];
+            then
+                ${new_process_command} 1>${output_file} 2>${error_file} &
+                new_process_result=${?};
+            else
+                ${new_process_command} 1>${output_file} &
+                new_process_result=${?};
+            fi;
+        else
+            if [ -n "${error_file}" ];
+            then
+                ${new_process_command} 2>${error_file} &
+                new_process_result=${?};
+            else
+                ${new_process_command} &
+                new_process_result=${?};
+            fi;
+        fi;
     fi;
 
     new_process_id=${!};

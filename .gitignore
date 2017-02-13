@@ -1,4 +1,4 @@
-# Do not upload "tests" folder.
+# Ignore "tests" directory content.
 ./tests/
 
 # Ignore log files.
@@ -9,3 +9,6 @@
 
 # Ignore pid files.
 *.pid
+
+# Ignore "audio" directory content.
+./audio/
