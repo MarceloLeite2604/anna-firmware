@@ -48,10 +48,10 @@ then
 	readonly directory_structure="./${company}/${project}/";
 fi;
 
-# Default audio directory.
-if [ -z ${default_audio_directory+x} ];
+# Directory where audio files will be stored.
+if [ -z ${audio_directory+x} ];
 then
-    readonly default_audio_directory="${root_directory}audio/";
+    readonly audio_directory="${root_directory}audio/";
 fi;
 
 # Temporary directory.
