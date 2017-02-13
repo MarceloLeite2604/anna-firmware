@@ -40,7 +40,8 @@ fi;
 
 # Parameter to specify for audio encoder the bit width (sample format) of input.
 if [ -z ${audio_encode_bit_width_parameter+x} ];
-    readonly audio_encode_bit_with_parameter="--bitwidth";
+then
+    readonly audio_encode_bit_width_parameter="--bitwidth";
 fi;
 
 # Path to audio encode bit width configuration file.
@@ -50,20 +51,21 @@ then
 fi;
 
 # Parameter to specify for audio encoder output channel mode.
-if [ -z ${audio_encode_channel_mode+x} ];
-    readonly audio_encode_channel_mode="-m";
+if [ -z ${audio_encode_channel_mode_parameter+x} ];
+then
+    readonly audio_encode_channel_mode_parameter="-m";
 fi;
 
 # Path to audio encode channel mode configuration file.
 if [ -z ${audio_encode_channel_mode_configuration_file+x} ];
 then
-    readonly audio_encode_bit_width_configuration_file="${audio_encode_configuration_directory}channel_mode";
+    readonly audio_encode_channel_mode_configuration_file="${audio_encode_configuration_directory}channel_mode";
 fi;
 
 # Parameter to specify encoding quality.
-if [ -z ${audio_encode_quality+x} ];
+if [ -z ${audio_encode_quality_parameter+x} ];
 then
-    readonly audio_encode_quality="-q";
+    readonly audio_encode_quality_parameter="-q";
 fi;
 
 # Path to audio encode quality configuration file.
@@ -73,14 +75,26 @@ then
 fi;
 
 # Parameters to specify the encoded audio comment.
-if [ -z ${audio_encode_comment+x} ];
+if [ -z ${audio_encode_comment_parameter+x} ];
 then
-    readonly audio_encode_comment="-tc";
+    readonly audio_encode_comment_parameter="--tc";
 fi;
 
 # Path to audio encoded audio comment configuration file.
 if [ -z ${audio_encode_comment_configuration_file+x} ];
 then
-    readonly audio_encode_comment_configuration_file="${audio_encode_comment_directory}comment";
+    readonly audio_encode_comment_configuration_file="${audio_encode_configuration_directory}comment";
+fi;
+
+# Parameter to specify the output file.
+if [ -z ${audio_encode_output_file_parameter+x} ];
+then
+    readonly audio_encode_output_file_parameter="-";
+fi;
+
+# Suffix to identify audio files.
+if [ -z ${audio_file_suffix+x} ]; 
+then
+	readonly audio_file_suffix="mp3";
 fi;
 

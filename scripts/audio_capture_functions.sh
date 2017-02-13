@@ -120,19 +120,12 @@ start_audio_capture_process(){
     #fi;
 
     local start_process_result;
-    local audio_capture_process_id;
     start_process "${start_audio_capture_command}" "audio_capture" "" "${audio_pipe_file}" "";
-    #echo "${start_audio_capture_command}"; 
-    #audio_capture_process_id=$(start_process "${start_audio_capture_command}");
-    #start_process_result=${?};
+    start_process_result=${?};
+    if [ ${start_process_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not start audio capture process.";
+    fi;
 
-    #if [ ${start_process_result} -ne ${success} -o -z "${audio_capture_process_id}" ];
-    #then
-        #log ${log_message_type_error} "Could not start audio capture process.";
-        #return ${generic_error};
-    #else
-        #log ${log_message_type_trace} "Audio capture process ID: ${audio_capture_process_id}";
-        #disown -h ${audio_capture_process_id};
-        #save_process_id "${audio_capture_process_id_file}" "${audio_capture_process_id}";
-    #fi;
+    return ${success};
 }

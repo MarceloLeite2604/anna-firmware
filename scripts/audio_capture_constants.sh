@@ -65,7 +65,7 @@ fi;
 # Parameter to define the record device on audio capture program.
 if [ -z ${audio_capture_record_device_parameter} ];
 then
-    readonly audio_capture_record_device_parameter="-f";
+    readonly audio_capture_record_device_parameter="-D";
 fi;
 
 # Path to audio capture record device configuration.
