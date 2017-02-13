@@ -23,6 +23,7 @@ source $(dirname ${BASH_SOURCE})/log_functions.sh
 #    0. If audio capture program was started correctly.
 #    1. Otherwise.
 start_audio_capture_process(){
+
     # Searches for audio capture program.
     local audio_capture_program_path;
     audio_capture_program_path=$(find_program "${audio_capture_program}");
