@@ -1,8 +1,11 @@
 # Do not upload "tests" folder.
 ./tests/
 
-# Do not upload log files.
+# Ignore log files.
 *.log
 
-# Do not upload swap files.
+# Ignore swap files.
 *.swp
+
+# Ignore pid files.
+*.pid

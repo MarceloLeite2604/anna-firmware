@@ -5,11 +5,11 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
-# Load audio capture constants file.
+# Load audio capture constants script.
 source $(dirname ${BASH_SOURCE})/audio_capture_constants.sh
 
-# Load audio general functions file.
-source $(dirname ${BASH_SOURCE})/audio_general_functions.sh
+# Load audio generic functions script.
+source $(dirname ${BASH_SOURCE})/audio_generic_functions.sh
 
 # Load log and trace functions.
 source $(dirname ${BASH_SOURCE})/log_functions.sh
@@ -23,7 +23,6 @@ source $(dirname ${BASH_SOURCE})/log_functions.sh
 #    0. If audio capture program was started correctly.
 #    1. Otherwise.
 start_audio_capture_process(){
-
     # Searches for audio capture program.
     local audio_capture_program_path;
     audio_capture_program_path=$(find_program "${audio_capture_program}");
@@ -111,28 +110,28 @@ start_audio_capture_process(){
     start_audio_capture_command+=" ${channels_parameter}";
     start_audio_capture_command+=" ${sample_format_parameter}";
     start_audio_capture_command+=" ${sampling_rate_parameter}";
-    start_audio_capture_command+=" ${device_parameter}";
-    start_audio_capture_command+=" 1>${audio_pipe_file}";
+    start_audio_capture_command+=" ${record_device_parameter}";
+    #start_audio_capture_command+=" 1> ${audio_pipe_file}";
 
-    if [ -n "${audio_capture_log_file}" ];
-    then
-        start_audio_capture_command+=" 2>${audio_capture_log_file}";
-    fi;
+    #if [ -n "${audio_capture_log_file}" ];
+    #then
+        #start_audio_capture_command+=" 2>${audio_capture_log_file}";
+    #fi;
 
     local start_process_result;
     local audio_capture_process_id;
-    # audio_capture_process_id=$(start_process "${start_audio_capture_command}");
-    # start_process_result=${?};
+    start_process "${start_audio_capture_command}" "audio_capture" "" "${audio_pipe_file}" "";
+    #echo "${start_audio_capture_command}"; 
+    #audio_capture_process_id=$(start_process "${start_audio_capture_command}");
+    #start_process_result=${?};
 
-    if [ ${start_process_result} -ne ${success} ];
-    then
-        log ${log_message_type_error} "Could not start audio capture process.";
-        return ${generic_error};
-    else
-        log ${log_message_type_trace} "Audio capture process ID: ${audio_capture_process_id}";
-        save_process_id "${audio_capture_process_id_file}" "${audio_capture_process_id}";
-    fi;
-
-    
-    echo "${start_audio_capture_command}"; 
+    #if [ ${start_process_result} -ne ${success} -o -z "${audio_capture_process_id}" ];
+    #then
+        #log ${log_message_type_error} "Could not start audio capture process.";
+        #return ${generic_error};
+    #else
+        #log ${log_message_type_trace} "Audio capture process ID: ${audio_capture_process_id}";
+        #disown -h ${audio_capture_process_id};
+        #save_process_id "${audio_capture_process_id_file}" "${audio_capture_process_id}";
+    #fi;
 }
