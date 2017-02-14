@@ -7,11 +7,11 @@
 # Ignore pid files.
 *.pid
 
-# Ignore "audio" directory.
-audio/
+# Ignore mp3 files.
+*.mp3
+
+# Ignore pid filed.
+*.pid
 
 # Ignore "temporary" directory.
 temporary/
-
-# Ignore "pid" directory.
-pid/
