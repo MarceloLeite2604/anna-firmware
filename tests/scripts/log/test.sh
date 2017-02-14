@@ -5,8 +5,8 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
-# Load "log_functions.sh" file.
-source $(dirname ${BASH_SOURCE})/../log_functions.sh
+# Load log functions script.
+source "$(dirname ${BASH_SOURCE})/../../../scripts/log/functions.sh";
 
 # Directory to store log files.
 readonly test_log_directory="../../tests/log/";
@@ -212,7 +212,7 @@ test_log_write_log_message(){
 
 # Test functions "set_log_level", "log" and "trace".
 test_set_log_level(){
-    echo "Testing function \"set_log_level\", \"log\" and \"trace\".";
+    echo "Testing function \"set_log_level\", \"get_log_level\", \"log\" and \"trace\".";
 
     create_log_file "test_set_log_level";
 
@@ -258,10 +258,11 @@ test_set_log_level(){
     cat ${temporary_log_file_path};
     echo -e "End of content.\n";
 
-    echo -e "Tests of functions \"set_log_level\", \"log\" and \"trace\" concluded.\n";
+    echo -e "Tests of functions \"set_log_level\", \"get_log_level\", \"log\" and \"trace\" concluded.\n";
 }
 
 # Executes test functions.
+# TODO: Create "test_log_get_current_time" function.
 test_log_write_stderr;
 test_set_log_directory;
 test_log_write_on_file;

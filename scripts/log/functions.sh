@@ -5,11 +5,8 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
-# Load configuration file.
-source $(dirname ${BASH_SOURCE})/configuration.sh
-
-# Load constants used by log functions.
-source $(dirname ${BASH_SOURCE})/log_constants.sh
+# Load log constants script.
+source "$(dirname ${BASH_SOURCE})/constants.sh";
 
 # Log directory.
 _log_directory="log/";

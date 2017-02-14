@@ -1,6 +1,3 @@
-# Ignore "tests" directory content.
-tests/
-
 # Ignore log files.
 *.log
 
@@ -10,5 +7,11 @@ tests/
 # Ignore pid files.
 *.pid
 
-# Ignore "audio" directory content.
+# Ignore "audio" directory.
 audio/
+
+# Ignore "temporary" directory.
+temporary/
+
+# Ignore "pid" directory.
+pid/
