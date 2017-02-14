@@ -1,5 +1,5 @@
 # Ignore "tests" directory content.
-./tests/
+tests/
 
 # Ignore log files.
 *.log
@@ -11,4 +11,4 @@
 *.pid
 
 # Ignore "audio" directory content.
-./audio/
+audio/
