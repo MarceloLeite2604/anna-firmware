@@ -71,3 +71,21 @@ if [ -z ${process_id_files_suffix+x} ];
 then
     readonly process_id_files_suffix=".pid";
 fi;
+
+# Signal sent to kill a process.
+if [ -z ${process_kill_signal+x} ];
+then
+    readonly process_kill_signal="SIGKILL";
+fi;
+
+# Signal sent to interrupt a process.
+if [ -z ${process_interrupt_signal+x} ];
+then
+    readonly process_interrupt_signal="SIGINT";
+fi;
+
+# Signal sent to terminate a process.
+if [ -z ${process_terminate_signal+x} ];
+then
+    readonly process_terminate_signal="SIGTERM";
+fi;

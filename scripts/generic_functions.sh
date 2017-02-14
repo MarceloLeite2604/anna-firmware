@@ -374,7 +374,7 @@ check_process_is_alive(){
 # Creates the process id file path.
 #
 # Parameters.
-#   1. The preffix with identifies the process id file.
+#   1. The process identifier.
 #
 # Returns
 #   0. If process id file path was created successfully.
@@ -388,9 +388,9 @@ create_process_id_file_path(){
         return ${generic_error};
     fi;
 
-    local process_id_file_preffix="${1}";
+    local process_identifier="${1}";
 
-    local process_id_file_name=${process_id_file_preffix}${process_id_files_suffix};
+    local process_id_file_name=${process_identifier}${process_id_files_suffix};
 
     local check_file_is_directory_result;
     check_file_is_directory "${process_id_files_directory}";
@@ -404,14 +404,13 @@ create_process_id_file_path(){
     local readonly process_id_file_path="${process_id_files_directory}${process_id_file_name}";
 
     echo "${process_id_file_path}";
-
     return ${success};
 }
 
 # Saves a process id on a process id file.
 #
 # Parameters
-#   1. The process id file preffix.
+#   1. The process identifier.
 #   2. The process id to be written on process_id file.
 #
 # Returns
@@ -425,11 +424,11 @@ save_process_id() {
         return ${generic_error};
     fi;
 
-    local readonly process_id_file_preffix="${1}";
+    local readonly process_identifier="${1}";
     local readonly process_id=${2};
 
     local create_process_id_file_path_result;
-    process_id_file_path=$(create_process_id_file_path "${process_id_file_preffix}");
+    process_id_file_path=$(create_process_id_file_path "${process_identifier}");
     create_process_id_file_path_result=${?};
     if [ ${create_process_id_file_path_result} -ne ${success} ];
     then
@@ -438,7 +437,7 @@ save_process_id() {
 
     if [ -z "${process_id_file_path}" ];
     then
-        log ${log_message_type_error} "Could not define the process id file path for \"${process_id_file_preffix}\" process.";
+        log ${log_message_type_error} "Could not define the process id file path for \"${process_identifier}\" process.";
         return ${generic_error}
     fi;
 
@@ -482,11 +481,87 @@ save_process_id() {
     return ${success};
 }
 
+# Retrieves a process id from a process id file.
+#
+# Parameters
+#   1. The process identifier
+#
+# Returns
+#   0. If the process id was retrieved successfully.
+#   1. If there was an error while retrieving the process id.
+#   It also returns the process id read from file through "echo".
+retrieve_process_id(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${generic_error};
+    fi;
+
+    local readonly process_identifier="${1}";
+
+    local check_file_is_directory_result;
+    check_file_is_directory "${process_id_files_directory}";
+    check_file_is_directory_result=${?};
+    if [ ${check_file_is_directory_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not find directory \"${process_id_files_directory}\".";
+        return ${generic_error};
+    fi;
+
+    local check_read_permission_result;
+    check_read_permission "${process_id_files_directory}";
+    check_read_permission_result=${?};
+    if [ ${check_read_permission_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "User \"$(username)\" does not have permission to read content from directory \"${process_id_files_directory}\".";
+        return ${generic_error};
+    fi;
+        
+    local readonly process_id_file_path=$(create_process_id_file_path "${process_identifier}");
+
+    local check_file_exists_result;
+    check_file_exists "${process_id_file_path}";
+    check_file_exists_result=${?};
+    if [ ${check_file_exists_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not find process id file \"${process_id_file_path}\".";
+        return ${generic_error};
+    fi;
+
+    check_read_permission "${process_id_file_path}";
+    check_read_permission_result=${?};
+    if [ ${check_read_permission_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "User \"$(username)\" does not have permission to read content from process id file \"${process_id_file_path}\".";
+        return ${generic_error};
+    fi;
+
+    local process_id;
+    local cat_result;
+    process_id=$(cat "${process_id_file_path}");
+    cat_result=${?};
+    if [ ${cat_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Error reading content from file \"${process_id_file_path}\" (${cat_result}).";
+        return ${generic_error};
+    fi;
+
+    if [ -z "${process_id}" ];
+    then
+        log ${log_message_type_error} "Process id file \"${process_id_file_path}\" is empty.";
+        return ${generic_error}
+    fi;
+
+    echo "${process_id}";
+    return ${success};
+}
+
 # Starts a new process.
 #
 # Parameters
 #   1. Command to start the new process.
-#   2. Preffix to identify the new process id file.
+#   2. The process identifier.
 #   3. File input for the new process.
 #   4. File output for the new process.
 #   5. File error output for the new process.
@@ -508,13 +583,13 @@ start_process(){
     fi;
 
     local readonly new_process_command="${1}";
-    local readonly process_id_file_preffix="${2}";
+    local readonly process_identifier="${2}";
     local readonly input_file="${3}";
     local readonly output_file="${4}";
     local readonly error_file="${5}";
 
     local create_process_id_file_path_result;
-    process_id_file_path=$(create_process_id_file_path "${process_id_file_preffix}");
+    process_id_file_path=$(create_process_id_file_path "${process_identifier}");
     create_process_id_file_path_result=${?};
     if [ ${create_process_id_file_path_result} -ne ${success} ];
     then
@@ -523,7 +598,7 @@ start_process(){
 
     if [ -z "${process_id_file_path}" ];
     then
-        log ${log_message_type_error} "Could not define the process id file path for \"${process_id_file_preffix}\" process.";
+        log ${log_message_type_error} "Could not define the process id file path for \"${process_identifier}\" process.";
         return ${generic_error}
     fi;
     
@@ -606,7 +681,7 @@ start_process(){
     fi;
 
     local save_process_id_result;
-    save_process_id "${process_id_file_preffix}" "${new_process_id}";
+    save_process_id "${process_identifier}" "${new_process_id}";
     save_process_id_result=${?};
     if [ ${save_process_id_result} -ne ${success} ];
     then
@@ -618,3 +693,174 @@ start_process(){
     return ${success}; 
 }
 
+
+# Send a signal to a process.
+#
+# Parameters
+#   1. The process id the send the signal.
+#   2. The signal to send.
+#
+# Returns
+#   0. If the signal was sent successfully.
+#   1. Otherwise.
+send_signal_to_process(){
+
+    if [ ${#} -ne 2 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${generic_error};
+    fi;
+
+    local readonly process_id=${1};
+    local readonly signal="${2}";
+
+    if [ "${signal}" != "${process_kill_signal}" -a  "${signal}" != "${process_interrupt_signal}" -a "${signal}" != "${process_terminate_signal}" ];
+    then
+        log ${log_message_type_error} "Invalid signal value to send to process (\"${signal}\").";
+        return ${generic_error};
+    fi;
+
+    local check_process_is_alive_result;
+    check_process_is_alive ${process_id};
+    check_process_is_alive_result=${?};
+    if [ ${check_process_is_alive_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not find process \"${process_id}\".";
+        return ${generic_error};
+    fi;
+
+    local kill_result;
+    kill -${signal} ${process_id};
+    kill_result=${?};
+    if [ ${kill_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Error sending \"${signal}\" signal to process id \"${process_id}\" (${kill_result}).";
+        return ${generic_error};
+    fi;
+
+    return ${success};
+}
+
+# Send an interrupt signal to a process.
+#
+# Parameters
+#   1. The process id the send the interrupt signal.
+#
+# Returns
+#   0. If the interrupt signal was sent successfully.
+#   1. Otherwise.
+send_interrupt_signal(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${generic_error};
+    fi;
+
+    local readonly process_id=${1};
+
+    local send_signal_to_process_result;
+    send_signal_to_process ${process_id} "${process_interrupt_signal}";
+    send_signal_to_process_result=${?};
+    if [ ${send_signal_to_process_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not send interrupt signal to process ${process_id}.";
+        return ${generic_error};
+    fi;
+
+    return ${success};
+}
+
+
+# Send an kill signal to a process.
+#
+# Parameters
+#   1. The process id the send the kill signal.
+#
+# Returns
+#   0. If the kill signal was sent successfully.
+#   1. Otherwise.
+send_kill_signal(){
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${generic_error};
+    fi;
+
+    local readonly process_id=${1};
+
+    local send_signal_to_process_result;
+    send_signal_to_process ${process_id} "${process_kill_signal}";
+    send_signal_to_process_result=${?};
+    if [ ${send_signal_to_process_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not send kill signal to process ${process_id}.";
+        return ${generic_error};
+    fi;
+
+    return ${success};
+}
+
+# Stops a process.
+#
+# Parameters
+#   1. The process id to stop.
+#
+# Returns
+#   0. If process was stopped sucessfully.
+#   1. Otherwise
+stop_process() {
+
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return ${generic_error};
+    fi;
+
+    local readonly process_id=${1};
+
+    local check_process_is_alive_result;
+    check_process_is_alive ${process_id};
+    check_process_is_alive_result=${?};
+    if [ ${check_process_is_alive_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Process ${process_id} does not exist.";
+        return ${generic_error};
+    fi;
+
+    local send_kill_signal_result;
+    send_kill_signal ${process_id};
+    send_kill_signal_result=${?};
+    if [ ${send_kill_signal_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Error sending kill signal to process id ${process_id}.";
+        return ${generic_error};
+    fi;
+
+    local process_terminated="false";
+    local retries=0;
+    local max_retries=50;
+    while [ "${process_terminated}" == "false" -a ${retries} -lt ${max_retries} ];
+    do
+        sleep 0.1;
+
+        check_process_is_alive ${process_id};
+        check_process_is_alive_result=${?};
+        if [ ${check_process_is_alive_result} -eq ${success} ];
+        then
+            retries=$((retries+1));
+        else
+            process_terminated="true";
+        fi;
+    done;
+
+    if [ ${process_terminated} = "false" ];
+    then
+        log ${log_message_type_error} "Process ${process_id} is still alive.";
+        return ${generic_failure};
+    fi;
+
+    log ${log_message_type_trace} "Process ${process_id} interrupted.";
+    return ${success};
+}
