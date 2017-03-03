@@ -15,3 +15,9 @@
 
 # Ignore "temporary" directory.
 temporary/
+
+# Ignore directory where binaries are stored.
+bin/
+
+# Ignore directory where objects are stored.
+objects/
