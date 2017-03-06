@@ -21,3 +21,6 @@ bin/
 
 # Ignore directory where objects are stored.
 objects/
+
+# Ignore object files.
+*.o
