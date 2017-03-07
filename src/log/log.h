@@ -22,6 +22,16 @@
 #define LOG_MESSAGE_TYPE_WARNING 10
 #define LOG_MESSAGE_TYPE_ERROR 15
 
+// Macro to print a log message.
+#define LOG(x, y) write_log_message((x), __func__, __LINE__, (y))
+
+// Macro to print a trace message.
+#define TRACE(x) write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, (x));
+
+// Macro to print a trace point.
+#define TRACE_ write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, NULL);
+
+
 /*
  * Function headers.
  */
@@ -64,9 +74,14 @@ int open_log_file(char* log_file_preffix);
 /*
  * Defines the directory to store log files.
  */
-int set_log_directory(char* new_log_directory);
+int set_log_directory(const char* new_log_directory);
 
 /*
  * Defines the current level of log file.
  */ 
 int set_log_level(int new_log_level);
+
+/*
+ * Writes a log message.
+ */
+int write_log_message(const int message_type, const char* tag, const int index, const char* message);

@@ -24,6 +24,7 @@
 void test_log_directory();
 void test_set_log_level();
 void test_open_log_file();
+void test_write_log_message();
 
 
 /*
@@ -38,6 +39,7 @@ int main(int argc, char** argv){
     test_log_directory();
     test_set_log_level();
     test_open_log_file();
+    test_write_log_message();
     return 0;
 }
 
@@ -160,7 +162,71 @@ void test_open_log_file(){
         printf("Log file is closed.\n");
     }
 
+    printf("Test of functions \"open_log_file\", \"is_log_open\" and \"close_log_file\" concluded.\n\n");
+}
 
+/*
+ * Tests "write_log_message" function.
+ */
+void test_write_log_message() {
+    printf("Testing \"write_log_message\" function and \"LOG\" and \"TRACE\" macros.\n");
 
-    printf("Test of functions \"open_log_file\", \"is_log_open\" and \"close_log_file\" concluded.\n");
+    char log_directory[256];
+    char* function_name = "test_write_log_message";
+
+    strcpy(log_directory, LOG_ROOT_DIRECTORY);
+    strcat(log_directory, function_name);
+    strcat(log_directory, "/");
+    struct stat stat_struct = {0};
+
+    if ( stat(log_directory, &stat_struct) == -1 ) {
+        printf("Directory \"%s\" does not exist.\n", log_directory);
+        if ( mkdir(log_directory, 0700) == 0 ) {
+            printf("Directory \"%s\" created.\n", log_directory);
+        } else {
+            printf("Could not create directory \"%s\".\n", log_directory);
+            return;
+        }
+    }
+
+    write_log_message(LOG_MESSAGE_TYPE_TRACE, function_name, 1, "This trace message should be written on console."); 
+    write_log_message(LOG_MESSAGE_TYPE_WARNING, function_name, 2, "This warning message should be written on console."); 
+    write_log_message(LOG_MESSAGE_TYPE_ERROR, function_name, 3, "This error message should be written on console."); 
+    TRACE("This trace message was written through \"TRACE\" macro.");
+    TRACE_;
+
+    set_log_directory(log_directory);
+
+    if (open_log_file(function_name) == 0 ) {
+        printf("Log file opened.\n");
+        }
+    else {
+        printf("Error opening log file.\n");
+    }
+
+    printf("Log directory is \"%s\".\n", get_log_directory());
+    printf("Log file name: \"%s\".\n", get_log_file_name());
+    printf("Log file path: \"%s\".\n", get_log_file_path());
+
+    write_log_message(LOG_MESSAGE_TYPE_TRACE, function_name, 4, "This trace message should be written on log file."); 
+    write_log_message(LOG_MESSAGE_TYPE_WARNING, function_name, 5, "This warning message should be written on log file."); 
+    write_log_message(LOG_MESSAGE_TYPE_ERROR, function_name, 6, "This error message should be written on log file.");
+
+    TRACE("This message was written through \"TRACE\" macro.");
+    TRACE_;
+
+    if ( close_log_file() == 0 ) {
+        printf("Log file closed.\n");
+    }
+    else {
+        printf("Error closing log file.\n");
+    }
+
+    if ( is_log_open() == true ) {
+        printf("Log file is open.\n");
+    } else {
+        printf("Log file is closed.\n");
+    }
+
+    printf("Test of function \"write_log_message\" and \"LOG\" and \"TRACE\" macros concluded.\n\n");
 }
