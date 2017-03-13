@@ -8,4 +8,4 @@
 export INPUT_DIRECTORY="../../resources/";
 export OUTPUT_DIRECTORY="${INPUT_DIRECTORY}";
 
-./bin/testdirectory;
+$(dirname ${BASH_SOURCE})/bin/testdirectory;
