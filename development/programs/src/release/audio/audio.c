@@ -1,5 +1,5 @@
 /*
- * This source file contains all functions required to execute shell scripts to record audio.
+ * This source file contains all functions required to start and stop audio record.
  *
  * Version: 0.1
  * Author: Marcelo Leite
@@ -8,42 +8,67 @@
 /*
  * Includes.
  */
-#include "audio.h"
-#include "../directory/directory.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "../log/log.h"
+#include "../script/script.h"
+
 
 /*
  * Definitions.
  */
 
-// Path to script directory.
-#define SCRIPT_DIRECTORY "scripts/"
+// Script name to start audio record.
+#define START_AUDIO_RECORD_SCRIPT_NAME "start_record.sh"
 
-// Script to start audio record.
-#define START_RECORD_AUDIO "start_record.sh"
-
-// Script to stop audio record.
-#define STOP_RECORD_AUDIO "stop_record.sh"
+// Script name to stop audio record.
+#define STOP_AUDIO_RECORD_SCRIPT_NAME "stop_record.sh"
 
 
 /*
- * Function elaborations.
+ * Starts audio record.
+ *
+ * Parameters:
+ *  None.
+ *
+ * Returns:
+ *  0. If audio record was started successfully.
+ *  1. Otherwise.
  */
-int start_record(){
+int start_audio_record(){
+    char* error_message;
+    int script_result = execute_script(START_AUDIO_RECORD_SCRIPT_NAME);
 
-    char* input_directory;
-    char* start_record_script_path;
-    int start_record_script_path_length;
+    if ( script_result != 0 ){
+        error_message = malloc(256*sizeof(char));
+        sprintf(error_message, "Error executing start record script. Execution returned: %d.", script_result);
+        LOG_ERROR(error_message);
+        return 1;
+    }
 
-    input_directory=get_input_directory();
-    start_record_script_path_length=strlen(input_directory);
+    return script_result;
+}
 
-    start_record_script_path_length+=strlen(SCRIPT_DIRECTORY);
-    start_record_script_path_length+=strlen(START_RECORD_AUDIO);
+/*
+ * Stops audio record.
+ *
+ * Parameters:
+ *  None.
+ *
+ * Returns:
+ *  0. If audio record was started successfully.
+ *  1. Otherwise.
+ */
+int stop_audio_record(){
+    char* error_message;
+    int script_result = execute_script(STOP_AUDIO_RECORD_SCRIPT_NAME);
 
-    start_record_script_path=malloc((start_record_script_path_length+1)*sizeof(char));
+    if ( script_result != 0 ){
+        error_message = malloc(256*sizeof(char));
+        sprintf(error_message, "Error executing stop record script. Execution returned: %d.", script_result);
+        LOG_ERROR(error_message);
+        return 1;
+    }
 
-    strcpy(start_record_script_path, input_directory);
-    strcat(start_record_script_path, SCRIPT_DIRECTORY);
-    strcat(start_record_script_path, START_RECORD_AUDIO);
-
+    return script_result;
 }

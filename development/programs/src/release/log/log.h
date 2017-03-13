@@ -22,10 +22,13 @@
 #define LOG_MESSAGE_TYPE_WARNING 10
 #define LOG_MESSAGE_TYPE_ERROR 15
 
-// Macro to print a log message.
+// Macro to register a log message.
 #define LOG(x, y) write_log_message((x), __func__, __LINE__, (y))
 
-// Macro to print a trace message.
+// Macro to register an error message
+#define LOG_ERROR(x) write_log_message(LOG_MESSAGE_TYPE_ERROR, __func__, __LINE__, (x)) 
+
+// Macro to register a trace message.
 #define TRACE(x) write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, (x));
 
 // Macro to print a trace point.

@@ -7,18 +7,81 @@
 
 release_version="0.1";
 
-development_directory="$(dirname ${BASH_SOURCE})/development";
+development_directory="$(dirname ${BASH_SOURCE})/development/";
 
-release_directory="$(dirname ${BASH_SOURCE})/release";
+release_directory="$(dirname ${BASH_SOURCE})/release/";
 
-configuration_development_directory="${development_directory}/configuration";
+configuration_development_directory="${development_directory}configuration/";
 
-scripts_development_directory="${development_directory}/scripts";
+scripts_development_directory="${development_directory}scripts/";
 
-programs_development_directory="${development_directory}/programs";
+programs_development_directory="${development_directory}programs/";
 
-release_version_directory="${release_directory}/${release_version}";
+release_version_directory="${release_directory}${release_version}/";
 
+create_directory() {
+
+    local directory="${1}";
+    if [ ! -d "${directory}" ];
+    then
+        echo -e "Creating directory \"${directory}\".";
+        mkdir -p "${directory}";
+        local mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            echo -e "Error creating directory \"${directory}\" (${mkdir_result}).";
+            return 1;
+        fi;
+    fi;
+
+    return 0;
+}
+
+create_directory_structure(){
+
+    local root_directory="${1}";
+
+    create_directory "${root_directory}temporary/";
+    local create_directory_result=${?};
+    if [ ${create_directory_result} -ne 0 ];
+    then
+        return ${create_directory_result};
+    fi;
+
+    create_directory "${root_directory}pids/";
+    local create_directory_result=${?};
+    if [ ${create_directory_result} -ne 0 ];
+    then
+        return ${create_directory_result};
+    fi;
+
+    create_directory "${root_directory}audio/";
+    local create_directory_result=${?};
+    if [ ${create_directory_result} -ne 0 ];
+    then
+        return ${create_directory_result};
+    fi;
+
+    create_directory "${root_directory}logs/";
+    local create_directory_result=${?};
+    if [ ${create_directory_result} -ne 0 ];
+    then
+        return ${create_directory_result};
+    fi;
+
+    return 0;
+}
+
+define_input_output_directories() {
+
+    local source_directory="${1}";
+    local input_output_directory="${2}";
+
+    echo "${input_output_directory}" > ${source_directory}input_directory;
+    echo "${input_output_directory}" > ${source_directory}output_directory;
+
+    return 0;
+}
 
 create_release_version_directory(){
 
@@ -33,15 +96,15 @@ create_release_version_directory(){
 deploy_configuration(){
     echo -e "Deploying \"configuration\" project division.";
 
-    rm -rf ${scripts_development_directory}/resources/configuration;
-    cp -r ${configuration_development_directory} ${scripts_development_directory}/resources/configuration;
+    rm -rf ${scripts_development_directory}resources/configuration;
+    cp -r ${configuration_development_directory} ${scripts_development_directory}resources/configuration;
 
-    rm -rf ${programs_development_directory}/resources/configuration;
-    cp -r ${configuration_development_directory} ${programs_development_directory}/resources/configuration;
+    rm -rf ${programs_development_directory}resources/configuration;
+    cp -r ${configuration_development_directory} ${programs_development_directory}resources/configuration;
 
     create_release_version_directory;
-    rm -rf ${release_version_directory}/configuration;
-    cp -r ${configuration_development_directory} ${release_version_directory}/configuration;
+    rm -rf ${release_version_directory}configuration;
+    cp -r ${configuration_development_directory} ${release_version_directory}configuration;
 
     return 0;
 }
@@ -50,12 +113,20 @@ deploy_scripts(){
     echo -e "Deploying \"scripts\" project division.";
 
 
-    rm -rf ${programs_development_directory}/resources/scripts;
-    cp -r ${scripts_development_directory}/deploy ${programs_development_directory}/resources/scripts;
+    rm -rf ${programs_development_directory}resources/scripts;
+    cp -r ${scripts_development_directory}deploy ${programs_development_directory}resources/scripts;
 
     create_release_version_directory;
-    rm -rf ${release_version_directory}/scripts;
-    cp -r ${development_directory}/scripts/deploy ${release_version_directory}/scripts;
+    rm -rf ${release_version_directory}scripts;
+    cp -r ${development_directory}scripts/deploy ${release_version_directory}scripts;
+
+    echo -e "Defining input and output directories.";
+    define_input_output_directories "${programs_development_directory}resources/scripts/directories/" "../../"
+
+    echo -e "Creating directories structure.";
+    create_directory_structure "${programs_development_directory}resources/";
+    create_directory_structure "${release_version_directory}";
+
     return 0;
 }
 

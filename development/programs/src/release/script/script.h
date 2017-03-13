@@ -1,0 +1,11 @@
+/*
+ * This header file contains all functions required to execute bash scripts.
+ *
+ * Version: 0.1
+ * Author: Marcelo Leite
+ */
+
+/*
+ * Executes a bash script.
+ */
+int execute_script(char* script_name);

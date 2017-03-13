@@ -11,7 +11,7 @@ source "$(dirname ${BASH_SOURCE})/../generic/constants.sh";
 # Process id files directory.
 if [ -z "${process_id_files_directory}" ];
 then
-    readonly process_id_files_directory="${root_directory}pids/";
+    readonly process_id_files_directory="${output_files_directory}pids/";
 fi;
 
 # Suffix to identify process id files.

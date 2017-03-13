@@ -1,16 +1,16 @@
 /*
- * This header file contains all functions required to execution shell scripts to record audio.
+ * This header file contains all functions requires to start and stop audio record.
  *
  * Version: 0.1
  * Author: Marcelo Leite
  */
 
 /*
- * Executes bash script to start record.
+ * Starts audio record.
  */
-int start_record();
+int start_audio_record();
 
 /*
- * Executes bash script to stop record.
+ * Stops audio record.
  */
-int stop_record();
+int stop_audio_record();

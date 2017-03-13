@@ -16,7 +16,7 @@
 /*
  * Definitions.
  */
-#define LOG_ROOT_DIRECTORY "../../output/tests/logs/"
+#define LOG_ROOT_DIRECTORY "../../output/tests/log/"
 
 /*
  * Function headers.
