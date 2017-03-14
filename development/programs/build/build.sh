@@ -43,8 +43,16 @@ build_programs() {
         return 1;
     fi;
     
+    echo "Creating \"bluetooth\" object.";
+    gcc -c ${release_source_directory}bluetooth/bluetooth.c -o ${objects_directory}bluetooth.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth\" object.";
+        return 1;
+    fi;
+    
     echo "Creating \"testlog\" object.";
-    gcc -c ${test_source_directory}testlog.c -I${release_source_directory} -o ${objects_directory}testlog.o ${additional_arguments};
+    gcc -c ${test_source_directory}testlog.c -o ${objects_directory}testlog.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testlog\" object.";
@@ -61,7 +69,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testdirectory\" object.";
-    gcc -c ${test_source_directory}testdirectory.c -I${release_source_directory} -o ${objects_directory}testdirectory.o ${additional_arguments};
+    gcc -c ${test_source_directory}testdirectory.c -o ${objects_directory}testdirectory.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testdirectory\" object.";
@@ -78,7 +86,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testscript\" object.";
-    gcc -c ${test_source_directory}testscript.c -I${release_source_directory} -o ${objects_directory}testscript.o ${additional_arguments};
+    gcc -c ${test_source_directory}testscript.c -o ${objects_directory}testscript.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testdirectory\" object.";
@@ -95,7 +103,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testaudio\" object.";
-    gcc -c ${test_source_directory}testaudio.c -I${release_source_directory} -o ${objects_directory}testaudio.o ${additional_arguments};
+    gcc -c ${test_source_directory}testaudio.c -o ${objects_directory}testaudio.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testaudio\" object.";
@@ -112,7 +120,7 @@ build_programs() {
     fi;
 
     echo "Creating \"testbluetooth\" object.";
-    gcc -c ${test_source_directory}testbluetooth.c -I${release_source_directory} -o ${objects_directory}testbluetooth.o ${additional_arguments};
+    gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testbluetooth\" object.";
@@ -120,7 +128,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}log.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

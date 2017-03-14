@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "directory/directory.h"
+#include "../release/directory/directory.h"
 
 /*
  * Definitions.

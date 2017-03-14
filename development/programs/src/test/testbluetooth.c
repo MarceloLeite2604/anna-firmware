@@ -2,16 +2,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <bluetooth/bluetooth.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
+#include <inttypes.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include "log/log.h"
-#include <inttypes.h>
+#include "../release/bluetooth/bluetooth.h"
+#include "../release/log/log.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -20,7 +21,14 @@
 // Observation: On "hci_inquiry" function, the "len" is used to define inquiry time as "1.28 * len".
 #define INQUIRY_TIME 3
 
-int inquiry_devices(){
+/*typedef struct {
+    uint32_t uuid[4];
+    char* name;
+    char* description;
+    char* provider;
+} bluetooth_service_infos_t;*/
+
+/* int inquiry_devices(){
     char* error_message;
 
     inquiry_info* inquiry_infos = NULL;
@@ -34,37 +42,30 @@ int inquiry_devices(){
     char bluetooth_device_address[19] = {0};
     char bluetooth_device_name[248] = {0};
 
-    /*
-     * Returns the resource number of the first available bluetooth adapter.
-     * Observation: Bluetooth must be enable/activated on system.
-     */
+    
+    // Returns the resource number of the first available bluetooth adapter.
+    // Observation: Bluetooth must be enable/activated on system.
     bluetooth_device_id = hci_get_route(NULL);
     if ( bluetooth_device_id < 0 ) {
         LOG_ERROR("Could not find bluetooth device.");
         return 1;
     }
 
-    /*
-     * Opens a socket communication with the bluetooth device.
-     */
+    //  Opens a socket communication with the bluetooth device.
     bluetooth_device_socket = hci_open_dev(bluetooth_device_id);
     if ( bluetooth_device_socket < 0 ) {
         LOG_ERROR("Could not open socket with bluetooh device.");
         return 1;
     }
 
-    /*
-     * Observation: IRQ_CACHE_FLUSH ignores results from previous inquires.
-     */
+    // Observation: IRQ_CACHE_FLUSH ignores results from previous inquires.
     inquiry_flags = IREQ_CACHE_FLUSH;
 
     inquiry_infos = malloc(MAX_DISCOVERED_DEVICES * sizeof(inquiry_info));
 
     printf("Searching nearby devices.\n");
 
-    /*
-     * Inquires nearby bluetooth devices available.
-     */
+    // Inquires nearby bluetooth devices available.
     total_discovered_devices = hci_inquiry(bluetooth_device_id, INQUIRY_TIME, MAX_DISCOVERED_DEVICES, NULL, &inquiry_infos, inquiry_flags);
     if ( total_discovered_devices < 0 ) {
         error_message=malloc(ERROR_MESSAGE_SIZE*sizeof(char));
@@ -81,9 +82,7 @@ int inquiry_devices(){
         ba2str(&(var_inquiry_info->bdaddr), bluetooth_device_address);
         memset(bluetooth_device_name, 0, sizeof(bluetooth_device_name));
 
-        /*
-         * Gets the remote bluetooth device friendly name.
-         */
+        // Gets the remote bluetooth device friendly name.
         if (hci_read_remote_name(bluetooth_device_socket, &(var_inquiry_info->bdaddr), sizeof(bluetooth_device_name), bluetooth_device_name, 0) < 0 ){
             strcpy(bluetooth_device_name, "[unknown]");
         }
@@ -95,16 +94,19 @@ int inquiry_devices(){
 
     return 0;
 }
+*/
 
 int rfcomm_server(){
     struct sockaddr_rc local_address = { 0 };
     struct sockaddr_rc remote_device_address = { 0 };
-    char remote_device_address_string[19] = { 0 };
     int listening_socket_file_descriptor;
     int client_socket_file_descriptor;
     char content_read[1024];
     int bytes_read;
     socklen_t opt = sizeof(remote_device_address);
+    char remote_device_address_string[19] = { 0 };
+    char remote_device_name[256] = { 0 };
+    char log_message[1024];
 
     /*
      * Allocates a socket to listen to connections.
@@ -121,7 +123,7 @@ int rfcomm_server(){
      */
     local_address.rc_family = AF_BLUETOOTH;
     local_address.rc_bdaddr = *BDADDR_ANY;
-    local_address.rc_channel = (uint8_t) 1;
+    local_address.rc_channel = (uint8_t) 27;
     bind(listening_socket_file_descriptor, (struct sockaddr *)&local_address, sizeof(local_address));
 
     /*
@@ -129,20 +131,39 @@ int rfcomm_server(){
      */
     listen(listening_socket_file_descriptor, 1);
 
+    fd_set listening_socket_file_descriptor_fd_set;
+    struct timeval tv;
+    tv.tv_sec=(long)5;
+    tv.tv_usec=0;
+    int select_result;
+
+    FD_ZERO(&listening_socket_file_descriptor_fd_set);
+    FD_SET(listening_socket_file_descriptor, &listening_socket_file_descriptor_fd_set);
+
+    select_result = select((listening_socket_file_descriptor+1), &listening_socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &tv);
+    if ( select_result = 0 ) {
+        TRACE("Connection acceptance timeout.");
+        return 1;
+    }
+
     /*
      * Accepts one connection from the listening socket.
      */
-    printf("Waiting for bluetooth connections.\n");
     client_socket_file_descriptor = accept(listening_socket_file_descriptor, (struct sockaddr *)&remote_device_address, &opt);
+    ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
 
-    printf("Connection created.\n");
+    if (hci_read_remote_name(client_socket_file_descriptor, &(remote_device_address.rc_bdaddr), sizeof(remote_device_name), remote_device_name, 0) < 0 ){
+        sprintf(log_message, "Connected with device \"%s\".", remote_device_address_string);
+    }
+    else {
+        sprintf(log_message, "Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
+    }
+    TRACE(log_message);
 
     /*
      * Turns the remote bluetooth device address on a human-readable address.
      */
-    ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
-    printf("Remote device address: %s\n", remote_device_address_string);
-    memset(remote_device_address_string, 0, sizeof(remote_device_address_string));
+
 
     /*
      * Read data from socket.
@@ -162,105 +183,111 @@ int rfcomm_server(){
     close(listening_socket_file_descriptor);
     return 0;
 }
-
-int register_service()
+/*
+int register_service(bluetooth_service_infos_t bluetooth_service_infos)
 {
-    // uint32_t svc_uuid_int[] = { 0x7b6b1238, 0x52d34516, 0x9e1ec8c1, 0xaa1bdd49 };
-    // uint32_t svc_uuid_int[] = { 0xf5934b96, 0x011011e6, 0x8d225e55, 0x17507c66 };
-    uint32_t svc_uuid_int[] = { 0x964b93f5, 0xe6111001, 0x555e228d, 0x667c5017 };
-    printf("Service UUID: %" PRIu32 ".\n", svc_uuid_int[3]);
-    // uint8_t rfcomm_port = 11;
-    uint8_t rfcomm_channel = 3;
-    const char *service_name = "Projeto Anna";
-    const char *service_dsc = "This is my project description";
-    const char *service_prov = "Marcelo";
+    
+    uint8_t rfcomm_channel = 27;
 
-    uuid_t root_uuid;
+    uuid_t public_browse_group_uuid;
     uuid_t l2cap_uuid;
     uuid_t rfcomm_uuid;
-    uuid_t svc_uuid;
-    uuid_t svc_class_uuid;
+    uuid_t service_uuid;
+
+    sdp_list_t *service_class_id_list = 0;
+    sdp_list_t *public_browse_group_list = 0;
+
     sdp_list_t *l2cap_list = 0;
     sdp_list_t *rfcomm_list = 0;
-    sdp_list_t *root_list = 0;
-    sdp_list_t *proto_list = 0;
-    sdp_list_t *access_proto_list = 0;
-    sdp_list_t *svc_class_list = 0;
-    sdp_list_t *profile_list = 0;
-    sdp_data_t *channel = 0;
-    sdp_profile_desc_t profile;
+    sdp_list_t *protocol_list = 0;
+    sdp_list_t *access_protocol_list = 0;
+    sdp_data_t *channel_data = 0;
     sdp_record_t record = { 0 };
     sdp_session_t *session = 0;
-    int service_availability_time = 20;
 
-    // PART ONE
-    // set the general service ID
-    sdp_uuid128_create( &svc_uuid, &svc_uuid_int );
-    //printf("%x %x.\n", svc_uuid, svc_uuid_int);
-    sdp_set_service_id( &record, svc_uuid );
+    // Creates the service ID.
+    // sdp_uuid128_create( &service_uuid, &service_uuid_int );
+    sdp_uuid128_create( &service_uuid, &bluetooth_service_infos.uuid );
 
-    // set the service class
-    sdp_uuid16_create(&svc_class_uuid, SERIAL_PORT_SVCLASS_ID);
-    // printf("%x", SERIAL_PORT_SVCLASS_ID);
-    // svc_class_list = sdp_list_append(0, &svc_class_uuid);
-    svc_class_list = sdp_list_append(0, &svc_uuid);
-    sdp_set_service_classes(&record, svc_class_list);
+    // Sets the services classes ID.
+    service_class_id_list = sdp_list_append(0, &service_uuid);
+    sdp_set_service_classes(&record, service_class_id_list);
 
-    // set the Bluetooth profile information
-    sdp_uuid16_create(&profile.uuid, SERIAL_PORT_PROFILE_ID);
-    profile.version = 0x0100;
-    profile_list = sdp_list_append(0, &profile);
-    sdp_set_profile_descs(&record, profile_list);
+    // Makes the service record publicly browsable.
+    sdp_uuid16_create(&public_browse_group_uuid, PUBLIC_BROWSE_GROUP);
+    public_browse_group_list = sdp_list_append(0, &public_browse_group_uuid);
+    sdp_set_browse_groups( &record, public_browse_group_list );
 
-    // make the service record publicly browsable
-    sdp_uuid16_create(&root_uuid, PUBLIC_BROWSE_GROUP);
-    root_list = sdp_list_append(0, &root_uuid);
-    sdp_set_browse_groups( &record, root_list );
-
-    // set l2cap information
+    // Elaborates L2CAP protocol informations.
     sdp_uuid16_create(&l2cap_uuid, L2CAP_UUID);
     l2cap_list = sdp_list_append( 0, &l2cap_uuid );
-    proto_list = sdp_list_append( 0, l2cap_list );
+    protocol_list = sdp_list_append( 0, l2cap_list );
 
-    // register the RFCOMM channel for RFCOMM sockets
+    // Elaborates RFCOMM protocol informations.
     sdp_uuid16_create(&rfcomm_uuid, RFCOMM_UUID);
-    channel = sdp_data_alloc(SDP_UINT8, &rfcomm_channel);
     rfcomm_list = sdp_list_append( 0, &rfcomm_uuid );
-    sdp_list_append( rfcomm_list, channel );
-    sdp_list_append( proto_list, rfcomm_list );
-    access_proto_list = sdp_list_append( 0, proto_list );
-    sdp_set_access_protos( &record, access_proto_list );
+    channel_data = sdp_data_alloc(SDP_UINT8, &rfcomm_channel);
 
-    // set the name, provider, and description
-    sdp_set_info_attr(&record, service_name, service_prov, service_dsc);
+    // Defines the procol accepted by the service.
+    sdp_list_append( rfcomm_list, channel_data );
+    sdp_list_append( protocol_list, rfcomm_list );
+    access_protocol_list = sdp_list_append( 0, protocol_list );
+    sdp_set_access_protos( &record, access_protocol_list );
 
-    // PART TWO
-    // connect to the local SDP server, register the service record, and
-    // disconnect
-    /*
-     * Observation: There is a bug on Ubuntu related to BlueZ version used. To correct it, follow the instructions listed on "https://bbs.archlinux.org/viewtopic.php?id=201672".
-     */
+    // Set the service name, description and provider.
+    // sdp_set_info_attr(&record, service_name, service_dsc, service_prov);
+    sdp_set_info_attr(&record, bluetooth_service_infos.name, bluetooth_service_infos.description, bluetooth_service_infos.provider);
+
+    
+     // Connects the service to the local SDP server.
+     // Observation: There is a bug on Ubuntu related to BlueZ version used. To correct it, follow the instructions listed on "https://bbs.archlinux.org/viewtopic.php?id=201672".
     session = sdp_connect( BDADDR_ANY, BDADDR_LOCAL, SDP_RETRY_IF_BUSY);
-    printf("session: %p.\n", session);
+
+    // Register the service on SDP server.
     sdp_record_register(session, &record, 0);
 
-    // cleanup
-    sdp_data_free( channel );
+    // Clean variables previously alocated. 
+    sdp_data_free( channel_data );
     sdp_list_free( l2cap_list, 0 );
     sdp_list_free( rfcomm_list, 0 );
-    sdp_list_free( root_list, 0 );
-    sdp_list_free( access_proto_list, 0 );
+    sdp_list_free( public_browse_group_list, 0 );
+    sdp_list_free( access_protocol_list, 0 );
 
-    printf("Service will be available for %d seconds.\n", service_availability_time);
-    sleep(service_availability_time);
-    sdp_close(session);
     return 0;
 }
+*/
 
 int main( int argc, char** argv){
+
+    bluetooth_service_infos_t bluetooth_service_infos;
+
+    /*
+     *  Defines the bluetooth service UUID.
+     *  Observation: Be careful when informing UUID. When it is passed to 
+     *  service descriptor, its bytes order will be rearranged from big-endian
+     *  to little-endian.
+     */
+    bluetooth_service_infos.uuid[0] = 0x964b93f5;
+    bluetooth_service_infos.uuid[1] = 0xe6111001;
+    bluetooth_service_infos.uuid[2] = 0x555e228d;
+    bluetooth_service_infos.uuid[3] = 0x667c5017;
+
+    const char* service_name = "Projeto Anna";
+    const char* service_provider = "Marcelo de Moraes Leite";
+    const char* service_description = "A service to communicate between the project's hardware and the smart device.";
+
+    bluetooth_service_infos.name = malloc(strlen(service_name)*sizeof(char));
+    bluetooth_service_infos.description = malloc(strlen(service_description)*sizeof(char));
+    bluetooth_service_infos.provider = malloc(strlen(service_provider)*sizeof(char));
+
+    strcpy(bluetooth_service_infos.name, service_name);
+    strcpy(bluetooth_service_infos.provider, service_provider);
+    strcpy(bluetooth_service_infos.description, service_description);
+
     //inquiry_devices();
-    //rfcomm_server();
-    register_service();
+    if ( register_service(bluetooth_service_infos) == 0 ) {
+        rfcomm_server();
+    }
 
     return 0;
 }

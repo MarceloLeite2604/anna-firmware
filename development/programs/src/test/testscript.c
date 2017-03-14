@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "script/script.h"
+#include "../release/script/script.h"
 
 /*
  * Function headers.

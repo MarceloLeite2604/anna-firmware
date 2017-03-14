@@ -10,7 +10,7 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include "audio/audio.h"
+#include "../release/audio/audio.h"
 
 /*
  * Function headers.
