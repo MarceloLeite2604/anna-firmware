@@ -8,8 +8,11 @@
 /*
  * Includes.
  */
-#include <stdlib.h>
+#include <unistd.h>
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include "bluetooth.h"
@@ -20,10 +23,10 @@
  */
 
 // Informations about the registered bluetooth service.
-bluetooth_service_infos_t registered_bluetooth_service_infos;
+// bluetooth_service_infos_t registered_bluetooth_service_infos;
 
 // Session indicating the connection to bluetooth service provider.
-sdp_session_t* sdp_connect_session;
+sdp_session_t* sdp_connect_session = NULL;
 
 
 /*
@@ -33,16 +36,133 @@ sdp_session_t* sdp_connect_session;
 /*
  * Defines the information about the registered bluetooth service.
  */
-int set_registered_bluetooth_service_infos(bluetooth_service_infos_t);
+// int set_registered_bluetooth_service_infos(bluetooth_service_infos_t);
 
 /*
  * Removes the service from bluetooth service provider.
  */
-int clear_registered_bluetooth_device_infos();
+// int clear_registered_bluetooth_device_infos();
 
 /*
  * Functions elaboration.
  */
+
+/*
+ * Accepts a connection from service.
+ *
+ * Parameters
+ *  wait_time - Time to wait for a connection.
+ *
+ * Returns
+ *  The socket id if a connection was stablished.
+ *  0. If not connection was stablished.
+ *  1. If there was an error during execution.
+ */
+int accept_connection(struct timeval wait_time) {
+    TRACE("Accepting connection.");
+
+    struct sockaddr_rc local_address = { 0 };
+    struct sockaddr_rc remote_device_address = { 0 };
+
+    int listening_socket_file_descriptor;
+    int client_socket_file_descriptor;
+
+    socklen_t opt = sizeof(remote_device_address);
+
+    char remote_device_address_string[19] = { 0 };
+    char remote_device_name[256] = { 0 };
+    char log_message[1024];
+    fd_set listening_socket_file_descriptor_fd_set;
+    int select_result;
+
+    // struct timeval tv;
+    // char content_read[1024];
+    // int bytes_read;
+
+    /*
+     * Allocates a socket to listen to connections.
+     */
+    listening_socket_file_descriptor = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+    if ( listening_socket_file_descriptor <= 0 ) {
+        LOG_ERROR("Could not create socket to listen for connections.");
+        return 1;
+    }
+
+    /*
+     * Defines the remote address of socket connection. On a server program, "BDADDR_ANY" is used to inform that it accepts a connection from any device.
+     * Observation: For listening sockets, "rc_channel" specifies the port number to listen.
+     */
+    local_address.rc_family = AF_BLUETOOTH;
+    local_address.rc_bdaddr = *BDADDR_ANY;
+    /* TODO: Isn't the channel supposed to be selectable? */
+    local_address.rc_channel = (uint8_t) 27;
+    bind(listening_socket_file_descriptor, (struct sockaddr *)&local_address, sizeof(local_address));
+
+    /*
+     * Listens for connections on socket, defining the listening queue to a maximum of one.
+     */
+    listen(listening_socket_file_descriptor, 1);
+
+
+    FD_ZERO(&listening_socket_file_descriptor_fd_set);
+    FD_SET(listening_socket_file_descriptor, &listening_socket_file_descriptor_fd_set);
+   /*
+    * Checks if there is a connection waiting to be stablished.
+    */
+    TRACE("Waiting for a connection.");
+    select_result = select((listening_socket_file_descriptor+1), &listening_socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &wait_time);
+    if ( select_result == 0 ) {
+        TRACE("Connection acceptance timeout.");
+        close(listening_socket_file_descriptor);
+        return 0;
+    }
+
+    /* Accepts one connection from the listening socket. */
+    client_socket_file_descriptor = accept(listening_socket_file_descriptor, (struct sockaddr *)&remote_device_address, &opt);
+
+    /* Turns the remote bluetooth device address on a human-readable address. */
+    ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
+
+    if (hci_read_remote_name(client_socket_file_descriptor, &(remote_device_address.rc_bdaddr), sizeof(remote_device_name), remote_device_name, 0) < 0 ){
+        sprintf(log_message, "Connected with device \"%s\".", remote_device_address_string);
+    }
+    else {
+        sprintf(log_message, "Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
+    }
+    TRACE(log_message);
+
+    /* Read data from socket. */
+/*    bytes_read = read(client_socket_file_descriptor, content_read, sizeof(content_read));
+    if ( bytes_read < 0 ) {
+        LOG_ERROR("Could not read content from remote bluetooth device.");
+        return 1;
+    } */
+
+    // printf("Content received: %s\n", content_read);
+
+    /* Close socket. */
+    // close(client_socket_file_descriptor);
+
+    close(listening_socket_file_descriptor);
+    return client_socket_file_descriptor;
+}
+
+/*
+ * Indicates if there is a bluetooth service registered.
+ *
+ * Parameters
+ *  None.
+ *
+ * Returns
+ *  true  - If the bluetooth service is registered.
+ *  false - Otherwhise.
+ */
+bool is_bluetooth_service_registered() {
+    if ( sdp_connect_session == NULL ) {
+        return false;
+    }
+    return true; 
+}
 
 /*
  * Register a new service on bluetooth service provider.
@@ -55,6 +175,7 @@ int clear_registered_bluetooth_device_infos();
  *  1. Otherwise.
  */
 int register_service(bluetooth_service_infos_t bluetooth_service_infos){
+    TRACE("Registering service.");
 
     if ( is_bluetooth_service_registered() == true ) {
         LOG_ERROR("A bluetooth service is already registered.");
@@ -131,27 +252,11 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos){
     sdp_list_free( public_browse_group_list, 0 );
     sdp_list_free( access_protocol_list, 0 );
 
-    set_registered_bluetooth_service_infos(bluetooth_service_infos);
+    // set_registered_bluetooth_service_infos(bluetooth_service_infos);
     sdp_connect_session = session;
+    TRACE("Service registered.");
 
     return 0;
-}
-
-/*
- * Indicates if there is a bluetooth service registered.
- *
- * Parameters
- *  None.
- *
- * Returns
- *  true  - If the bluetooth service is registered.
- *  false - Otherwhise.
- */
-bool is_bluetooth_service_registered() {
-    if ( sdp_connect_session == NULL ) {
-        return false;
-    }
-    return true; 
 }
 
 /*
@@ -168,7 +273,7 @@ int remove_service(){
     if ( is_bluetooth_service_registered() == true ) {
         sdp_close(sdp_connect_session);
         sdp_connect_session = NULL;
-        clear_registered_bluetooth_device_infos();
+        // clear_registered_bluetooth_device_infos();
     }
 
     return 0;
@@ -184,7 +289,7 @@ int remove_service(){
  *  0. If values were define correctly.
  *  1. Otherwise.
  */
-int set_registered_bluetooth_service_infos(bluetooth_service_infos_t bluetooth_service_infos) {
+/* int set_registered_bluetooth_service_infos(bluetooth_service_infos_t bluetooth_service_infos) {
     int counter;
 
     registered_bluetooth_service_infos.name = malloc(strlen(bluetooth_service_infos.name)*sizeof(char));
@@ -209,7 +314,7 @@ int set_registered_bluetooth_service_infos(bluetooth_service_infos_t bluetooth_s
     }
 
     return 0;
-}
+} */
 
 /*
  * Clears the informations about the registered bluetooth service.
@@ -221,7 +326,7 @@ int set_registered_bluetooth_service_infos(bluetooth_service_infos_t bluetooth_s
  *  0. If information was cleared successfully.
  *  1. Otherwise.
  */
-int clear_registered_bluetooth_device_infos() {
+/* int clear_registered_bluetooth_device_infos() {
     int counter;
 
     if ( registered_bluetooth_service_infos.name != NULL ) {
@@ -244,5 +349,5 @@ int clear_registered_bluetooth_device_infos() {
     }
 
     return 0;
-}
+} */
 

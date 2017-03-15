@@ -32,9 +32,9 @@ typedef struct {
  */
 
 /*
- * Register a new service on bluetooth service provider.
+ * Accepts a connection from service.
  */
-int register_service(bluetooth_service_infos_t bluetooth_service_infos);
+int accept_connection(struct timeval wait_time);
 
 /*
  * Indicates if there is a bluetooth service registered.
@@ -42,11 +42,12 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos);
 bool is_bluetooth_service_registered();
 
 /*
+ * Register a new service on bluetooth service provider.
+ */
+int register_service(bluetooth_service_infos_t bluetooth_service_infos);
+
+/*
  * Removes the service from bluetooth service provider.
  */
 int remove_service();
 
-/*
- * Accepts a connection from service.
- */
-int accept_connection(struct timeval timeout);

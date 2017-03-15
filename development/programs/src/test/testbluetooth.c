@@ -260,6 +260,12 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos)
 int main( int argc, char** argv){
 
     bluetooth_service_infos_t bluetooth_service_infos;
+    struct timeval wait_connection_time;
+    int client_socket_id;
+
+   /* Defines the time to wait for a connection as 10 seconds. */
+    wait_connection_time.tv_sec = 10;
+    wait_connection_time.tv_usec = 0;
 
     /*
      *  Defines the bluetooth service UUID.
@@ -274,7 +280,7 @@ int main( int argc, char** argv){
 
     const char* service_name = "Projeto Anna";
     const char* service_provider = "Marcelo de Moraes Leite";
-    const char* service_description = "A service to communicate between the project's hardware and the smart device.";
+    const char* service_description = "A service to create a communication channel between the project's hardware and the smart device.";
 
     bluetooth_service_infos.name = malloc(strlen(service_name)*sizeof(char));
     bluetooth_service_infos.description = malloc(strlen(service_description)*sizeof(char));
@@ -285,9 +291,42 @@ int main( int argc, char** argv){
     strcpy(bluetooth_service_infos.description, service_description);
 
     //inquiry_devices();
-    if ( register_service(bluetooth_service_infos) == 0 ) {
-        rfcomm_server();
+    TRACE("Registering bluetooth service.");
+    if ( register_service(bluetooth_service_infos) != 0 ) {
+        LOG_ERROR("Error registering bluetooth service.");
+        return 1;
     }
+
+    TRACE("Waiting for a connection.");
+    client_socket_id = accept_connection(wait_connection_time);
+    if ( client_socket_id < 0 ) {
+        LOG_ERROR("Error while waiting for a client connection.");
+        return 1;
+    }
+    else {
+        if ( client_socket_id == 0 ) {
+            TRACE("No client to stablish a connection.");
+
+            if ( remove_service() != 0 ) {
+                LOG_ERROR("Error while removing bluetooth service.");
+                return 1;
+            } 
+            TRACE("Bluetooth service removed.");
+
+            return 1;
+        } 
+    }
+
+    TRACE("Connection stablished with a client.");
+
+    close(client_socket_id);
+
+    if ( remove_service() != 0 ) {
+        LOG_ERROR("Error while removing bluetooth service.");
+        return 1;
+    } 
+
+    TRACE("Bluetooth service removed.");
 
     return 0;
 }
