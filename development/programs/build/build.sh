@@ -51,6 +51,14 @@ build_programs() {
         return 1;
     fi;
     
+    echo "Creating \"commands\" object.";
+    gcc -c ${release_source_directory}general/commands.c -o ${objects_directory}commands.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"general\" object.";
+        return 1;
+    fi;
+
     echo "Creating \"testlog\" object.";
     gcc -c ${test_source_directory}testlog.c -o ${objects_directory}testlog.o ${additional_arguments};
     if [ $? -ne 0 ];
@@ -128,7 +136,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

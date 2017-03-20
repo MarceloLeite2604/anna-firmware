@@ -51,3 +51,7 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos);
  */
 int remove_service();
 
+/*
+ * Reads a content from bluetooth socket.
+ */
+int read_bluetooth_socket(int socket_file_descriptor, char* buffer, int buffer_length, struct timeval wait_time);

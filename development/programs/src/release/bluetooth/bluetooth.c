@@ -111,6 +111,7 @@ int accept_connection(struct timeval wait_time) {
     */
     TRACE("Waiting for a connection.");
     select_result = select((listening_socket_file_descriptor+1), &listening_socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &wait_time);
+    FD_CLR(listening_socket_file_descriptor, &listening_socket_file_descriptor_fd_set);
     if ( select_result == 0 ) {
         TRACE("Connection acceptance timeout.");
         close(listening_socket_file_descriptor);
@@ -351,3 +352,46 @@ int remove_service(){
     return 0;
 } */
 
+/*
+ * Reads a content from bluetooth socket.
+ *
+ * Parameters
+ *   socket_file_descriptor - The file descriptor of the bluetooth socket connection.
+ *   buffer - Buffer where the content read will be stored.
+ *   buffer_length - Length of the buffer to store the content read.
+ *   wait_time - Time to wait for a content to be read through the socket.
+ *
+ * Returns
+ *  If something was read from the socket, the function will return the content size.
+ *  0. If nothing was read from the socket on the specified time.
+ *  -1. If there was an error while reading the socket content.
+ */
+int read_bluetooth_socket(int socket_file_descriptor, char* buffer, int buffer_length, struct timeval wait_time) {
+
+    int select_result;
+    int total_read;
+    fd_set socket_file_descriptor_fd_set;
+
+    FD_ZERO(&socket_file_descriptor_fd_set);
+    FD_SET(socket_file_descriptor, &socket_file_descriptor_fd_set);
+
+    select_result = select((socket_file_descriptor+1), &socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &wait_time);
+    FD_CLR(socket_file_descriptor, &socket_file_descriptor_fd_set);
+    if ( select_result == 0 ) {
+        TRACE("No content received from socket.");
+        return 0;
+    } else {
+        if ( select_result == -1 ) {
+            TRACE("Error while waiting for a content from the socket.");
+            return -1;
+        }
+    }
+
+    total_read = read(socket_file_descriptor, buffer, buffer_length);
+    if ( total_read < 0 ) {
+        LOG_ERROR("Error while reading content from socket.");
+        return -1;
+    }
+
+    return total_read;
+}

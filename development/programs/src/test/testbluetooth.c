@@ -11,8 +11,10 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
+#include <byteswap.h>
 #include "../release/bluetooth/bluetooth.h"
 #include "../release/log/log.h"
+#include "../release/general/commands.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -96,93 +98,6 @@
 }
 */
 
-int rfcomm_server(){
-    struct sockaddr_rc local_address = { 0 };
-    struct sockaddr_rc remote_device_address = { 0 };
-    int listening_socket_file_descriptor;
-    int client_socket_file_descriptor;
-    char content_read[1024];
-    int bytes_read;
-    socklen_t opt = sizeof(remote_device_address);
-    char remote_device_address_string[19] = { 0 };
-    char remote_device_name[256] = { 0 };
-    char log_message[1024];
-
-    /*
-     * Allocates a socket to listen to connections.
-     */
-    listening_socket_file_descriptor = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-    if ( listening_socket_file_descriptor <= 0 ) {
-        LOG_ERROR("Could not create socket to listen for connections.");
-        return 1;
-    }
-
-    /*
-     * Defines the remote address of socket connection. On a server program, "BDADDR_ANY" is used to inform that it accepts a connection from any device.
-     * Observation: For listening sockets, "rc_channel" specifies the port number to listen.
-     */
-    local_address.rc_family = AF_BLUETOOTH;
-    local_address.rc_bdaddr = *BDADDR_ANY;
-    local_address.rc_channel = (uint8_t) 27;
-    bind(listening_socket_file_descriptor, (struct sockaddr *)&local_address, sizeof(local_address));
-
-    /*
-     * Listens for connections on socket, defining the listening queue to a maximum of one.
-     */
-    listen(listening_socket_file_descriptor, 1);
-
-    fd_set listening_socket_file_descriptor_fd_set;
-    struct timeval tv;
-    tv.tv_sec=(long)5;
-    tv.tv_usec=0;
-    int select_result;
-
-    FD_ZERO(&listening_socket_file_descriptor_fd_set);
-    FD_SET(listening_socket_file_descriptor, &listening_socket_file_descriptor_fd_set);
-
-    select_result = select((listening_socket_file_descriptor+1), &listening_socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &tv);
-    if ( select_result = 0 ) {
-        TRACE("Connection acceptance timeout.");
-        return 1;
-    }
-
-    /*
-     * Accepts one connection from the listening socket.
-     */
-    client_socket_file_descriptor = accept(listening_socket_file_descriptor, (struct sockaddr *)&remote_device_address, &opt);
-    ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
-
-    if (hci_read_remote_name(client_socket_file_descriptor, &(remote_device_address.rc_bdaddr), sizeof(remote_device_name), remote_device_name, 0) < 0 ){
-        sprintf(log_message, "Connected with device \"%s\".", remote_device_address_string);
-    }
-    else {
-        sprintf(log_message, "Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
-    }
-    TRACE(log_message);
-
-    /*
-     * Turns the remote bluetooth device address on a human-readable address.
-     */
-
-
-    /*
-     * Read data from socket.
-     */
-    bytes_read = read(client_socket_file_descriptor, content_read, sizeof(content_read));
-    if ( bytes_read < 0 ) {
-        LOG_ERROR("Could not read content from remote bluetooth device.");
-        return 1;
-    }
-
-    printf("Content received: %s\n", content_read);
-
-    /*
-     * Close sockets.
-     */
-    close(client_socket_file_descriptor);
-    close(listening_socket_file_descriptor);
-    return 0;
-}
 /*
 int register_service(bluetooth_service_infos_t bluetooth_service_infos)
 {
@@ -262,10 +177,24 @@ int main( int argc, char** argv){
     bluetooth_service_infos_t bluetooth_service_infos;
     struct timeval wait_connection_time;
     int client_socket_id;
+    struct timeval read_content_time;
+    char* buffer;
+    int buffer_size = 1024;
+    int read_result;
+    int counter;
+    char command[4];
 
-   /* Defines the time to wait for a connection as 10 seconds. */
-    wait_connection_time.tv_sec = 10;
+    copy_command(command, START_RECORD);
+    printf("%02x %02x %02x %02x\n", command[0], command[1], command[2], command[3]);
+
+   /* Defines the time to wait for a connection as 30 seconds. */
+    wait_connection_time.tv_sec = 30; 
     wait_connection_time.tv_usec = 0;
+
+    /* Defines the time to wait for a content to read as 1 second. */
+    read_content_time.tv_sec = 1;
+    read_content_time.tv_usec = 0;
+    
 
     /*
      *  Defines the bluetooth service UUID.
@@ -319,6 +248,27 @@ int main( int argc, char** argv){
 
     TRACE("Connection stablished with a client.");
 
+    buffer = malloc(buffer_size*sizeof(char));
+
+    while (1) {
+        read_result = read_bluetooth_socket(client_socket_id, buffer, buffer_size, read_content_time);
+        if ( read_result > 0 ) {
+            printf("%d bytes read from socket.\n", read_result);
+            for (counter = 0; counter < read_result; counter++) {
+                printf("%02x ", buffer[counter]);
+            }
+            printf("\n");
+        }
+        else {
+            if ( read_result < 0 ) {
+                printf("Error while reading content from socket.\n");
+                break;
+            }
+        }
+    }
+
+    free(buffer);
+
     close(client_socket_id);
 
     if ( remove_service() != 0 ) {
@@ -330,3 +280,4 @@ int main( int argc, char** argv){
 
     return 0;
 }
+#include <stdio.h>
