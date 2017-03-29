@@ -14,7 +14,7 @@
 #include <byteswap.h>
 #include "../release/bluetooth/bluetooth.h"
 #include "../release/log/log.h"
-#include "../release/general/commands.h"
+#include "../release/general/codes.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -182,10 +182,19 @@ int main( int argc, char** argv){
     int buffer_size = 1024;
     int read_result;
     int counter;
+
+    package_code_t package_code = confirmation_code;
+    printf("Package code length: %d.\n", sizeof(package_code_t));
+    printf("%x %x %x %x\n", package_code.data[0], package_code.data[1], package_code.data[2], package_code.data[3]);
+
+
+
+    /*
     char command[4];
 
     copy_command(command, START_RECORD);
     printf("%02x %02x %02x %02x\n", command[0], command[1], command[2], command[3]);
+    */
 
    /* Defines the time to wait for a connection as 30 seconds. */
     wait_connection_time.tv_sec = 30; 

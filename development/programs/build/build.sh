@@ -51,8 +51,16 @@ build_programs() {
         return 1;
     fi;
     
-    echo "Creating \"commands\" object.";
-    gcc -c ${release_source_directory}general/commands.c -o ${objects_directory}commands.o ${additional_arguments};
+    echo "Creating \"bluetooth package\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/package.c -o ${objects_directory}package.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth package\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"codes\" object.";
+    gcc -c ${release_source_directory}general/codes.c -o ${objects_directory}codes.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"general\" object.";
