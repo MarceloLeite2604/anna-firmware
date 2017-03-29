@@ -15,6 +15,7 @@
 #include "../release/bluetooth/bluetooth.h"
 #include "../release/log/log.h"
 #include "../release/general/codes.h"
+#include "../release/general/error_messages.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -184,8 +185,10 @@ int main( int argc, char** argv){
     int counter;
 
     package_code_t package_code = confirmation_code;
-    printf("Package code length: %d.\n", sizeof(package_code_t));
+    printf("Package code length: %d.\n", (int)sizeof(package_code_t));
     printf("%x %x %x %x\n", package_code.data[0], package_code.data[1], package_code.data[2], package_code.data[3]);
+
+    printf("Error message 1: \"%s\"\n", error_messages[1]);
 
 
 

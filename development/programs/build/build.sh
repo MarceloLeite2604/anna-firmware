@@ -63,7 +63,15 @@ build_programs() {
     gcc -c ${release_source_directory}general/codes.c -o ${objects_directory}codes.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"general\" object.";
+        echo "Error creating \"codes\" object.";
+        return 1;
+    fi;
+
+    echo "Creating \"error messages\" object.";
+    gcc -c ${release_source_directory}general/error_messages.c -o ${objects_directory}error_messages.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"error messages\" object.";
         return 1;
     fi;
 
@@ -144,7 +152,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
