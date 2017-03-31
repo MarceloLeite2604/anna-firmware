@@ -51,22 +51,22 @@ build_programs() {
         return 1;
     fi;
     
+    echo "Creating \"bluetooth package codes\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/codes/codes.c -o ${objects_directory}bluetooth_package_codes.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth package codes\" object.";
+        return 1;
+    fi;
+
     echo "Creating \"bluetooth package\" object.";
-    gcc -c ${release_source_directory}bluetooth/package/package.c -o ${objects_directory}package.o ${additional_arguments};
+    gcc -c ${release_source_directory}bluetooth/package/package.c -o ${objects_directory}bluetooth_package.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"bluetooth package\" object.";
         return 1;
     fi;
     
-    echo "Creating \"codes\" object.";
-    gcc -c ${release_source_directory}general/codes.c -o ${objects_directory}codes.o ${additional_arguments};
-    if [ $? -ne 0 ];
-    then
-        echo "Error creating \"codes\" object.";
-        return 1;
-    fi;
-
     echo "Creating \"error messages\" object.";
     gcc -c ${release_source_directory}general/error_messages.c -o ${objects_directory}error_messages.o ${additional_arguments};
     if [ $? -ne 0 ];
@@ -152,7 +152,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}bluetooth_package.o ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

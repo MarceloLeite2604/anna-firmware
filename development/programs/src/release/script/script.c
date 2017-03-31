@@ -55,7 +55,7 @@ int execute_script(char* script_name){
     strcpy(script_path, input_directory);
     strcat(script_path, SCRIPT_DIRECTORY);
     strcat(script_path, script_name);
-    TRACE(script_path);
+    TRACE("%s", script_path);
 
     script_result = system(script_path);
     return script_result;

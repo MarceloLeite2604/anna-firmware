@@ -51,6 +51,9 @@
  * Global variables.
  */
 
+/* Log message buffer. */
+char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
+
 // Current directory to store log files.
 char* log_directory = NULL;
 
@@ -250,12 +253,11 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
         message_length = 0;
         additional_characters=8;
     }
-    /* TODO: Analyse memory alloc. */
 
     temporary_buffer_length=TIME_STRING_READ_LENGTH+preffix_length+tag_length+string_index_length+message_length+additional_characters+1;
     temporary_buffer = malloc(temporary_buffer_length*sizeof(char));
 
-    if ( message != NULL ) {
+    if ( message != NULL && strlen(message) > 0 ) {
         sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", get_current_time_read_formatted(), preffix, tag, string_index, message);
     }
     else {

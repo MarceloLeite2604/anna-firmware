@@ -71,7 +71,6 @@ int accept_connection(struct timeval wait_time) {
 
     char remote_device_address_string[19] = { 0 };
     char remote_device_name[256] = { 0 };
-    char log_message[1024];
     fd_set listening_socket_file_descriptor_fd_set;
     int select_result;
 
@@ -125,12 +124,11 @@ int accept_connection(struct timeval wait_time) {
     ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
 
     if (hci_read_remote_name(client_socket_file_descriptor, &(remote_device_address.rc_bdaddr), sizeof(remote_device_name), remote_device_name, 0) < 0 ){
-        sprintf(log_message, "Connected with device \"%s\".", remote_device_address_string);
+        TRACE("Connected with device \"%s\".", remote_device_address_string);
     }
     else {
-        sprintf(log_message, "Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
+        TRACE("Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
     }
-    TRACE(log_message);
 
     /* Read data from socket. */
 /*    bytes_read = read(client_socket_file_descriptor, content_read, sizeof(content_read));

@@ -15,6 +15,9 @@
 #define SEND_FILE_CHUNK_VALUE 0x0f0f769f
 #define SEND_FILE_TRAILER_VALUE 0x8c61e11c
 
+#define PACKAGE_HEADER 0xf0037142
+#define PACKAGE_TRAILER 0x9228c204
+
 /* Structure to store a code value */
 typedef union {
     int value;
@@ -32,5 +35,3 @@ extern const package_code_t disconnect_code;
 extern const package_code_t send_file_header_code;
 extern const package_code_t send_file_chunk_code;
 extern const package_code_t send_file_trailer_code;
-
-void copy_command(char* buffer, int command);

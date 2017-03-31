@@ -14,7 +14,7 @@
 #include <byteswap.h>
 #include "../release/bluetooth/bluetooth.h"
 #include "../release/log/log.h"
-#include "../release/general/codes.h"
+#include "../release/bluetooth/package/package.h"
 #include "../release/general/error_messages.h"
 
 #define ERROR_MESSAGE_SIZE 512
@@ -184,11 +184,32 @@ int main( int argc, char** argv){
     int read_result;
     int counter;
 
+    /*
     package_code_t package_code = confirmation_code;
     printf("Package code length: %d.\n", (int)sizeof(package_code_t));
     printf("%x %x %x %x\n", package_code.data[0], package_code.data[1], package_code.data[2], package_code.data[3]);
 
     printf("Error message 1: \"%s\"\n", error_messages[1]);
+    */
+
+    content_t error_content;
+    content_t confirmation_content;
+
+    error_content = create_error_content(2, ERROR_MESSAGE_002);
+    confirmation_content = create_confirmation_content(0xabcdef10);
+
+    byte_array_t confirmation_content_byte_array = create_confirmation_content_byte_array(confirmation_content);
+    byte_array_t error_content_byte_array = create_error_content_byte_array(error_content);
+
+    for (counter = 0; counter < confirmation_content_byte_array.size; counter++ ) {
+        printf("%02x ", confirmation_content_byte_array.data[counter]);
+    }
+    printf("\n");
+
+    for (counter = 0; counter < error_content_byte_array.size; counter++ ) {
+        printf("%c", (unsigned char)error_content_byte_array.data[counter]);
+    }
+    printf("\n");
 
 
 

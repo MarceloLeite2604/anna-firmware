@@ -14,7 +14,7 @@
 #define ERROR_MESSAGE_012 "No audio record file found."
 #define ERROR_MESSAGE_013 "Could not transmit audio record."
 #define ERROR_MESSAGE_014 "Connection lost."
-#define ERROR_MESSAGE_015 "Maximum attempts reached whie trying to read content from socket."
+#define ERROR_MESSAGE_015 "Maximum attempts reached while trying to read content from socket."
 #define ERROR_MESSAGE_016 "Failed to finish communication."
 #define ERROR_MESSAGE_017 "Failed to unregister bluetooth service."
 #define ERROR_MESSAGE_018 "Failed to transmit error message."

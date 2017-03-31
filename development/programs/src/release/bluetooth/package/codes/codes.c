@@ -12,10 +12,3 @@ const package_code_t disconnect_code = { DISCONNECT_VALUE };
 const package_code_t send_file_header_code = { SEND_FILE_HEADER_VALUE };
 const package_code_t send_file_chunk_code = { SEND_FILE_CHUNK_VALUE };
 const package_code_t send_file_trailer_code = { SEND_FILE_TRAILER_VALUE };
-
-void copy_command(char* buffer, int command) {
-
-    char* pointer = (char*)&command;
-
-    memcpy(buffer, pointer, 4);
-}

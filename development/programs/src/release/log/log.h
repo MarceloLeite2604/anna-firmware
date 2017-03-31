@@ -11,6 +11,7 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
 
 
 /*
@@ -22,17 +23,28 @@
 #define LOG_MESSAGE_TYPE_WARNING 10
 #define LOG_MESSAGE_TYPE_ERROR 15
 
+#define LOG_MESSAGE_BUFFER_SIZE 256
+
 // Macro to register a log message.
 #define LOG(x, y) write_log_message((x), __func__, __LINE__, (y))
 
 // Macro to register an error message
 #define LOG_ERROR(x) write_log_message(LOG_MESSAGE_TYPE_ERROR, __func__, __LINE__, (x)) 
 
-// Macro to register a trace message.
-#define TRACE(x) write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, (x));
-
 // Macro to print a trace point.
-#define TRACE_ write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, NULL);
+#define TRACE_POINT write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, _log_message_buffer);\
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
+
+// Macro to register a trace message.
+#define TRACE(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+    TRACE_POINT;
+
+
+
+/*
+ * Variables.
+ */
+extern char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
 
 
 /*
