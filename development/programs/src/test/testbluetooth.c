@@ -15,7 +15,8 @@
 #include "../release/bluetooth/bluetooth.h"
 #include "../release/log/log.h"
 #include "../release/bluetooth/package/package.h"
-#include "../release/general/error_messages.h"
+#include "../release/bluetooth/package/codes/codes.h"
+#include "../release/general/error_messages/error_messages.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -192,24 +193,50 @@ int main( int argc, char** argv){
     printf("Error message 1: \"%s\"\n", error_messages[1]);
     */
 
-    content_t error_content;
-    content_t confirmation_content;
+    content_t content;
 
-    error_content = create_error_content(2, ERROR_MESSAGE_002);
-    confirmation_content = create_confirmation_content(0xabcdef10);
+    byte_array_t file_chunk;
 
-    byte_array_t confirmation_content_byte_array = create_confirmation_content_byte_array(confirmation_content);
-    byte_array_t error_content_byte_array = create_error_content_byte_array(error_content);
+    file_chunk.size = 256;
 
-    for (counter = 0; counter < confirmation_content_byte_array.size; counter++ ) {
-        printf("%02x ", confirmation_content_byte_array.data[counter]);
+    file_chunk.data = (uint8_t*)malloc(file_chunk.size*sizeof(uint8_t));
+    memset(file_chunk.data, 0x22, file_chunk.size);
+
+    package_t package;
+    /* package = create_package(ERROR_CODE); */
+
+
+
+    /* content = create_confirmation_content(0xabcdef10); */
+    /* content = create_result_content(1); */
+    /* content = create_error_content(2, ERROR_MESSAGE_002); */
+    /* content = create_send_file_header_content(4*1024*1024, "20170331_180432.mp3"); */
+    /* content = create_send_file_chunk_content(file_chunk.size, file_chunk.data); */
+    /* content = create_send_file_trailer_content(); */
+    package.content = content;
+
+    byte_array_t byte_array;
+    /* byte_array = create_confirmation_content_byte_array(content); */
+    /* byte_array = create_result_content_byte_array(content); */
+    /* byte_array = create_error_content_byte_array(content); */
+    /* byte_array = create_send_file_header_content_byte_array(content); */
+    /* byte_array = create_send_file_chunk_content_byte_array(content);  */
+    /* byte_array = create_send_file_trailer_content_byte_array(content); */
+    byte_array = create_package_byte_array(package);
+
+    
+    for (counter = 0; counter < byte_array.size; counter++ ) {
+        printf("%02x ", byte_array.data[counter]);
     }
     printf("\n");
+    
 
+    /*
     for (counter = 0; counter < error_content_byte_array.size; counter++ ) {
         printf("%c", (unsigned char)error_content_byte_array.data[counter]);
     }
     printf("\n");
+    */
 
 
 
@@ -221,12 +248,12 @@ int main( int argc, char** argv){
     */
 
    /* Defines the time to wait for a connection as 30 seconds. */
-    wait_connection_time.tv_sec = 30; 
-    wait_connection_time.tv_usec = 0;
+    /* wait_connection_time.tv_sec = 30; 
+    wait_connection_time.tv_usec = 0; */
 
     /* Defines the time to wait for a content to read as 1 second. */
-    read_content_time.tv_sec = 1;
-    read_content_time.tv_usec = 0;
+    /* read_content_time.tv_sec = 1;
+    read_content_time.tv_usec = 0; */
     
 
     /*
@@ -235,7 +262,7 @@ int main( int argc, char** argv){
      *  service descriptor, its bytes order will be rearranged from big-endian
      *  to little-endian.
      */
-    bluetooth_service_infos.uuid[0] = 0x964b93f5;
+    /* bluetooth_service_infos.uuid[0] = 0x964b93f5;
     bluetooth_service_infos.uuid[1] = 0xe6111001;
     bluetooth_service_infos.uuid[2] = 0x555e228d;
     bluetooth_service_infos.uuid[3] = 0x667c5017;
@@ -310,6 +337,7 @@ int main( int argc, char** argv){
     } 
 
     TRACE("Bluetooth service removed.");
+    */
 
     return 0;
 }
