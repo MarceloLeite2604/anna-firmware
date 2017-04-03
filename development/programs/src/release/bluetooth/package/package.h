@@ -9,6 +9,7 @@
  * Includes.
  */
 #include <stdint.h>
+#include "../../general/byte_array/byte_array.h"
 
 /*
  * Structure definitions.
@@ -70,13 +71,6 @@ typedef struct {
     uint32_t trailer;
 } package_t;
 
-/* Structure to store a byte array. */
-typedef struct {
-    uint8_t* data;
-    size_t size;
-} byte_array_t;
-
-
 /*
  * Function headers.
  */
@@ -107,9 +101,6 @@ package_t create_send_file_header_package(size_t, char*);
 
 /* Creates a send file trailer package. */
 package_t create_send_file_trailer_package();
-
-/* Deletes a byte array. */
-int delete_byte_array(byte_array_t);
 
 /* Deletes a package. */
 int delete_package(package_t);

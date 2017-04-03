@@ -11,11 +11,11 @@ build_programs() {
     local objects_directory="${output_directory}objects/";
     local binary_folder="${output_directory}bin/";
     
-    echo "Creating \"log\" object.";
+    echo "creating \"log\" object.";
     gcc -c ${release_source_directory}log/log.c -o ${objects_directory}log.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"log\" object.";
+        echo "error creating \"log\" object.";
         return 1;
     fi;
     
@@ -24,6 +24,14 @@ build_programs() {
     if [ $? -ne 0 ];
     then
         echo "Error creating \"directory\" object.";
+        return 1;
+    fi;
+    
+    echo "creating \"byte array\" object.";
+    gcc -c ${release_source_directory}general/byte_array/byte_array.c -o ${objects_directory}byte_array.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "error creating \"byte_array\" object.";
         return 1;
     fi;
     
@@ -64,6 +72,14 @@ build_programs() {
     if [ $? -ne 0 ];
     then
         echo "Error creating \"bluetooth package\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"bluetooth connection\" object.";
+    gcc -c ${release_source_directory}bluetooth/connection/connection.c -o ${objects_directory}bluetooth_connection.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth connection\" object.";
         return 1;
     fi;
     
@@ -160,7 +176,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testpackage\" program.";
-    gcc -o ${binary_folder}testpackage ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}testpackage.o ${additional_arguments};
+    gcc -o ${binary_folder}testpackage ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}testpackage.o ${additional_arguments};
 
     echo "Creating \"testbluetooth\" object.";
     gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
@@ -171,7 +187,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
