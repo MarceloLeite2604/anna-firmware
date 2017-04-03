@@ -151,6 +151,17 @@ build_programs() {
         return 1;
     fi;
 
+    echo "Creating \"testpackage\" object.";
+    gcc -c ${test_source_directory}testpackage.c -o ${objects_directory}testpackage.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"testpackage\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"testpackage\" program.";
+    gcc -o ${binary_folder}testpackage ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}testpackage.o ${additional_arguments};
+
     echo "Creating \"testbluetooth\" object.";
     gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
     if [ $? -ne 0 ];
@@ -160,7 +171,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}bluetooth_package.o ${objects_directory}commands.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

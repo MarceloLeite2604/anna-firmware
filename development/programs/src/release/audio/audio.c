@@ -36,13 +36,10 @@
  *  1. Otherwise.
  */
 int start_audio_record(){
-    char* error_message;
     int script_result = execute_script(START_AUDIO_RECORD_SCRIPT_NAME);
 
     if ( script_result != 0 ){
-        error_message = malloc(256*sizeof(char));
-        sprintf(error_message, "Error executing start record script. Execution returned: %d.", script_result);
-        LOG_ERROR(error_message);
+        LOG_ERROR("Error executing start record script. Execution returned: %d.", script_result);
         return 1;
     }
 
@@ -60,13 +57,10 @@ int start_audio_record(){
  *  1. Otherwise.
  */
 int stop_audio_record(){
-    char* error_message;
     int script_result = execute_script(STOP_AUDIO_RECORD_SCRIPT_NAME);
 
     if ( script_result != 0 ){
-        error_message = malloc(256*sizeof(char));
-        sprintf(error_message, "Error executing stop record script. Execution returned: %d.", script_result);
-        LOG_ERROR(error_message);
+        LOG_ERROR("Error executing stop record script. Execution returned: %d.", script_result);
         return 1;
     }
 

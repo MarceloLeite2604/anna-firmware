@@ -55,7 +55,7 @@
 char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
 
 // Current directory to store log files.
-char* log_directory = NULL;
+char log_directory[512] = { DEFAULT_LOG_DIRECTORY };
 
 // Current log file name.
 char* log_file_name = NULL;
@@ -118,7 +118,9 @@ int close_log_file() {
         return 1;
     }
 
-    fprintf(log_file, "[%s] Log finished.\n", get_current_time_read_formatted());
+    char* current_time_read_formatted = get_current_time_read_formatted();
+    fprintf(log_file, "[%s] Log finished.\n", current_time_read_formatted);
+    free(current_time_read_formatted);
 
     if ( fclose(log_file) != 0 ) {
         _LOG_PRINT_ERROR("Error while closing log file.\n");
@@ -160,7 +162,9 @@ char* create_log_file_name(char* log_file_preffix){
 
     strcpy(result, log_file_preffix);
     strcat(result, "_");
-    strcat(result, get_current_time_file_formatted());
+    char* current_time_file_formatted = get_current_time_file_formatted();
+    strcat(result, current_time_file_formatted);
+    free(current_time_file_formatted);
     strcat(result, LOG_FILE_SUFFIX);
 
     return result;
@@ -257,12 +261,14 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
     temporary_buffer_length=TIME_STRING_READ_LENGTH+preffix_length+tag_length+string_index_length+message_length+additional_characters+1;
     temporary_buffer = malloc(temporary_buffer_length*sizeof(char));
 
+    char* current_time_read_formatted = get_current_time_read_formatted();
     if ( message != NULL && strlen(message) > 0 ) {
-        sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", get_current_time_read_formatted(), preffix, tag, string_index, message);
+        sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", current_time_read_formatted, preffix, tag, string_index, message);
     }
     else {
-        sprintf(temporary_buffer, "[%s] %s: %s (%s)", get_current_time_read_formatted(), preffix, tag, string_index);
+        sprintf(temporary_buffer, "[%s] %s: %s (%s)", current_time_read_formatted, preffix, tag, string_index);
     }
+    free(current_time_read_formatted);
 
     if ( temporary_buffer_length > buffer_size ) {
         characters_to_copy=buffer_size-1;
@@ -344,9 +350,6 @@ char* get_current_time_read_formatted(){
  *  The current directory where log files are stored.
  */
 char* get_log_directory() {
-    if ( log_directory == NULL ) {
-        return DEFAULT_LOG_DIRECTORY;
-    }
 
     return log_directory;
 }
@@ -455,7 +458,6 @@ int open_log_file(char* log_file_preffix){
     }
 
     if ( is_log_open() == true ) {
-        //fprintf(stderr, "[%s] %s: A log file is already open.\n", get_current_time_read_formatted(), LOG_ERROR_PREFFIX);
         _LOG_PRINT_ERROR("A log file is already open.");
         return 1;
     }
@@ -483,7 +485,9 @@ int open_log_file(char* log_file_preffix){
         return 1;
     }
 
-    fprintf(log_file, "[%s] Log started.\n", get_current_time_read_formatted());
+    char* current_time_read_formatted = get_current_time_read_formatted();
+    fprintf(log_file, "[%s] Log started.\n", current_time_read_formatted);
+    free(current_time_read_formatted);
 
     return 0;
 }
@@ -523,10 +527,12 @@ int set_log_directory(const char* new_log_directory){
 
     new_log_directory_length=strlen(new_log_directory);
 
+    /*
     if ( log_directory != NULL ) {
         free(log_directory);
     }
     log_directory=malloc((new_log_directory_length+1)*sizeof(char));
+    */
     strcpy(log_directory, new_log_directory);
     return 0;
 }

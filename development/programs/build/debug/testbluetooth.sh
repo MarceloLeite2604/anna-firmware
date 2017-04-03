@@ -5,7 +5,7 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
-export INPUT_DIRECTORY="../../resources/";
-export OUTPUT_DIRECTORY="${INPUT_DIRECTORY}";
+# Defines the input and output directories for program execution.
+source "$(dirname ${BASH_SOURCE})/set_input_output_directories.sh";
 
 $(dirname $BASH_SOURCE)/bin/testbluetooth;

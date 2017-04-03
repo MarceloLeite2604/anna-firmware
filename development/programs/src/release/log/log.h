@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 
 /*
@@ -25,19 +26,24 @@
 
 #define LOG_MESSAGE_BUFFER_SIZE 256
 
-// Macro to register a log message.
+// Macro to register a warning message
+#define LOG_WARNING(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+    write_log_message(LOG_MESSAGE_TYPE_WARNING, __func__, __LINE__, _log_message_buffer);\
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
 #define LOG(x, y) write_log_message((x), __func__, __LINE__, (y))
 
 // Macro to register an error message
-#define LOG_ERROR(x) write_log_message(LOG_MESSAGE_TYPE_ERROR, __func__, __LINE__, (x)) 
-
-// Macro to print a trace point.
-#define TRACE_POINT write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, _log_message_buffer);\
+#define LOG_ERROR(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+    write_log_message(LOG_MESSAGE_TYPE_ERROR, __func__, __LINE__, _log_message_buffer);\
     memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
 
 // Macro to register a trace message.
-#define TRACE(...) sprintf(_log_message_buffer, __VA_ARGS__);\
-    TRACE_POINT;
+#define LOG_TRACE(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+    LOG_TRACE_POINT;
+
+// Macro to register a trace point.
+#define LOG_TRACE_POINT write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, _log_message_buffer);\
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
 
 
 

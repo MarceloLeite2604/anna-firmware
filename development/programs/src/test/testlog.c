@@ -192,8 +192,8 @@ void test_write_log_message() {
     write_log_message(LOG_MESSAGE_TYPE_TRACE, function_name, 1, "This trace message should be written on console."); 
     write_log_message(LOG_MESSAGE_TYPE_WARNING, function_name, 2, "This warning message should be written on console."); 
     write_log_message(LOG_MESSAGE_TYPE_ERROR, function_name, 3, "This error message should be written on console."); 
-    TRACE("This trace message was written through \"TRACE\" macro.");
-    TRACE_POINT;
+    LOG_TRACE("This trace message was written through \"TRACE\" macro.");
+    LOG_TRACE_POINT;
 
     set_log_directory(log_directory);
 
@@ -212,8 +212,8 @@ void test_write_log_message() {
     write_log_message(LOG_MESSAGE_TYPE_WARNING, function_name, 5, "This warning message should be written on log file."); 
     write_log_message(LOG_MESSAGE_TYPE_ERROR, function_name, 6, "This error message should be written on log file.");
 
-    TRACE("This message was written through \"TRACE\" macro.");
-    TRACE_POINT;
+    LOG_TRACE("This message was written through \"TRACE\" macro.");
+    LOG_TRACE_POINT;
 
     if ( close_log_file() == 0 ) {
         printf("Log file closed.\n");

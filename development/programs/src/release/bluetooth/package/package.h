@@ -22,18 +22,20 @@ typedef struct {
 /* Error package content. */
 typedef struct {
     uint32_t error_code;
+    uint32_t error_message_size;
     uint8_t* error_message;
 } error_content_t;
 
-/* Result package content. */
+/* Command result package content. */
 typedef struct {
     uint32_t result_code;
-} result_content_t;
+} command_result_content_t;
 
 /* Send file header package content. */
 typedef struct {
     uint32_t file_header;
     uint32_t file_size;
+    uint32_t file_name_size;
     uint8_t* file_name;
 } send_file_header_content_t;
 
@@ -53,7 +55,7 @@ typedef struct {
 typedef union {
     confirmation_content_t* confirmation_content;
     error_content_t* error_content;
-    result_content_t* result_content;
+    command_result_content_t* command_result_content;
     send_file_header_content_t* send_file_header_content;
     send_file_chunk_content_t* send_file_chunk_content;
     send_file_trailer_content_t* send_file_trailer_content;
@@ -79,30 +81,35 @@ typedef struct {
  * Function headers.
  */
 
-/* Creates a confirmation package. */
-/* TODO: Implement. */
-package_t create_confirmation_package(uint32_t);
-
-/* Creates an error package. */
-/* TODO: Implement. */
-package_t create_error_package(uint32_t, uint8_t*);
+/* Creates a check connection package. */
+package_t create_check_connection_package();
 
 /* Creates a command result package. */
-/* TODO: Implement. */
 package_t create_command_result_package(uint32_t);
+
+/* Creates a confirmation package. */
+package_t create_confirmation_package(uint32_t);
+
+/* Creates a disconnect package. */
+package_t create_disconnect_package();
+
+/* Creates an error package. */
+package_t create_error_package(uint32_t, const char*);
 
 /* Creates a byte array containing a package content. */
 byte_array_t create_package_byte_array(package_t package);
 
 /* Creates a send file chunk package. */
-/* TODO: Implement. */
 package_t create_send_file_chunk_package(size_t, uint8_t*);
 
 /* Creates a send file header package. */
-/* TODO: Implement. */
 package_t create_send_file_header_package(size_t, char*);
 
 /* Creates a send file trailer package. */
-/* TODO: Implement. */
 package_t create_send_file_trailer_package();
 
+/* Deletes a byte array. */
+int delete_byte_array(byte_array_t);
+
+/* Deletes a package. */
+int delete_package(package_t);

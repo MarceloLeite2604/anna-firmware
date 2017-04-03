@@ -59,7 +59,7 @@ sdp_session_t* sdp_connect_session = NULL;
  *  1. If there was an error during execution.
  */
 int accept_connection(struct timeval wait_time) {
-    TRACE("Accepting connection.");
+    LOG_TRACE("Accepting connection.");
 
     struct sockaddr_rc local_address = { 0 };
     struct sockaddr_rc remote_device_address = { 0 };
@@ -108,11 +108,11 @@ int accept_connection(struct timeval wait_time) {
    /*
     * Checks if there is a connection waiting to be stablished.
     */
-    TRACE("Waiting for a connection.");
+    LOG_TRACE("Waiting for a connection.");
     select_result = select((listening_socket_file_descriptor+1), &listening_socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &wait_time);
     FD_CLR(listening_socket_file_descriptor, &listening_socket_file_descriptor_fd_set);
     if ( select_result == 0 ) {
-        TRACE("Connection acceptance timeout.");
+        LOG_TRACE("Connection acceptance timeout.");
         close(listening_socket_file_descriptor);
         return 0;
     }
@@ -124,10 +124,10 @@ int accept_connection(struct timeval wait_time) {
     ba2str( &remote_device_address.rc_bdaddr, remote_device_address_string );
 
     if (hci_read_remote_name(client_socket_file_descriptor, &(remote_device_address.rc_bdaddr), sizeof(remote_device_name), remote_device_name, 0) < 0 ){
-        TRACE("Connected with device \"%s\".", remote_device_address_string);
+        LOG_TRACE("Connected with device \"%s\".", remote_device_address_string);
     }
     else {
-        TRACE("Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
+        LOG_TRACE("Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
     }
 
     /* Read data from socket. */
@@ -174,7 +174,7 @@ bool is_bluetooth_service_registered() {
  *  1. Otherwise.
  */
 int register_service(bluetooth_service_infos_t bluetooth_service_infos){
-    TRACE("Registering service.");
+    LOG_TRACE("Registering service.");
 
     if ( is_bluetooth_service_registered() == true ) {
         LOG_ERROR("A bluetooth service is already registered.");
@@ -253,7 +253,7 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos){
 
     // set_registered_bluetooth_service_infos(bluetooth_service_infos);
     sdp_connect_session = session;
-    TRACE("Service registered.");
+    LOG_TRACE("Service registered.");
 
     return 0;
 }
@@ -376,11 +376,11 @@ int read_bluetooth_socket(int socket_file_descriptor, char* buffer, int buffer_l
     select_result = select((socket_file_descriptor+1), &socket_file_descriptor_fd_set, (fd_set*)NULL, (fd_set*)NULL, &wait_time);
     FD_CLR(socket_file_descriptor, &socket_file_descriptor_fd_set);
     if ( select_result == 0 ) {
-        TRACE("No content received from socket.");
+        LOG_TRACE("No content received from socket.");
         return 0;
     } else {
         if ( select_result == -1 ) {
-            TRACE("Error while waiting for a content from the socket.");
+            LOG_TRACE("Error while waiting for a content from the socket.");
             return -1;
         }
     }
