@@ -26,6 +26,14 @@ build_programs() {
         echo "Error creating \"directory\" object.";
         return 1;
     fi;
+
+    echo "Creating \"wait time\" object.";
+    gcc -c ${release_source_directory}general/wait_time/wait_time.c -o ${objects_directory}wait_time.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"wait time\" object.";
+        return 1;
+    fi;
     
     echo "creating \"byte array\" object.";
     gcc -c ${release_source_directory}general/byte_array/byte_array.c -o ${objects_directory}byte_array.o ${additional_arguments};
@@ -80,6 +88,21 @@ build_programs() {
     if [ $? -ne 0 ];
     then
         echo "Error creating \"bluetooth connection\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"bluetooth communication\" object.";
+    gcc -c ${release_source_directory}bluetooth/communication/communication.c -o ${objects_directory}bluetooth_communication.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth communication\" object.";
+        return 1;
+    fi;
+    echo "Creating \"bluetooth service\" object.";
+    gcc -c ${release_source_directory}bluetooth/service/service.c -o ${objects_directory}bluetooth_service.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth service\" object.";
         return 1;
     fi;
     
@@ -160,10 +183,25 @@ build_programs() {
     
     echo "Creating \"testaudio\" program.";
     gcc -o ${binary_folder}testaudio ${objects_directory}log.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}audio.o ${objects_directory}testaudio.o ${additional_arguments};
-    
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"testaudio\" object.";
+        echo "Error creating \"testaudio\" program.";
+        return 1;
+    fi;
+
+    echo "Creating \"testwaittime\" object.";
+    gcc -c ${test_source_directory}testwaittime.c -o ${objects_directory}testwaittime.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"testwaittime\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"testwaittime\" program.";
+    gcc -o ${binary_folder}testwaittime ${objects_directory}testwaittime.o ${objects_directory}log.o ${objects_directory}wait_time.o -lm ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"testwaittime\" program.";
         return 1;
     fi;
 

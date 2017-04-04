@@ -59,19 +59,19 @@ int close_socket(int socket_fd){
  *
  * Parameters
  *  socket_fd - The socket communication file descriptor to be checked.
+ *  check_time - Time to wait for a content to be avilable on socket.
  *
  * Returns
- *  True if there is content to be read.
- *  False otherwise.
+ *  If there is no content on socket, it returns 0. Otherwise, it returns the content size to be read.
+ *  If there was an error while checking socket content, it returns -1.
  */
-int check_socket_content(int socket_fd) {
+int check_socket_content(int socket_fd, struct timeval check_time) {
     int result;
     fd_set socket_fd_set;
-    struct timeval read_wait_time = _read_wait_time;
 
     FD_ZERO(&socket_fd_set);
     FD_SET(socket_fd, &socket_fd_set);
-    result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &read_wait_time);
+    result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &check_time);
     FD_CLR(socket_fd, &socket_fd_set);
 
     switch (result) {
@@ -101,6 +101,7 @@ int check_socket_content(int socket_fd) {
 byte_array_t read_socket_content(int socket_fd) {
     LOG_TRACE("Socket file descriptor: %d", socket_fd);
 
+    struct timeval read_wait_time = _read_wait_time;
     int select_result;
     uint8_t buffer[READ_CONTENT_BUFFER_SIZE];
     ssize_t content_size;
@@ -111,7 +112,7 @@ byte_array_t read_socket_content(int socket_fd) {
     while (concluded == false) {
         LOG_TRACE("Total read: %zu.", result_byte_array.size);
 
-        select_result = check_socket_content(socket_fd);
+        select_result = check_socket_content(socket_fd, read_wait_time);
         LOG_TRACE_POINT;
 
         switch (select_result) {

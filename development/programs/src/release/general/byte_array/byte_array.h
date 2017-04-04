@@ -5,6 +5,9 @@
  * Author: Marcelo Leite
  */
 
+#ifndef BYTE_ARRAY_H
+#define BYTE_ARRAY_H
+
 /*
  * Includes.
  */
@@ -30,3 +33,4 @@ typedef struct {
 /* Deletes a byte array. */
 int delete_byte_array(byte_array_t);
 
+#endif
