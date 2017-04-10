@@ -100,7 +100,7 @@ package_t create_error_package(uint32_t, const char*);
 package_t create_send_file_chunk_package(size_t, uint8_t*);
 
 /* Creates a send file header package. */
-package_t create_send_file_header_package(size_t, char*);
+package_t create_send_file_header_package(size_t, const char*);
 
 /* Creates a send file trailer package. */
 package_t create_send_file_trailer_package();

@@ -20,31 +20,19 @@
 /* Checks if a device is connected. */
 int check_connection(int);
 
-/* Receives a confirmation package. */
-int receive_confirmation(int, package_t);
+/* Checks if a device is connected. */
+/* int is_connected(int); */
 
-/* Sends a confirmation package. */
-int send_confirmation(int, package_t);
+/* Receives a package from a connection. */
+int receive_package(int, package_t*);
 
-/* Sends a file chunk. */
-int send_file_chunk(int, size_t, uint8_t*);
-
-/* Sends a file header. */
-int send_file_header(int, const char*, size_t);
-
-/* Sends a file trailer. */
-int send_file_trailer(int);
-
-/* Sends a package through a connection. */
-int send_package(int, package_t);
+/* Sends a file through a connection. */
+int send_file(int, char*);
 
 /* Transmits a command result. */
 int transmit_command_result(int, int);
 
 /* Transmits an error. */
 int transmit_error(int, int, const char*);
-
-/* Checks if a device os connected. */
-/* int is_connected(int); */
 
 #endif

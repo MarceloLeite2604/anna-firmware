@@ -18,12 +18,20 @@ build_programs() {
         echo "error creating \"log\" object.";
         return 1;
     fi;
-    
+
     echo "Creating \"directory\" object.";
     gcc -c ${release_source_directory}directory/directory.c -o ${objects_directory}directory.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"directory\" object.";
+        return 1;
+    fi;
+
+    echo "creating \"file\" object.";
+    gcc -c ${release_source_directory}general/file/file.c -o ${objects_directory}file.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "error creating \"file\" object.";
         return 1;
     fi;
 
