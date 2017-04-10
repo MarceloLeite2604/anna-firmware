@@ -5,6 +5,9 @@
  * Author: Marcelo Leite
  */
 
+#ifndef BLUETOOTH_CONNECTION_H
+#define BLUETOOTH_CONNECTION_H
+
 /*
  * Includes.
  */
@@ -27,3 +30,5 @@ byte_array_t read_socket_content(int);
 
 /* Writes content on socket. */
 int write_content_on_socket(int, byte_array_t);
+
+#endif

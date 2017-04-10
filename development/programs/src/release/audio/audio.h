@@ -5,6 +5,9 @@
  * Author: Marcelo Leite
  */
 
+#ifndef AUDIO_H
+#define AUDIO_H
+
 /*
  * Starts audio record.
  */
@@ -14,3 +17,5 @@ int start_audio_record();
  * Stops audio record.
  */
 int stop_audio_record();
+
+#endif

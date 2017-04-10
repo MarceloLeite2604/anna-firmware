@@ -24,7 +24,11 @@
  */
 int delete_byte_array(byte_array_t byte_array){
     LOG_TRACE_POINT;
-    free(byte_array.data);
+
+    if ( byte_array.size > 0 ) {
+        LOG_TRACE_POINT;
+        free(byte_array.data);
+    }
 
     LOG_TRACE_POINT;
     return 0;

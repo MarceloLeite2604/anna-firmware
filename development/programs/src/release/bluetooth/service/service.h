@@ -4,6 +4,8 @@
  * Version: 0.1
  * Author: Marcelo Leite
  */
+#ifndef BLUETOOTH_SERVICE_H
+#define BLUETOOTH_SERVICE_H
 
 /*
  * Includes.
@@ -26,3 +28,5 @@ int register_bluetooth_service();
 
 /* Unregisters the bluetooth service. */
 int unregister_bluetooth_service();
+
+#endif

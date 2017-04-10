@@ -4,6 +4,8 @@
  * Version: 0.1
  * Author: Marcelo Leite
  */
+#ifndef BLUETOOTH_COMMUNICATION_H
+#define BLUETOOTH_COMMUNICATION_H
 
 /*
  * Includes.
@@ -45,3 +47,4 @@ int transmit_error(int, int, const char*);
 /* Checks if a device os connected. */
 /* int is_connected(int); */
 
+#endif

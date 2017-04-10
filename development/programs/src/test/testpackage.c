@@ -30,6 +30,7 @@ void test_packages();
 void print_package(package_t);
 void print_package_content(uint32_t, content_t);
 void print_uint8_t_array(uint8_t*, size_t);
+void test_package(package_t);
 
 
 /*
@@ -47,10 +48,10 @@ int main(int argc, char** argv){
 
 
 /*
- * Tests "create_check_connection_package", "create_command_result_package", "create_confirmation_package", "create_disconnect_package", "create_error_package", "create_package_byte_array", "create_send_file_chunk_package", "create_send_file_header_package", "create_send_file_trailer_package" and "delete_package" functions.
+ * Tests "convert_byte_array_to_package", "convert_package_to_byte_array", "create_check_connection_package", "create_command_result_package", "create_confirmation_package", "create_disconnect_package", "create_error_package", "create_send_file_chunk_package", "create_send_file_header_package", "create_send_file_trailer_package" and "delete_package" functions.
  */
 void test_packages(){
-    printf("Testing \"create_check_connection_package\", \"create_command_result_package\", \"create_confirmation_package\", \"create_disconnect_package\", \"create_error_package\", \"create_package_byte_array\", \"create_send_file_chunk_package\", \"create_send_file_header_package\", \"create_send_file_trailer_package\" and \"delete_package\" functions.\n");
+    printf("Testing \"convert_byte_array_to_package\", \"convert_package_to_byte_array\", \"create_check_connection_package\", \"create_command_result_package\", \"create_confirmation_package\", \"create_disconnect_package\", \"create_error_package\", \"create_send_file_chunk_package\", \"create_send_file_header_package\", \"create_send_file_trailer_package\" and \"delete_package\" functions.\n");
 
     char log_directory[256];
     
@@ -62,92 +63,72 @@ void test_packages(){
     open_log_file("test_packages");
 
     package_t check_connection_package = create_check_connection_package();
-    print_package(check_connection_package);
-    byte_array_t check_connection_byte_array = create_package_byte_array(check_connection_package);
-    printf("Check connection byte array:\n");
-    print_byte_array(check_connection_byte_array);
-    printf("\n");
-    delete_byte_array(check_connection_byte_array);
+    test_package(check_connection_package);
     delete_package(check_connection_package);
     
     package_t command_result_package  = create_command_result_package(0x2236);
-    print_package(command_result_package);
-    byte_array_t command_result_byte_array = create_package_byte_array(command_result_package);
-    printf("Command result byte array:\n");
-    print_byte_array(command_result_byte_array);
-    printf("\n");
-    delete_byte_array(command_result_byte_array);
+    test_package(command_result_package);
     delete_package(command_result_package);
 
     package_t confirmation_package = create_confirmation_package(0xaabbccdd);
-    print_package(confirmation_package);
-    byte_array_t confirmation_byte_array = create_package_byte_array(confirmation_package);
-    printf("Confirmation byte array:\n");
-    print_byte_array(confirmation_byte_array);
-    printf("\n");
-    delete_byte_array(confirmation_byte_array);
+    test_package(confirmation_package);
     delete_package(confirmation_package);
 
     package_t disconnect_package = create_disconnect_package();
-    print_package(disconnect_package);
-    byte_array_t disconnect_byte_array = create_package_byte_array(disconnect_package);
-    printf("Disconnect byte array:\n");
-    print_byte_array(disconnect_byte_array);
-    printf("\n");
-    delete_byte_array(disconnect_byte_array);
+    test_package(disconnect_package);
     delete_package(disconnect_package);
 
     uint32_t error_code = 0xc;
     package_t error_package = create_error_package(error_code, error_messages[error_code]);
-    print_package(error_package);
-    byte_array_t error_byte_array = create_package_byte_array(error_package);
-    printf("Error byte array:\n");
-    print_byte_array(error_byte_array);
-    printf("\n");
-    delete_byte_array(error_byte_array);
+    test_package(error_package);
     delete_package(error_package);
 
     size_t chunk_size = 256;
     uint8_t chunk_data[chunk_size];
     memset(chunk_data, 0x22, chunk_size);
     package_t send_file_chunk_package = create_send_file_chunk_package(chunk_size, chunk_data);
-    print_package(send_file_chunk_package);
-    byte_array_t send_file_chunk_byte_array = create_package_byte_array(send_file_chunk_package);
-    printf("Send file chunk byte array:\n");
-    print_byte_array(send_file_chunk_byte_array);
-    printf("\n");
-    delete_byte_array(send_file_chunk_byte_array);
+    test_package(send_file_chunk_package);
     delete_package(send_file_chunk_package);
 
     char* file_name = "20170309_141802.mp3";
     int file_size = (int)(3.128*1024*1024);
     package_t send_file_header_package = create_send_file_header_package(file_size, file_name);
-    print_package(send_file_header_package);
-    byte_array_t send_file_header_byte_array = create_package_byte_array(send_file_header_package);
-    printf("Send file header byte array:\n");
-    print_byte_array(send_file_header_byte_array);
-    printf("\n");
-    delete_byte_array(send_file_header_byte_array);
+    test_package(send_file_header_package);
     delete_package(send_file_header_package);
 
     package_t send_file_trailer_package = create_send_file_trailer_package();
-    print_package(send_file_trailer_package);
-    byte_array_t send_file_trailer_byte_array = create_package_byte_array(send_file_trailer_package);
-    printf("Send file trailer byte array:\n");
-    print_byte_array(send_file_trailer_byte_array);
-    printf("\n");
-    delete_byte_array(send_file_trailer_byte_array);
+    test_package(send_file_trailer_package);
     delete_package(send_file_trailer_package);
 
     close_log_file();
 }
 
+void test_package(package_t package) {
+    int convertion_result;
+    byte_array_t byte_array;
+    package_t converted_package;
+
+    print_package(package);
+    convertion_result = convert_package_to_byte_array(&byte_array, package);
+    printf("Conversion result: %d\n", convertion_result);
+    printf("Command result byte array:\n");
+    print_byte_array(byte_array);
+    convertion_result = convert_byte_array_to_package(&converted_package, byte_array);
+    printf("Conversion result: %d\n", convertion_result);
+    printf("Converted package:\n");
+    print_package(converted_package);
+    delete_byte_array(byte_array);
+    delete_package(converted_package);
+    printf("\n");
+
+}
+
 void print_package(package_t package) {
-    printf("Package header...: 0x%x\n", package.header);
-    printf("Package id.......: 0x%x\n", package.id);
-    printf("Package type code: 0x%x\n", package.type_code);
+    printf("Package header...: 0x%02x\n", package.header);
+    printf("Package id.......: 0x%02x\n", package.id);
+    printf("Package type code: 0x%02x\n", package.type_code);
     print_package_content(package.type_code, package.content);
-    printf("Package trailer..: 0x%x\n\n", package.trailer);
+    printf("Package trailer..: 0x%02x\n", package.trailer);
 }
 
 void print_package_content(uint32_t package_type, content_t content){
@@ -215,7 +196,7 @@ void print_byte_array(byte_array_t byte_array) {
         }
         printf("0x%02x ", byte_array.data[counter]);
     }
-    if ( counter != 0 && counter%16 == 0 ) {
+    if ( counter != 0 && counter%16 != 1 ) {
         printf("\n");
     }
 }

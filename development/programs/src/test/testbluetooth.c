@@ -222,7 +222,8 @@ int main( int argc, char** argv){
     /* byte_array = create_send_file_header_content_byte_array(content); */
     /* byte_array = create_send_file_chunk_content_byte_array(content);  */
     /* byte_array = create_send_file_trailer_content_byte_array(content); */
-    byte_array = create_package_byte_array(package);
+    int conversion_result;
+    conversion_result = convert_package_to_byte_array(&byte_array, package);
 
     
     for (counter = 0; counter < byte_array.size; counter++ ) {

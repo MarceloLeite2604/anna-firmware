@@ -5,6 +5,8 @@
  * Version: 0.1
  * Author: Marcelo Leite
  */
+#ifndef LOG_H
+#define LOG_H
 
 /*
  * Includes.
@@ -106,3 +108,5 @@ int set_log_level(int new_log_level);
  * Writes a log message.
  */
 int write_log_message(const int message_type, const char* tag, const int index, const char* message);
+
+#endif

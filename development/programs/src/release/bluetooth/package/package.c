@@ -21,6 +21,42 @@
  * Private function declarations.
  */
 
+/* Converts a byte array to a check connection package content. */
+int convert_byte_array_to_check_connection_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a confirmation package content. */
+int convert_byte_array_to_confirmation_content(content_t*, byte_array_t);
+
+/* Convert a byte array to a command result content. */
+int convert_byte_array_to_command_result_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a package content. */
+int convert_byte_array_to_content(content_t*, byte_array_t, uint32_t);
+
+/* Converts a byte array to a disconnect package content. */
+int convert_byte_array_to_disconnect_content(content_t*, byte_array_t);
+
+/* Converts a byte array to an error package content. */
+int convert_byte_array_to_error_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a request audio file package content. */
+int convert_byte_array_to_request_audio_file_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a send file chunk package content. */
+int convert_byte_array_to_send_file_chunk_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a send file header package content. */
+int convert_byte_array_to_send_file_header_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a send file trailer package content. */
+int convert_byte_array_to_send_file_trailer_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a start record package content. */
+int convert_byte_array_to_start_record_content(content_t*, byte_array_t);
+
+/* Converts a byte array to a stop record package content. */
+int convert_byte_array_to_stop_record_content(content_t*, byte_array_t);
+
 /* Creates a command result package content. */
 content_t create_command_result_content(uint32_t);
 
@@ -91,6 +127,548 @@ int delete_send_file_trailer_content(content_t);
 /*
  * Function elaborations.
  */
+
+/*
+ * Converts a byte array to a check connection package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_check_connection_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    /* This package type does not have a content. */
+    return 0;
+}
+
+/*
+ * Converts a byte array to a confirmation package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_confirmation_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+
+    content_size = sizeof(uint32_t);
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The byte array size does not match a confirmation content.");
+        return -1;
+    }
+
+    content->confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t));
+    memcpy(&content->confirmation_content->package_id, byte_array.data, sizeof(uint32_t));
+    return 0;
+}
+
+/*
+ * Converts a byte array to a command result package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_command_result_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+
+    content_size = sizeof(uint32_t);
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The byte array size does not match a command result content.");
+        return -1;
+    }
+
+    content->command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
+    memcpy(&content->command_result_content->result_code, byte_array.data, sizeof(uint32_t));
+    return 0;
+}
+
+/*
+ * Converts a byte array to a package content.
+ *
+ * Parameters
+ *  content - The content package to store the informations obtained from the byte array.
+ *  byte_array - The byte array with the content informations.
+ *  package_type_code - The package type of the content byte array.
+ *
+ * Returns
+ *  0. If the content was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, uint32_t package_type_code){
+    LOG_TRACE("Byte array size: %zu, package type: 0x%x.", byte_array.size, package_type_code);
+    int result;
+    int convertion_result;
+    content_t temporary_content;
+
+    switch (package_type_code) {
+        case CHECK_CONNECTION_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_check_connection_content(&temporary_content, byte_array);
+            break;
+        case CONFIRMATION_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_confirmation_content(&temporary_content, byte_array);
+            break;
+        case COMMAND_RESULT_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_command_result_content(&temporary_content, byte_array);
+            break;
+        case DISCONNECT_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_disconnect_content(&temporary_content, byte_array);
+            break;
+        case ERROR_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_error_content(&temporary_content, byte_array);
+            break;
+        case REQUEST_AUDIO_FILE_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_request_audio_file_content(&temporary_content, byte_array);
+            break;
+        case SEND_FILE_CHUNK_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_send_file_chunk_content(&temporary_content, byte_array);
+            break;
+        case SEND_FILE_HEADER_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_send_file_header_content(&temporary_content, byte_array);
+            break;
+        case SEND_FILE_TRAILER_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_send_file_trailer_content(&temporary_content, byte_array);
+            break;
+        case START_RECORD_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_start_record_content(&temporary_content, byte_array);
+            break;
+        case STOP_RECORD_CODE:
+            LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_stop_record_content(&temporary_content, byte_array);
+            break;
+        default:
+            LOG_ERROR("Unknown package type: 0x%x.", package_type_code);
+            convertion_result = -1;
+            break;
+    }
+
+    if ( convertion_result != 0 ) {
+        LOG_ERROR("Error while converting byte array to content.");
+        return -1;
+    }
+
+    content->confirmation_content = temporary_content.confirmation_content;
+    return 0;
+}
+
+/*
+ * Converts a byte array to disconnect package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_disconnect_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    /* This package type does not have a content. */
+    return 0;
+}
+
+/*
+ * Converts a byte array to an error package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+    uint8_t* array_pointer;
+
+    content_size = sizeof(uint32_t);
+    content_size += sizeof(uint32_t);
+    content_t temporary_content;
+
+    if ( byte_array.size < content_size ) {
+        LOG_ERROR("The byte array size does not match an error content.");
+        return -1;
+    }
+
+    array_pointer = byte_array.data;
+
+    temporary_content.error_content = (error_content_t*)malloc(sizeof(error_content_t));
+
+    memcpy(&temporary_content.error_content->error_code, array_pointer, sizeof(uint32_t));
+    LOG_TRACE("Error code: 0x%02x.", temporary_content.error_content->error_code);
+    array_pointer += sizeof(uint32_t);
+    memcpy(&temporary_content.error_content->error_message_size, array_pointer, sizeof(uint32_t));
+    LOG_TRACE("Error message size: 0x%02x.", temporary_content.error_content->error_message_size);
+    array_pointer += sizeof(uint32_t);
+
+    content_size += temporary_content.error_content->error_message_size;
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The byte array error message length does not match it's message length.");
+        free(temporary_content.error_content);
+        return -1;
+    }
+
+    temporary_content.error_content->error_message = (uint8_t*)malloc(temporary_content.error_content->error_message_size*sizeof(uint8_t));
+    memcpy(temporary_content.error_content->error_message, array_pointer, temporary_content.error_content->error_message_size*sizeof(uint8_t));
+
+    content->error_content = temporary_content.error_content;
+
+    return 0;
+}
+
+/*
+ * Converts a byte array to request audio file package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_request_audio_file_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    /* This package type does not have a content. */
+    return 0;
+}
+
+/*
+ * Converts a byte array to an send file chunk content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+    uint8_t* array_pointer;
+
+    content_size = sizeof(uint32_t);
+    content_size += sizeof(uint32_t);
+    content_t temporary_content;
+
+    if ( byte_array.size < content_size ) {
+        LOG_ERROR("The byte array size does not match a send file chunk content.");
+        return -1;
+    }
+
+    array_pointer = byte_array.data;
+
+    temporary_content.send_file_chunk_content = (send_file_chunk_content_t*)malloc(sizeof(send_file_chunk_content_t));
+
+    memcpy(&temporary_content.send_file_chunk_content->file_content, array_pointer, sizeof(uint32_t));
+
+    if ( temporary_content.send_file_chunk_content->file_content != SEND_FILE_CHUNK_CONTENT_CODE ) {
+        LOG_ERROR("Could not find the send file chunk content code.");
+        return -1;
+    }
+
+    array_pointer += sizeof(uint32_t);
+    memcpy(&temporary_content.send_file_chunk_content->chunk_size, array_pointer, sizeof(uint32_t));
+    LOG_TRACE("Chunk size: 0x%02x.", temporary_content.send_file_chunk_content->chunk_size);
+
+    content_size += temporary_content.send_file_chunk_content->chunk_size;
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The chunk size informed on byte array does not match it's chunk size.");
+        free(temporary_content.send_file_chunk_content);
+        return -1;
+    }
+    array_pointer += sizeof(uint32_t);
+
+    temporary_content.send_file_chunk_content->chunk_data = (uint8_t*)malloc(temporary_content.send_file_chunk_content->chunk_size*sizeof(uint8_t));
+    memcpy(temporary_content.send_file_chunk_content->chunk_data, array_pointer, temporary_content.send_file_chunk_content->chunk_size*sizeof(uint8_t));
+
+    content->send_file_chunk_content = temporary_content.send_file_chunk_content;
+
+    return 0;
+}
+
+/*
+ * Converts a byte array to a send file header package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_send_file_header_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+    uint8_t* array_pointer;
+    content_t temporary_content;
+
+    content_size = sizeof(uint32_t);
+    content_size += sizeof(uint32_t);
+    content_size += sizeof(uint32_t);
+
+    if ( byte_array.size < content_size ) {
+        LOG_ERROR("The byte array size does not match a send file header result content.");
+        return -1;
+    }
+
+    array_pointer = byte_array.data;
+
+    temporary_content.send_file_header_content = (send_file_header_content_t*)malloc(sizeof(send_file_header_content_t));
+    memcpy(&temporary_content.send_file_header_content->file_header, array_pointer, sizeof(uint32_t));
+
+    if ( temporary_content.send_file_header_content->file_header != SEND_FILE_HEADER_CONTENT_CODE ) {
+        LOG_ERROR("The content header does not match a send file header content.");
+        return -1;
+    }
+
+    array_pointer += sizeof(uint32_t);
+
+    memcpy(&temporary_content.send_file_header_content->file_size, array_pointer, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+
+    memcpy(&temporary_content.send_file_header_content->file_name_size, array_pointer, sizeof(uint32_t));
+
+    content_size += temporary_content.send_file_header_content->file_name_size;
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The file name size on byte array does not match is content.");
+        free(temporary_content.send_file_header_content);
+        return -1;
+    }
+
+    array_pointer += sizeof(uint32_t);
+
+    temporary_content.send_file_header_content->file_name = (uint8_t*)malloc(temporary_content.send_file_header_content->file_name_size*sizeof(uint8_t));
+    memcpy(temporary_content.send_file_header_content->file_name, array_pointer, temporary_content.send_file_header_content->file_name_size*sizeof(uint8_t));
+
+    content->send_file_header_content = temporary_content.send_file_header_content;
+
+    return 0;
+}
+
+/*
+ * Converts a byte array to a send file trailer package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_send_file_trailer_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    size_t content_size;
+
+    content_size = sizeof(uint32_t);
+
+    if ( byte_array.size != content_size ) {
+        LOG_ERROR("The byte array size does not match a send file trailer content.");
+        return -1;
+    }
+
+    content->send_file_trailer_content = (send_file_trailer_content_t*)malloc(sizeof(send_file_trailer_content_t));
+    memcpy(&content->send_file_trailer_content->file_trailer, byte_array.data, sizeof(uint32_t));
+    return 0;
+}
+
+/*
+ * Converts a byte array to a start record package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_start_record_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    /* This package type does not have a content. */
+    return 0;
+}
+
+/*
+ * Converts a byte array to a stop record package content.
+ *
+ * Parameters
+ *  content - The content where the byte array informations will be stored.
+ *  byte_array - The byte array with the content informations.
+ *
+ * Returns
+ *  0. If the byte array was converted successfully.
+ *  -1. Otherwise.
+ */
+int convert_byte_array_to_stop_record_content(content_t* content, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+    /* This package type does not have a content. */
+    return 0;
+}
+
+/*
+ * Converts a byte array to a package.
+ *
+ * Parameters
+ *
+ *  byte_array - The byte array to be converted as package.
+ *
+ * Returns
+ *  A package_t type with the informations obtained from the byte_array.
+ */
+int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+
+    package_t temporary_package;
+    byte_array_t content_byte_array;
+    size_t package_size;
+    uint8_t* array_pointer;
+    int convert_byte_array_to_content_result;
+
+    package_size = sizeof(uint32_t);
+    package_size += sizeof(uint32_t);
+    package_size += sizeof(uint32_t);
+    package_size += sizeof(uint32_t);
+
+    if ( byte_array.size < package_size ) {
+        LOG_ERROR("Invalid package size. It must be at least %zu bytes to be a package.", package_size);
+        return -1;
+    }
+
+    array_pointer = byte_array.data;
+    memcpy(&temporary_package.header, array_pointer, sizeof(uint32_t));
+
+    if (temporary_package.header != PACKAGE_HEADER) {
+        LOG_ERROR("Byte array is not a package.");
+        return -1;
+    }
+
+    array_pointer += sizeof(uint32_t);
+
+    memcpy(&temporary_package.id, array_pointer, sizeof(uint32_t));
+    LOG_TRACE("Package id: 0x%x.", temporary_package.id);
+    array_pointer += sizeof(uint32_t);
+
+    memcpy(&temporary_package.type_code, array_pointer, sizeof(uint32_t));
+    LOG_TRACE("Package type: 0x%x.", temporary_package.type_code);
+    array_pointer += sizeof(uint32_t);
+
+    content_byte_array.size = byte_array.size - package_size;
+    LOG_TRACE("Package content size: %zu bytes.", content_byte_array.size);
+
+    if ( content_byte_array.size > 0 ) {
+        content_byte_array.data = (uint8_t*)malloc(content_byte_array.size*sizeof(uint8_t));
+        memcpy(content_byte_array.data, array_pointer, content_byte_array.size*sizeof(uint8_t));
+    }
+
+    convert_byte_array_to_content_result = convert_byte_array_to_content(&temporary_package.content, content_byte_array, temporary_package.type_code);
+    if ( convert_byte_array_to_content_result != 0 ) {
+        LOG_ERROR("Error while converting byte array data to package content.");
+        return -1;
+    }
+
+    array_pointer += content_byte_array.size*sizeof(uint8_t);
+    memcpy(&temporary_package.trailer, array_pointer, sizeof(uint32_t));
+
+    if ( content_byte_array.size > 0 ) {
+        delete_byte_array(content_byte_array);
+    }
+
+    package->header = temporary_package.header;
+    package->id = temporary_package.id;
+    package->type_code = temporary_package.type_code;
+    package->content = temporary_package.content;
+    package->trailer = temporary_package.trailer;
+
+    return 0;
+}
+
+/*
+ * Converts a package to a byte array.
+ *
+ * Parameters
+ *  byte_array - The byte array where the package informations will be stored.
+ *  package - The package with the informations to be copied to the byte array.
+ *
+ * Returns
+ *  0. If the conversion was made successfully.
+ *  -1. Otherwise.
+ */
+int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
+    LOG_TRACE_POINT;
+
+    byte_array_t temporary_byte_array;
+
+    temporary_byte_array.size = 0;
+    temporary_byte_array.size += sizeof(uint32_t);
+    temporary_byte_array.size += sizeof(uint32_t);
+    temporary_byte_array.size += sizeof(uint32_t);
+    temporary_byte_array.size += sizeof(uint32_t);
+
+    byte_array_t content_byte_array = create_content_byte_array(package.content, package.type_code);
+
+    temporary_byte_array.size += content_byte_array.size;
+
+    temporary_byte_array.data = (uint8_t*)malloc(temporary_byte_array.size*sizeof(uint8_t));
+
+    uint8_t* array_pointer = temporary_byte_array.data;
+    memcpy(array_pointer, &package.header, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+    memcpy(array_pointer, &package.id, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+    memcpy(array_pointer, &package.type_code, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+    memcpy(array_pointer, content_byte_array.data, content_byte_array.size);
+    array_pointer += content_byte_array.size;
+    memcpy(array_pointer, &package.trailer, sizeof(uint32_t));
+
+    delete_byte_array(content_byte_array);
+
+    byte_array->size = temporary_byte_array.size;
+    byte_array->data = (uint8_t*)malloc(temporary_byte_array.size*sizeof(uint8_t));
+    memcpy(byte_array->data, temporary_byte_array.data, temporary_byte_array.size*sizeof(uint8_t));
+
+    delete_byte_array(temporary_byte_array);
+
+    LOG_TRACE_POINT;
+    return 0;
+}
 
 /*
  * Creates a check connection package.
@@ -417,49 +995,6 @@ package_t create_package(uint32_t package_type_code) {
 }
 
 /*
- * Creates a byte array with the package content.
- *
- * Parameters
- *  package - The package with the informations to be copied to the byte array.
- *
- * Returns
- *  A byte array with the package informations.
- */
-byte_array_t create_package_byte_array(package_t package) {
-    LOG_TRACE_POINT;
-
-    byte_array_t byte_array;
-
-    byte_array.size = 0;
-    byte_array.size += sizeof(uint32_t);
-    byte_array.size += sizeof(uint32_t);
-    byte_array.size += sizeof(uint32_t);
-    byte_array.size += sizeof(uint32_t);
-
-    byte_array_t content_byte_array = create_content_byte_array(package.content, package.type_code);
-
-    byte_array.size += content_byte_array.size;
-
-    byte_array.data = (uint8_t*)malloc(byte_array.size*sizeof(uint8_t));
-
-    uint8_t* array_pointer = byte_array.data;
-    memcpy(array_pointer, &package.header, sizeof(uint32_t));
-    array_pointer += sizeof(uint32_t);
-    memcpy(array_pointer, &package.id, sizeof(uint32_t));
-    array_pointer += sizeof(uint32_t);
-    memcpy(array_pointer, &package.type_code, sizeof(uint32_t));
-    array_pointer += sizeof(uint32_t);
-    memcpy(array_pointer, content_byte_array.data, content_byte_array.size);
-    array_pointer += content_byte_array.size;
-    memcpy(array_pointer, &package.trailer, sizeof(uint32_t));
-
-    delete_byte_array(content_byte_array);
-
-    LOG_TRACE_POINT;
-    return byte_array;
-}
-
-/*
  * Creates a package id.
  *
  * Parameters
@@ -759,17 +1294,18 @@ int delete_content(uint32_t package_type, content_t content){
     int result;
 
     switch(package_type) {
+        case CHECK_CONNECTION_CODE:
+        case DISCONNECT_CODE:
+        case REQUEST_AUDIO_FILE_CODE:
+        case START_RECORD_CODE:
+        case STOP_RECORD_CODE:
+            LOG_TRACE_POINT("This package type doesn't have a content.");
+            break;
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
             result = delete_confirmation_content(content);
             LOG_TRACE_POINT;
             free(content.confirmation_content);
-            break;
-        case ERROR_CODE:
-            LOG_TRACE_POINT;
-            result = delete_error_content(content);
-            LOG_TRACE_POINT;
-            free(content.error_content);
             break;
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
@@ -777,17 +1313,23 @@ int delete_content(uint32_t package_type, content_t content){
             LOG_TRACE_POINT;
             free(content.command_result_content);
             break;
-        case SEND_FILE_HEADER_CODE:
+        case ERROR_CODE:
             LOG_TRACE_POINT;
-            result = delete_send_file_header_content(content);
+            result = delete_error_content(content);
             LOG_TRACE_POINT;
-            free(content.send_file_header_content);
+            free(content.error_content);
             break;
         case SEND_FILE_CHUNK_CODE:
             LOG_TRACE_POINT;
             result = delete_send_file_chunk_content(content);
             LOG_TRACE_POINT;
             free(content.send_file_chunk_content);
+            break;
+        case SEND_FILE_HEADER_CODE:
+            LOG_TRACE_POINT;
+            result = delete_send_file_header_content(content);
+            LOG_TRACE_POINT;
+            free(content.send_file_header_content);
             break;
         case SEND_FILE_TRAILER_CODE:
             LOG_TRACE_POINT;

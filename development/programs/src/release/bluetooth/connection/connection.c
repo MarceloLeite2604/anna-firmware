@@ -179,5 +179,40 @@ byte_array_t read_socket_content(int socket_fd) {
  *  1. Otherwise.
  */
 int write_content_on_socket(int socket_fd, byte_array_t byte_array) {
-    /* TODO: Elaborate. */
+    size_t write_result;
+    size_t total_written = 0;
+    bool concluded = false;
+    int errno_value;
+    int result = 0;
+
+    while (concluded == false ) {
+        write_result = write(socket_fd, byte_array.data, byte_array.size);
+        switch (write_result) {
+            case -1:
+                errno_value = errno;
+                LOG_ERROR("Error while writing content on socket.");
+                LOG_ERROR("%s", strerror(errno_value));
+                result = -1;
+                concluded = true;
+                break;
+            case 0:
+                if ( byte_array.size != 0 ) {
+                    LOG_ERROR("The content was not written on socket.");
+                    result = -1;
+                    concluded = true;
+                }
+                break;
+            default:
+                LOG_TRACE("%zu byte(s) written on socket.", write_result);
+                break;
+        }
+
+        total_written += write_result;
+        LOG_TRACE("%zu of %zu byte(s) written on socket.", total_written, byte_array.size);
+        if ( total_written >= byte_array.size ) {
+            concluded = true;
+        }
+    }
+
+    return result;
 }

@@ -5,6 +5,9 @@
  * Author: Marcelo Leite
  */
 
+#ifndef BLUETOOTH_H
+#define BLUETOOTH_H
+
 /*
  * Includes.
  */
@@ -55,3 +58,5 @@ int remove_service();
  * Reads a content from bluetooth socket.
  */
 int read_bluetooth_socket(int socket_file_descriptor, char* buffer, int buffer_length, struct timeval wait_time);
+
+#endif

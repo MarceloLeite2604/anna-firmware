@@ -5,7 +5,12 @@
  * Author: Marcelo Leite
  */
 
+#ifndef SCRIPT_H
+#define SCRIPT_H
+
 /*
  * Executes a bash script.
  */
 int execute_script(char* script_name);
+
+#endif

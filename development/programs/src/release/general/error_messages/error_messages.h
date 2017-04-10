@@ -1,3 +1,11 @@
+/*
+ * This header file contains all error messages used by the program.
+ *
+ * Version: 0.1
+ * Author: Marcelo Leite
+ */
+#ifndef ERROR_MESSAGES_H
+#define ERROR_MESSAGES_H
 
 #define ERROR_MESSAGE_000 "No error."
 #define ERROR_MESSAGE_001 "Could not start log."
@@ -24,3 +32,5 @@
 #define ERROR_MESSAGE_022 "Could not close connection gracefully."
 
 extern const char* error_messages[];
+
+#endif

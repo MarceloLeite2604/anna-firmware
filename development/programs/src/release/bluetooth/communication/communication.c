@@ -41,7 +41,7 @@ int check_connection(int socket_fd) {
 
     check_connection_package = create_check_connection_package();
 
-    check_connection_package_byte_array = create_package_byte_array(check_connection_package);
+    send_package(socket_fd, check_connection_package);
 
 }
 
@@ -119,12 +119,17 @@ int send_package(int socket_fd, package_t package) {
     int write_result;
     int wait_result;
     int receive_confirmation_result;
+    int convertion_result;
     bool write_concluded = false;
     retry_informations_t retry_informations;
     byte_array_t package_byte_array;
 
     retry_informations = create_retry_informations(MAXIMUM_WRITE_ATTEMPTS);
-    package_byte_array = create_package_byte_array(package);
+    convertion_result = convert_package_to_byte_array(&package_byte_array, package);
+
+    if ( convertion_result == -1 ) {
+        /* TODO: Elaborate. */
+    }
 
     while (write_concluded == false ) {
 

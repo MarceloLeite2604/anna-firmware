@@ -4,6 +4,8 @@
  * Version: 0.1
  * Author: Marcelo Leite
  */
+#ifndef WAIT_TIME_H
+#define WAIT_TIME_H
 
 /*
  * Structure declarations.
@@ -24,3 +26,5 @@ retry_informations_t create_retry_informations(int);
 
 /* Waits an amount of time base on retry attempts. */
 int wait_time(retry_informations_t*);
+
+#endif

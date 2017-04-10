@@ -4,6 +4,8 @@
  * Version: 0.1
  * Author: Marcelo Leite
  */
+#ifndef DIRECTORY_H
+#define DIRECTORY_H
 
 /*
  * Function headers.
@@ -19,4 +21,4 @@ char* get_input_directory();
  */
 char* get_output_directory();
 
-
+#endif
