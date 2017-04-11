@@ -232,3 +232,24 @@ stop_audio_encoder_process(){
 
     return ${success};
 }
+
+# Checks if audio encoder process is executing.
+#
+# Parameters
+#   None.
+#
+# Returns
+#  0. If audio encoder process is running.
+#  1. Otherwise.
+is_audio_encoder_process_running(){
+
+    local result;
+    local audio_encoder_process_id;
+    audio_encoder_process_id=$(retrieve_process_id "${audio_encoder_process_identifier}");
+    log ${log_message_type_trace} "Audio encoder process id : "${audio_encoder_process_id}".";
+
+    check_process_is_alive ${audio_encoder_process_id};
+    result=${?};
+
+    return ${result};
+}

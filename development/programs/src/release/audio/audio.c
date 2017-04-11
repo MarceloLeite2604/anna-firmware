@@ -18,12 +18,39 @@
  * Definitions.
  */
 
-// Script name to start audio record.
+/* Script name to start audio record. */
 #define START_AUDIO_RECORD_SCRIPT_NAME "start_record.sh"
 
-// Script name to stop audio record.
+/* Script name to stop audio record. */
 #define STOP_AUDIO_RECORD_SCRIPT_NAME "stop_record.sh"
 
+/* Script name to check if device is recording. */
+#define CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME "is_recording.sh"
+
+/* Script name to kill record processes. */
+#define KILL_AUDIO_RECORD_PROCESSES_SCRIPT_NAME "kill_record_processes.sh"
+
+
+/*
+ * Function elaborations.
+ */
+
+/*
+ * Checks if device is recording.
+ *
+ * Parameters
+ *  None.
+ *
+ * Returns
+ *  0. If device is recording.
+ *  1. Otherwise.
+ */
+int is_recording() {
+    LOG_TRACE_POINT;
+    int script_result = execute_script(CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME);
+
+    return script_result;
+}
 
 /*
  * Starts audio record.

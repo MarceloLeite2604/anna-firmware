@@ -9,6 +9,15 @@
 #define AUDIO_H
 
 /*
+ * Includes.
+ */
+#include <stdbool.h>
+
+/*
+ * Function headers.
+ */
+
+/*
  * Checks if device is recording.
  */
 bool is_recording();
