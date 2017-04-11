@@ -65,6 +65,11 @@ extern char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
 int close_log_file();
 
 /*
+ * Finishes a shell script log file.
+ */
+int finish_shell_script_log();
+
+/*
  * Returns the current log directory.
  */
 char* get_log_directory();
@@ -90,23 +95,33 @@ int get_log_level();
 bool is_log_open();
 
 /*
+ * Checks if shell log is activated.
+ */
+bool is_shell_log_activated();
+
+/*
  * Opens a log file.
  */
-int open_log_file(char* log_file_preffix);
+int open_log_file(char*);
 
 /*
  * Defines the directory to store log files.
  */
-int set_log_directory(const char* new_log_directory);
+int set_log_directory(const char*);
 
 /*
  * Defines the current level of log file.
  */ 
-int set_log_level(int new_log_level);
+int set_log_level(int);
+
+/*
+ * Starts shell script log.
+ */
+int start_shell_script_log(char*, int);
 
 /*
  * Writes a log message.
  */
-int write_log_message(const int message_type, const char* tag, const int index, const char* message);
+int write_log_message(const int, const char*, const int, const char*);
 
 #endif

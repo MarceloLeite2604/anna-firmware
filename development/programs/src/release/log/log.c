@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <time.h>
+#include "../script/script.h"
 #include "log.h"
 
 
@@ -23,28 +24,36 @@
  */
 
 
-// Default directory to log files.
+/* Default directory to log files. */
 #define DEFAULT_LOG_DIRECTORY "."
 
-// Preffixes used to identify message levels.
+/* Preffixes used to identify message levels. */
 #define LOG_TRACE_PREFFIX "TRACE"
 #define LOG_WARNING_PREFFIX "WARNING"
 #define LOG_ERROR_PREFFIX "ERROR"
 
+/* Script to start shell script log. */
+#define SHELL_SCRIPT_START_LOG_NAME "start_log.sh"
 
-// Length of time string formatted to read.
+/* Script to finish shell script log. */
+#define SHELL_SCRIPT_FINISH_LOG_NAME "finish_log.sh"
+
+/* Script to check is shell script log is activated. */
+#define SHELL_SCRIPT_IS_LOG_ACTIVATED "is_log_activated.sh"
+
+/* Length of time string formatted to read. */
 #define TIME_STRING_READ_LENGTH 19
 
-// Length of time string formatted to identify files.
+/* Length of time string formatted to identify files. */
 #define TIME_STRING_FILE_LENGTH 15
 
-// Suffix to identify log files.
+/* Suffix to identify log files. */
 #define LOG_FILE_SUFFIX ".log"
 
-// Length of error messsage buffer.
+/* Length of error messsage buffer. */
 #define ERROR_MESSAGE_BUFFER_LENGTH 1024
 
-// Macro to print an error message.
+/* Macro to print an error message. */
 #define _LOG_PRINT_ERROR(x) fprintf(stderr, "[%s] %s: (%s, %d): %s\n", get_current_time_read_formatted(), LOG_ERROR_PREFFIX, __func__, __LINE__, (x))
 
 /*
@@ -80,7 +89,7 @@ int log_level = LOG_MESSAGE_TYPE_TRACE;
 /*
  * Format a message to be logged.
  */
-int format_log_message(char* buffer, int buffer_size, const int message_type, const char* tag, const int index, const char* message);
+int format_log_message(char*, int, const int, const char*, const int, const char*);
 
 /*
  * Returns the current time formatted to sort file names.
@@ -95,7 +104,8 @@ char* get_current_time_read_formatted();
 /*
  * Creates a log file name.
  */
-char* create_log_file_name(char* log_file_preffix);
+char* create_log_file_name(char*);
+
 
 /*
  * Function elaborations.
@@ -134,6 +144,31 @@ int close_log_file() {
     log_file_path=NULL;
 
     return 0;
+}
+
+/*
+ * Finishes a shell script log file.
+ *
+ * Parameters
+ *  None.
+ *
+ * Returns
+ *  0. If shell script log was finished successfully.
+ *  1. Otherwise.
+ */
+int finish_shell_script_log(){
+    int result;
+    int script_result;
+
+    script_result = execute_script(SHELL_SCRIPT_FINISH_LOG_NAME);
+
+    if ( script_result == 0 ) {
+        result = 0;
+    } else {
+        result = 1;
+    }
+
+    return result;
 }
 
 /*
@@ -408,10 +443,10 @@ char* get_log_file_path() {
 /*
  * Returns the current log level.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  The current log level.
  */
 int get_log_level() {
@@ -421,12 +456,11 @@ int get_log_level() {
 /*
  * Indicates if a log file is open.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
- *  1 (true)  - If there is a log file specified.
- *  0 (false) - Otherwise.
+ * Returns
+ *  True if there is a log file specified. False otherwise.
  */
 bool is_log_open() {
     if ( log_file == NULL ) {
@@ -435,6 +469,30 @@ bool is_log_open() {
     else {
         return true;
     }
+}
+
+/*
+ * Checks if shell log is activated.
+ *
+ * Parameters
+ *  None
+ *
+ * Returns
+ *  True if shell script log is activated. False otherwise.
+ */
+bool is_shell_log_activated(){
+    bool result;
+    int script_result;
+
+    script_result = execute_script(SHELL_SCRIPT_IS_LOG_ACTIVATED);
+
+    if ( script_result == 0 ) {
+        result = true;
+    } else {
+        result = false;
+    }
+
+    return result;
 }
 
 /*
@@ -563,6 +621,37 @@ int set_log_level(int new_log_level) {
 
     return 0;
 }
+
+/*
+ * Starts shell script log.
+ *
+ * Parameters
+ *  log_preffix - The preffix to use on log file name.
+ *  log_level   - The log level to define.
+ *
+ * Returns
+ *  0. If shell script log was activated successfully.
+ *  1. Otherwise.
+ */
+int start_shell_script_log(char* log_preffix, int log_level){
+    int result;
+    int script_result;
+    char command[256];
+
+    sprintf(command, "%s \"%s\" %d", SHELL_SCRIPT_START_LOG_NAME, log_preffix, log_level);
+
+    script_result = execute_script(command);
+
+    if ( script_result == 0 ) {
+        result = 0;
+    }
+    else {
+        result = 1;
+    }
+
+    return result;
+}
+
 
 /* 
  * Writes a log message.

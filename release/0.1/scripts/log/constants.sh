@@ -53,3 +53,15 @@ then
     readonly _log_trace_function_name="trace";
 fi;
 
+# Path to the "log path" file.
+if [ -z "${_log_path_file_path}" ];
+then
+    readonly _log_path_file_path="${output_files_directory}logs/log_path";
+fi;
+
+# Path to the "log level" file.
+if [ -z "${_log_level_file_path}" ];
+then
+    readonly _log_level_file_path="${output_files_directory}logs/log_level";
+fi;
+

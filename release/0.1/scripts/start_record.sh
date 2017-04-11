@@ -14,29 +14,95 @@ source "$(dirname ${BASH_SOURCE})/audio/encoder/functions.sh";
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
-# Set log level.
-set_log_level ${log_message_type_trace};
+# Starts the audio record processes.
+#
+# Parameters
+#   None.
+#
+# Returns
+#   0. If audio record processes was started successfully.
+#   1. Otherwise.
+start_record(){
+    local result;
+    local continue_log_file_result;
+    local log_file_created;
+    local is_log_defined_result;
+    local log_file_created;
+    local is_recording_result;
+    local start_audio_capture_process_result;
+    local start_audio_encoder_process_result;
 
-# Set log directory.
-set_log_directory "$(dirname ${BASH_SOURCE})/../logs/";
+    continue_log_file_result=1;
+    log_file_created=1;
 
-# Create a log file.
-create_log_file "start_audio_record";
+    # Checks if log file is defined.
+    is_log_defined;
+    is_log_defined_result=${?};
+    if [ ${is_log_defined_result} -eq ${success} ];
+    then
 
-start_audio_capture_process;
-if [ ${?} -ne ${success} ];
-then
-    log ${log_message_type_error} "Could not start audio capture process."
-    exit ${generic_error};
-fi;
+        # Continues previous log file.
+        continue_log_file;
+        continue_log_file_result=${?};
+    fi;
 
-start_audio_encoder_process;
-if [ ${?} -ne ${success} ];
-then
-    log ${log_message_type_error} "Could not start audio encoder process."
-    exit ${generic_error};
-fi;
+    # If previous log file was not continued.
+    if [ ${continue_log_file_result} -ne ${success} ];
+    then
 
-log ${log_message_type_trace} "Audio record started.";
+        # Creates a new log file.
+        create_log_file "start_audio_record";
+        log_file_created=${?};
 
-exit ${success};
+        # Set log level.
+        set_log_level ${log_message_type_trace};
+    fi;
+
+    log ${log_message_type_trace} "Starting record processes.";
+
+    $(dirname ${BASH_SOURCE})/is_recording.sh
+    is_recording_result=${?};
+
+    if [ ${is_recording_result} -eq 2 ];
+    then
+        log ${log_message_type_error} "Only one of the audio processes is running.";
+        result=${generic_error};
+    else
+        if [ ${is_recording_result} -eq 0 ];
+        then
+            log ${log_message_type_trace} "Audio capture processes are already running.";
+            result=${success};
+        else
+            start_audio_capture_process;
+            start_audio_capture_process_result=${?};
+            if [ ${start_audio_capture_process_result} -ne ${success} ];
+            then
+                log ${log_message_type_error} "Could not start audio capture process."
+                result=${generic_error};
+            else
+                start_audio_encoder_process;
+                start_audio_encoder_process_result=${?};
+                if [ ${start_audio_encoder_process_result} -ne ${success} ];
+                then
+                    log ${log_message_type_error} "Could not start audio encoder process."
+                    result=${generic_error};
+                else
+                    log ${log_message_type_trace} "Audio record started.";
+                    result=${success};
+                fi;
+            fi;
+        fi;
+    fi;
+
+    if [ ${log_file_created} -eq ${success} ];
+    then
+
+        # Finishes the log file.
+        finish_log_file;
+    fi;
+
+    return ${result};
+}
+
+start_record;
+exit ${?};

@@ -26,4 +26,4 @@ objects/
 *.o
 
 # Ignore "fuse_hidden" files
-.fuse_hiddden*
+.fuse_hidden*

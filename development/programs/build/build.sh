@@ -139,7 +139,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testlog\" program.";
-    gcc -o ${binary_folder}testlog ${objects_directory}log.o ${objects_directory}testlog.o ${additional_arguments};
+    gcc -o ${binary_folder}testlog ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}log.o ${objects_directory}testlog.o ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
@@ -190,7 +190,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testaudio\" program.";
-    gcc -o ${binary_folder}testaudio ${objects_directory}log.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}audio.o ${objects_directory}testaudio.o ${additional_arguments};
+    gcc -o ${binary_folder}testaudio ${objects_directory}file.o ${objects_directory}log.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}audio.o ${objects_directory}testaudio.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testaudio\" program.";
@@ -206,7 +206,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testwaittime\" program.";
-    gcc -o ${binary_folder}testwaittime ${objects_directory}testwaittime.o ${objects_directory}log.o ${objects_directory}wait_time.o -lm ${additional_arguments};
+    gcc -o ${binary_folder}testwaittime ${objects_directory}testwaittime.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}log.o ${objects_directory}wait_time.o -lm ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testwaittime\" program.";
@@ -222,7 +222,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testpackage\" program.";
-    gcc -o ${binary_folder}testpackage ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}testpackage.o ${additional_arguments};
+    gcc -o ${binary_folder}testpackage ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}testpackage.o ${additional_arguments};
 
     echo "Creating \"testbluetooth\" object.";
     gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
@@ -233,7 +233,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

@@ -41,6 +41,8 @@
  *  The input directory location.
  */
 char* get_input_directory() {
+    char* result;
+    size_t input_directory_size;
     char* input_directory;
 
     input_directory = getenv(INPUT_DIRECTORY_VARIABLE_NAME);
@@ -48,9 +50,15 @@ char* get_input_directory() {
     if ( input_directory == NULL ) {
         input_directory=malloc((strlen(DEFAULT_INPUT_OUTPUT_DIRECTORY)+1)*sizeof(char));
         strcpy(input_directory, DEFAULT_INPUT_OUTPUT_DIRECTORY);
+        result = input_directory;
+    } else {
+        input_directory_size = strlen(input_directory);
+        result = (char*)malloc((input_directory_size+1)*sizeof(char));
+        strcpy(result, input_directory);
+        result[input_directory_size] = 0;
     }
 
-    return input_directory;
+    return result;
 }
 
 /*
@@ -63,6 +71,8 @@ char* get_input_directory() {
  *  The output directory location.
  */
 char* get_output_directory() {
+    char* result;
+    size_t output_directory_size;
     char* output_directory;
 
     output_directory = getenv(OUTPUT_DIRECTORY_VARIABLE_NAME);
@@ -70,6 +80,12 @@ char* get_output_directory() {
     if ( output_directory == NULL ) {
         output_directory=malloc((strlen(DEFAULT_INPUT_OUTPUT_DIRECTORY)+1)*sizeof(char));
         strcpy(output_directory, DEFAULT_INPUT_OUTPUT_DIRECTORY);
+        result = output_directory;
+    } else {
+        output_directory_size = strlen(output_directory);
+        result = (char*)malloc((output_directory_size+1)*sizeof(char));
+        strcpy(result, output_directory);
+        result[output_directory_size] = 0;
     }
     return output_directory;
 }

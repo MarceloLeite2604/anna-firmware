@@ -92,3 +92,9 @@ then
     # readonly temporary_directory="${root_directory}temporary/";
     readonly temporary_directory="${output_files_directory}temporary/";
 fi;
+
+# Path to the file where the latest audio record file name is stored.
+if [ -z "${latest_audio_record_file_name_file}" ];
+then
+    readonly latest_audio_record_file_name_file="${audio_directory}latest_audio_record";
+fi;

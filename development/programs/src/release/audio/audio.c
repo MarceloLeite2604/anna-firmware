@@ -8,10 +8,13 @@
 /*
  * Includes.
  */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../log/log.h"
 #include "../script/script.h"
+#include "../directory/directory.h"
+#include "../general/file/file.h"
 
 
 /*
@@ -27,13 +30,92 @@
 /* Script name to check if device is recording. */
 #define CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME "is_recording.sh"
 
-/* Script name to kill record processes. */
-#define KILL_AUDIO_RECORD_PROCESSES_SCRIPT_NAME "kill_record_processes.sh"
+/* Script name to find the latest audio record file name. */
+#define FIND_LATEST_AUDIO_RECORD_SCRIPT_NAME "find_latest_audio_record.sh"
 
+/* Path to the audio directory */
+#define AUDIO_DIRECTORY "audio/"
+
+/* Name of the file where is stored the latest audio record file name. */
+#define LATEST_AUDIO_RECORD_FILE_NAME_FILE "latest_audio_record"
 
 /*
  * Function elaborations.
  */
+
+/*
+ * Returns the latest audio record file path.
+ *
+ * Parameters
+ *  None
+ *
+ * Returns
+ *  The path to the latest audio record file or NULL if there was an error.
+ */
+char* get_latest_audio_record(){
+    char* output_directory;
+    char* result = NULL;
+    int script_result;
+    char* larfn_file_path;
+    int errno_value;
+
+    /* larfn: Latest audio record file name */
+    size_t larfn_file_path_length;
+    FILE* larfn_file;
+    size_t larfn_content_size;
+    char* larfn_content;
+    size_t bytes_read;
+
+    script_result = execute_script(FIND_LATEST_AUDIO_RECORD_SCRIPT_NAME);
+
+    if ( script_result == 0 ) {
+        output_directory = get_output_directory();
+        larfn_file_path_length = strlen(output_directory);
+        larfn_file_path_length += strlen(AUDIO_DIRECTORY);
+        larfn_file_path_length += strlen(LATEST_AUDIO_RECORD_FILE_NAME_FILE);
+        larfn_file_path_length += 1;
+
+        larfn_file_path = (char*)malloc(larfn_file_path_length*sizeof(char));
+        strcpy(larfn_file_path, output_directory);
+        strcat(larfn_file_path, AUDIO_DIRECTORY);
+        strcat(larfn_file_path, LATEST_AUDIO_RECORD_FILE_NAME_FILE);
+        LOG_TRACE("Latest audio record file name file path: \"%s\"", larfn_file_path);
+
+        larfn_file = fopen(larfn_file_path, "r");
+
+        if ( larfn_file == NULL ) {
+            errno_value = errno;
+            LOG_ERROR("Could not open file \"%s\".", larfn_file_path);
+            LOG_ERROR("%s", strerror(errno_value));
+            result = NULL;
+        }
+        else {
+            larfn_content_size = get_file_size(larfn_file_path);
+            larfn_content = (char*)malloc((larfn_content_size+1)*sizeof(char));
+            
+
+            bytes_read = fread(larfn_content, sizeof(char), larfn_content_size, larfn_file);
+
+            if ( ferror(larfn_file) != 0 ) {
+                LOG_ERROR("Error while reading \"latest record audio file name\" file: \"%s\".", larfn_file_path);
+                LOG_ERROR("%s", strerror(errno_value));
+                free(larfn_content);
+                result = NULL;
+            }
+            else {
+                larfn_content[larfn_content_size] = 0;
+                result = larfn_content;
+            }
+        }
+        free(larfn_file_path);
+        //free(output_directory);
+        fclose(larfn_file);
+        /* TODO: Check if "fclose" finished successfully. */
+
+    }
+
+    return result;
+}
 
 /*
  * Checks if device is recording.
@@ -47,9 +129,16 @@
  */
 int is_recording() {
     LOG_TRACE_POINT;
+    int result;
     int script_result = execute_script(CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME);
 
-    return script_result;
+    if (script_result == 0 ) {
+        result = 0;
+    } else {
+        result = 1;
+    }
+
+    return result;
 }
 
 /*

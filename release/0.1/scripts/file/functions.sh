@@ -58,7 +58,7 @@ check_write_permission(){
     local readonly file_path="$1";
 
     check_file_exists "${file_path}";
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;
@@ -91,7 +91,7 @@ check_read_permission(){
     local readonly file_path="$1";
 
     check_file_exists "${file_path}";
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;
@@ -124,7 +124,7 @@ check_file_is_directory(){
     local readonly file_path="$1";
 
     check_file_exists "${file_path}";
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;
@@ -192,14 +192,14 @@ read_file(){
 
     check_file_exists "${file}";
 
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;
 
     check_file_is_directory "${file}";
 
-    if [ $? -ne ${generic_error} ];
+    if [ ${?} -ne ${generic_error} ];
     then
         log ${log_message_type_error} "File \"${file}\" is a directory and can't be read.";
         return ${generic_error};
@@ -207,7 +207,7 @@ read_file(){
 
     check_read_permission "${file}";
 
-    if [ $? -ne ${success} ];
+    if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;

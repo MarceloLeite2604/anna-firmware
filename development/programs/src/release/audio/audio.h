@@ -18,6 +18,11 @@
  */
 
 /*
+ * Returns the latest audio record file path.
+ */
+char* get_latest_audio_record();
+
+/*
  * Checks if device is recording.
  */
 bool is_recording();

@@ -185,8 +185,15 @@ is_audio_capture_process_running(){
 
     local result;
     local audio_capture_process_id;
+
+    # Retrieve audio capture process id.
     audio_capture_process_id=$(retrieve_process_id "${audio_capture_process_identifier}");
-    log ${log_message_type_trace} "Audio capture process id : "${audio_capture_process_id}".";
+    retrieve_process_id_result=${?};
+    if [ ${retrieve_process_id_result} -ne ${success} -o -z "${audio_capture_process_id}" ];
+    then
+        log ${log_message_type_error} "Could not find audio capture process id."
+        exit ${generic_error};
+    fi;
 
     check_process_is_alive ${audio_capture_process_id};
     result=${?};

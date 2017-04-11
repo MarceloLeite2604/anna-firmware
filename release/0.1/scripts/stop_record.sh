@@ -15,51 +15,111 @@ source "$(dirname ${BASH_SOURCE})/audio/encoder/functions.sh";
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
-# Set log level.
-set_log_level ${log_message_type_trace};
+# Stops the audio record processes.
+#
+# Parameters
+#   None.
+#
+# Returns
+#  0. If audio record processes was stopped successfully.
+#  1. Otherwise.
+stop_record(){
+    local result;
+    local continue_log_file_result;
+    local log_file_created;
+    local is_log_defined_result;
+    local log_file_created;
+    local is_recording_result;
+    local stop_audio_capture_process_result;
+    local stop_audio_encoder_process_result;
 
-# Set log directory.
-set_log_directory "$(dirname ${BASH_SOURCE})/../logs/";
+    # Set log level.
+    set_log_level ${log_message_type_trace};
 
-# Create a log file.
-create_log_file "stop_audio_record";
+    # Set log directory.
+    #set_log_directory "$(dirname ${BASH_SOURCE})/../logs/";
 
-stop_audio_encoder_process;
-if [ ${?} -ne ${success} ];
-then
-    log ${log_message_type_error} "Could not stop audio encoder process.";
-    exit ${generic_error};
-fi;
+    continue_log_file_result=1;
+    log_file_created=1;
 
-# Retrieve audio capture process id.
-audio_capture_process_id=$(retrieve_process_id "${audio_capture_process_identifier}");
-retrieve_process_id_result=${?};
-if [ ${retrieve_process_id_result} -ne ${success} -o -z "${audio_capture_process_id}" ];
-then
-    log ${log_message_type_error} "Could not find audio capture process id."
-    exit ${generic_error};
-fi;
-
-# Check if audio capture process is still alive.
-check_process_is_alive ${audio_capture_process_id};
-audio_capture_process_id=${?};
-if [ ${audio_capture_process_id} -eq ${success} ];
-then
-
-    # Stop audio capture process.
-    stop_audio_capture_process;
-    if [ ${?} -ne ${success} ];
+    # Checks if log file is defined.
+    is_log_defined;
+    is_log_defined_result=${?};
+    if [ ${is_log_defined_result} -eq ${success} ];
     then
-        log ${log_message_type_error} "Could not stop audio capture process.";
-        exit ${generic_error};
-    else
-        log ${log_message_type_trace} "Audio capture process stopped.";
+
+        # Continues previous log file.
+        continue_log_file;
+        continue_log_file_result=${?};
     fi;
-else
-    log ${log_message_type_trace} "Audio capture process has already stopped.";
-fi;
 
-log ${log_message_type_trace} "Audio record stopped.";
+    # If previous log file was not continued.
+    if [ ${continue_log_file_result} -ne ${success} ];
+    then
 
-exit ${success};
+        # Creates a new log file.
+        create_log_file "stop_audio_record";
+        log_file_created=${?};
+    fi;
 
+    log ${log_message_type_trace} "Stopping record processes.";
+
+    $(dirname ${BASH_SOURCE})/is_recording.sh
+    is_recording_result=${?};
+
+    if [ ${is_recording_result} -eq 2 ];
+    then
+        log ${log_message_type_error} "Only one of the audio processes is running.";
+        result=${generic_error};
+    else
+        if [ ${is_recording_result} -eq 1 ];
+        then
+            log ${log_message_type_trace} "Audio capture processes are not running.";
+            result=${success};
+        else
+            stop_audio_encoder_process;
+            stop_audio_encoder_process_result=${?};
+            if [ ${stop_audio_encoder_process_result} -ne ${success} ];
+            then
+                log ${log_message_type_error} "Could not stop audio encoder process.";
+                result=${generic_error};
+            else
+                log ${log_message_type_trace} "Audio encoder process stopped.";
+                # After stop audio encoder process, check if audio capture process is still alive.
+                is_audio_capture_process_running;
+                is_captor_running=${?};
+
+                if [ ${is_captor_running} -ne ${success} ];
+                then
+                    log ${log_message_type_trace} "Audio capture process has already stopped.";
+                    result=${success};
+                else
+
+                    # Stop audio capture process.
+                    stop_audio_capture_process;
+                    stop_audio_capture_process_result=${?};
+                    if [ ${stop_audio_capture_process_result} -ne ${success} ];
+                    then
+                        log ${log_message_type_error} "Could not stop audio capture process.";
+                        result=${generic_error};
+                    else
+                        log ${log_message_type_trace} "Audio capture process stopped.";
+                        result=${success};
+                    fi;
+                fi;
+            fi;
+        fi;
+    fi;
+
+    if [ ${log_file_created} -eq ${success} ];
+    then
+
+        # Finishes the log file.
+        finish_log_file;
+    fi;
+
+    return ${result};
+}
+
+stop_record;
+exit ${?};
