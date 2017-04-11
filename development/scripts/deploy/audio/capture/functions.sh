@@ -172,3 +172,24 @@ stop_audio_capture_process(){
 
     return ${success};
 }
+
+# Checks if audio capture process is executing.
+#
+# Parameters
+#   None.
+#
+# Returns
+#  0. If audio capture process is running.
+#  1. Otherwise.
+is_audio_capture_process_running(){
+
+    local result;
+    local audio_capture_process_id;
+    audio_capture_process_id=$(retrieve_process_id "${audio_capture_process_identifier}");
+    log ${log_message_type_trace} "Audio capture process id : "${audio_capture_process_id}".";
+
+    check_process_is_alive ${audio_capture_process_id};
+    result=${?};
+
+    return ${result};
+}

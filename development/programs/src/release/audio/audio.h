@@ -9,6 +9,16 @@
 #define AUDIO_H
 
 /*
+ * Checks if device is recording.
+ */
+bool is_recording();
+
+/*
+ * Kills the record program.
+ */
+int kill_record_program();
+
+/*
  * Starts audio record.
  */
 int start_audio_record();
