@@ -58,6 +58,7 @@ char* get_latest_audio_record(){
     int script_result;
     char* larfn_file_path;
     int errno_value;
+    int fclose_result;
 
     /* larfn: Latest audio record file name */
     size_t larfn_file_path_length;
@@ -92,7 +93,7 @@ char* get_latest_audio_record(){
         else {
             larfn_content_size = get_file_size(larfn_file_path);
             larfn_content = (char*)malloc((larfn_content_size+1)*sizeof(char));
-            
+
 
             bytes_read = fread(larfn_content, sizeof(char), larfn_content_size, larfn_file);
 
@@ -107,9 +108,18 @@ char* get_latest_audio_record(){
                 result = larfn_content;
             }
         }
+
+        fclose_result = fclose(larfn_file);
+
+        if ( fclose_result != 0 ) {
+            errno_value = errno;
+            LOG_ERROR("Error while closing file \"%s\".", larfn_file_path);
+            LOG_ERROR("%s", strerror(errno_value));
+            return NULL;
+        }
+
         free(larfn_file_path);
-        //free(output_directory);
-        fclose(larfn_file);
+        free(output_directory);
         /* TODO: Check if "fclose" finished successfully. */
 
     }

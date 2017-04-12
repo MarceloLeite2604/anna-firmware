@@ -26,6 +26,9 @@ int check_connection(int);
 /* Receives a package from a connection. */
 int receive_package(int, package_t*);
 
+/* Sends a disconnect signal through a connection. */
+int send_disconnect(int);
+
 /* Sends a file through a connection. */
 int send_file(int, char*);
 

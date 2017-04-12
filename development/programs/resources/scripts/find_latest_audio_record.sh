@@ -69,7 +69,7 @@ find_latest_audio_record(){
         log ${log_message_type_trace} "Latest audio record file name: \"${latest_audio_record_file_name}\".";
 
 
-        echo -e "${latest_audio_record_file_name}" > ${latest_audio_record_file_name_file};
+        echo -ne "${latest_audio_record_file_name}" > ${latest_audio_record_file_name_file};
         echo_result=${?};
         if [ ${echo_result} -ne ${success} ];
         then

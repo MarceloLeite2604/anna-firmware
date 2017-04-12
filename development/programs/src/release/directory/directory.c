@@ -87,5 +87,5 @@ char* get_output_directory() {
         strcpy(result, output_directory);
         result[output_directory_size] = 0;
     }
-    return output_directory;
+    return result;
 }

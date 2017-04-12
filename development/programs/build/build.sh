@@ -237,7 +237,24 @@ build_programs() {
     
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"testbluetooth\" object.";
+        echo "Error creating \"testbluetooth\" program.";
+        return 1;
+    fi;
+
+    echo "Creating \"muni\" object.";
+    gcc -c ${release_source_directory}muni.c -o ${objects_directory}muni.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"muni\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"muni\" program.";
+    gcc -o ${binary_folder}muni ${objects_directory}muni.o ${objects_directory}log.o ${objects_directory}bluetooth_service.o ${objects_directory}script.o ${objects_directory}bluetooth_connection.o ${objects_directory}directory.o -lbluetooth ${additional_arguments};
+    
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"muni\" program.";
         return 1;
     fi;
 }

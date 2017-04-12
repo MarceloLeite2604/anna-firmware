@@ -22,9 +22,9 @@
  */
 
 // Codes used to identify a message level.
-#define LOG_MESSAGE_TYPE_TRACE 5
-#define LOG_MESSAGE_TYPE_WARNING 10
-#define LOG_MESSAGE_TYPE_ERROR 15
+#define LOG_MESSAGE_TYPE_TRACE 105
+#define LOG_MESSAGE_TYPE_WARNING 110
+#define LOG_MESSAGE_TYPE_ERROR 115
 
 #define LOG_MESSAGE_BUFFER_SIZE 256
 

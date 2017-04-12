@@ -355,6 +355,103 @@ int send_confirmation(int socket_fd, package_t package_to_confirm) {
 }
 
 /*
+ * Sends a disconnect signal through a connection.
+ *
+ * Parameters
+ *  socket_fd - The connection socket file descriptot to send the disconnect signal.
+ *
+ * Returns
+ *  0. If disconnect signal was sent successfully.
+ *  1. Otherwise.
+ */
+int send_disconnect_signal(int socket_fd) {
+    LOG_TRACE_POINT;
+
+    int send_result;
+    int result;
+
+    package_t disconnect_package = create_disconnect_package();
+
+    send_result = send_package(socket_fd, disconnect_package);
+
+    if ( send_result == 0 ) {
+        result = 0;
+    }
+    else {
+        result = 1;
+    }
+    
+    return result;
+}
+
+/*
+ * Sends a file through a connection.
+ *
+ * Paramters
+ *  socket_fd - The connection socket file descriptor to send the file.
+ *  file_path - Path to the file to be sent.
+ *
+ * Returns
+ *  0. If the file was sent successfully.
+ *  1. Otherwise.
+ */
+int send_file(int socket_fd, char* file_path) {
+    LOG_TRACE_POINT;
+
+    char* file_name;
+    size_t file_size;
+    int send_result;
+
+    if ( file_exists(file_path) == false ) {
+        LOG_ERROR("File \"%s\" does not exist.", file_path);
+        return 1;
+    }
+
+    if ( file_is_readable(file_path) == false ) {
+        LOG_ERROR("File \"%s\" is not readable.", file_path);
+        return 1;
+    }
+
+    file_size = get_file_size(file_path);
+    LOG_TRACE_POINT;
+
+    if ( file_size == -1 ) {
+        LOG_ERROR("Could not determine the \"%s\" file size.", file_path);
+        return 1;
+    }
+
+    file_name = basename(file_path);
+    LOG_TRACE("File name: \"%s\".", file_name);
+
+    send_result = send_file_header(socket_fd, file_size, file_name);
+    LOG_TRACE_POINT;
+
+    if ( send_result == 1 ) {
+        LOG_ERROR("Error while sending file header.");
+        return 1;
+    }
+
+    send_result = send_file_content(socket_fd, file_name, file_size);
+    LOG_TRACE_POINT;
+
+    if ( send_result == 1 ) {
+        LOG_ERROR("Error while sending file content.");
+        return 1;
+    }
+
+    send_result = send_file_trailer(socket_fd);
+    LOG_TRACE_POINT;
+
+    if ( send_result == 1 ) {
+        LOG_ERROR("Error while sending file trailer.");
+        return 1;
+    }
+
+    LOG_TRACE_POINT;
+    return 0;
+}
+
+/*
  * Sends a package through a connection.
  *
  * Parameters
@@ -437,73 +534,6 @@ int send_package(int socket_fd, package_t package) {
     delete_byte_array(package_byte_array);
     LOG_TRACE_POINT;
     return result;
-}
-
-/*
- * Sends a file through a connection.
- *
- * Paramters
- *  socket_fd - The connection socket file descriptor to send the file.
- *  file_path - Path to the file to be sent.
- *
- * Returns
- *  0. If the file was sent successfully.
- *  1. Otherwise.
- */
-int send_file(int socket_fd, char* file_path) {
-    LOG_TRACE_POINT;
-
-    char* file_name;
-    size_t file_size;
-    int send_result;
-
-    if ( file_exists(file_path) == false ) {
-        LOG_ERROR("File \"%s\" does not exist.", file_path);
-        return 1;
-    }
-
-    if ( file_is_readable(file_path) == false ) {
-        LOG_ERROR("File \"%s\" is not readable.", file_path);
-        return 1;
-    }
-
-    file_size = get_file_size(file_path);
-    LOG_TRACE_POINT;
-
-    if ( file_size == -1 ) {
-        LOG_ERROR("Could not determine the \"%s\" file size.", file_path);
-        return 1;
-    }
-
-    file_name = basename(file_path);
-    LOG_TRACE("File name: \"%s\".", file_name);
-
-    send_result = send_file_header(socket_fd, file_size, file_name);
-    LOG_TRACE_POINT;
-
-    if ( send_result == 1 ) {
-        LOG_ERROR("Error while sending file header.");
-        return 1;
-    }
-
-    send_result = send_file_content(socket_fd, file_name, file_size);
-    LOG_TRACE_POINT;
-
-    if ( send_result == 1 ) {
-        LOG_ERROR("Error while sending file content.");
-        return 1;
-    }
-
-    send_result = send_file_trailer(socket_fd);
-    LOG_TRACE_POINT;
-
-    if ( send_result == 1 ) {
-        LOG_ERROR("Error while sending file trailer.");
-        return 1;
-    }
-
-    LOG_TRACE_POINT;
-    return 0;
 }
 
 /*
