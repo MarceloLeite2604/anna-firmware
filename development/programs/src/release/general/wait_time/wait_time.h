@@ -8,6 +8,14 @@
 #define WAIT_TIME_H
 
 /*
+ * Definitions.
+ */
+
+/* Code used to indicate that retry controller reached its maximum attempts. */
+#define MAXIMUM_RETRY_ATTEMPTS_REACHED 53
+
+
+/*
  * Structure declarations.
  */
 

@@ -29,23 +29,43 @@
 #define LOG_MESSAGE_BUFFER_SIZE 256
 
 // Macro to register a warning message
-#define LOG_WARNING(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+#define LOG_WARNING(...) if (_log_writing_message == false){\
+    _log_writing_message = true;\
+    sprintf(_log_message_buffer, __VA_ARGS__);\
     write_log_message(LOG_MESSAGE_TYPE_WARNING, __func__, __LINE__, _log_message_buffer);\
-    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
-#define LOG(x, y) write_log_message((x), __func__, __LINE__, (y))
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);\
+    _log_writing_message = false;\
+}
+#define LOG(x, y) if (_log_writing_message == false){\
+    _log_writing_message=true;\
+    write_log_message((x), __func__, __LINE__, (y));\
+    _log_writing_message=false;\
+}
 
 // Macro to register an error message
-#define LOG_ERROR(...) sprintf(_log_message_buffer, __VA_ARGS__);\
+#define LOG_ERROR(...) if (_log_writing_message == false){\
+    _log_writing_message=true;\
+    sprintf(_log_message_buffer, __VA_ARGS__);\
     write_log_message(LOG_MESSAGE_TYPE_ERROR, __func__, __LINE__, _log_message_buffer);\
-    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);\
+    _log_writing_message=false;\
+}
 
 // Macro to register a trace message.
-#define LOG_TRACE(...) sprintf(_log_message_buffer, __VA_ARGS__);\
-    LOG_TRACE_POINT;
+#define LOG_TRACE(...) if (_log_writing_message == false){\
+    _log_writing_message=true;\
+    sprintf(_log_message_buffer, __VA_ARGS__);\
+    LOG_TRACE_POINT;\
+    _log_writing_message=false;\
+}
 
 // Macro to register a trace point.
-#define LOG_TRACE_POINT write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, _log_message_buffer);\
-    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);
+#define LOG_TRACE_POINT if (_log_writing_message == false){\
+    _log_writing_message=true;\
+write_log_message(LOG_MESSAGE_TYPE_TRACE, __func__, __LINE__, _log_message_buffer);\
+    memset(_log_message_buffer, 0, LOG_MESSAGE_BUFFER_SIZE);\
+    _log_writing_message=false;\
+}
 
 
 
@@ -53,6 +73,7 @@
  * Variables.
  */
 extern char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
+extern bool _log_writing_message;
 
 
 /*
@@ -63,6 +84,11 @@ extern char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
  * Closes a log file.
  */
 int close_log_file();
+
+/*
+ * Defines the start log level.
+ */
+int define_start_log_level(int);
 
 /*
  * Finishes a shell script log file.

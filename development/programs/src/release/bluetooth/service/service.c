@@ -17,6 +17,7 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include "service.h"
+#include "../../general/return_codes.h"
 #include "../connection/connection.h"
 #include "../../log/log.h"
 
@@ -87,23 +88,24 @@ sdp_session_t* sdp_connect_session = NULL;
  * Checks if there is a bluetooth connection attempt.
  *
  * Parameters
- *  None 
+ *  socket_fd - If a connection was stablished, the bluetooth connection's socket file descriptor will be returned through this parameter.
  *
  * Returns
- *  If a connection was stablished, it returns the connection file descriptor.
- *  If no connection attempt was received, it returns 0.
- *  If there was an error, it returns -1.
+ *  CONNECTION_STABLISHED - If a connection was stablished.
+ *  NO_CONNECTION - If no connection was stablished.
+ *  GENERIC_ERROR - If there was an error while checking a connection attempt.
  */
-int check_connection_attempt() {
+int check_connection_attempt(int* socket_fd) {
     LOG_TRACE_POINT;
 
     if ( is_bluetooth_service_registered() == false ) {
         LOG_ERROR("Bluetooth service is not registered.");
-        return -1;
+        return GENERIC_ERROR;
     }
 
     int listening_socket_file_descriptor;
     int client_socket_file_descriptor;
+    int close_socket_result;
     int result;
 
     struct sockaddr_rc remote_device_address = { 0 };
@@ -119,10 +121,11 @@ int check_connection_attempt() {
     listening_socket_file_descriptor = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if ( listening_socket_file_descriptor <= 0 ) {
         LOG_ERROR("Could not create socket to listen for connections.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     bind(listening_socket_file_descriptor, (struct sockaddr *)&local_address, sizeof(local_address));
+    LOG_TRACE_POINT;
 
     /*
      * Listens for connections on socket, defining the listening queue to a maximum of one.
@@ -131,17 +134,18 @@ int check_connection_attempt() {
 
     LOG_TRACE("Checking connection.");
     check_socket_content_result = check_socket_content(listening_socket_file_descriptor, check_connection_wait_time); 
+    LOG_TRACE_POINT;
 
     switch (check_socket_content_result) {
-        case 0:
+        case NO_CONTENT_TO_READ:
             LOG_TRACE("No connections.");
-            result = 0;
+            result = NO_CONNECTION;
             break;
-        case -1:
+        case GENERIC_ERROR:
             LOG_TRACE("Error while checking bluetooth service socket.");
-            result = -1;
+            result = GENERIC_ERROR;
             break;
-        default:
+        case CONTENT_TO_READ:
             LOG_TRACE("Connection attempt initialized.");
 
             /* Accepts one connection from the listening socket. */
@@ -157,11 +161,24 @@ int check_connection_attempt() {
             else {
                 LOG_TRACE("Connected with device \"%s\" (%s).", remote_device_name, remote_device_address_string); 
             }
-            result = client_socket_file_descriptor;
+            *socket_fd = client_socket_file_descriptor;
+            result = CONNECTION_STABLISHED;
+            break;
+        default:
+            LOG_ERROR("Unknown result received from \"check_socket_content\" function.");
+            result = GENERIC_ERROR;
             break;
     }
 
-    close_socket(listening_socket_file_descriptor);
+    close_socket_result = close_socket(listening_socket_file_descriptor);
+    LOG_TRACE_POINT;
+
+    if ( close_socket_result != SUCCESS ) {
+        LOG_ERROR("Error while closing socket connection.");
+        result = GENERIC_ERROR;
+    }
+
+    LOG_TRACE_POINT;
     return result;
 }
 
@@ -189,15 +206,15 @@ bool is_bluetooth_service_registered(){
  *  None
  *
  * Return
- *  0. If bluetooth service started successfully.
- *  1. If there was an error while starting bluetooth service.
+ *  SUCCESS - If bluetooth service started successfully.
+ *  GENERIC_ERROR - If there was an error while starting bluetooth service.
  */
 int register_bluetooth_service(){
     LOG_TRACE_POINT;
 
     if ( is_bluetooth_service_registered() == true ) {
         LOG_ERROR("The bluetooth service is already registered.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     uint8_t rfcomm_channel = _rfcomm_channel;
@@ -257,7 +274,7 @@ int register_bluetooth_service(){
     session = sdp_connect(BDADDR_ANY, BDADDR_LOCAL, SDP_RETRY_IF_BUSY);
     if ( session <= 0 ) {
         LOG_ERROR("Could not register the bluetooth service.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     // Register the service on SDP server.
@@ -274,7 +291,7 @@ int register_bluetooth_service(){
     sdp_connect_session = session;
 
     LOG_TRACE("Service registered.");
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -284,8 +301,8 @@ int register_bluetooth_service(){
  *  None
  *
  * Returns
- *  0. If bluetooth service was unregistered successfully.
- *  1. If there was an error while unregistering bluetooth service.
+ *  SUCCESS - If bluetooth service was unregistered successfully.
+ *  GENERIC_ERROR - If there was an error while unregistering bluetooth service.
  */
 int unregister_bluetooth_service() {
     if ( is_bluetooth_service_registered() == true ) {
@@ -293,5 +310,5 @@ int unregister_bluetooth_service() {
         sdp_connect_session = NULL;
     }
 
-    return 0;
+    return SUCCESS;
 }

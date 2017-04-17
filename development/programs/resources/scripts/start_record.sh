@@ -51,11 +51,11 @@ start_record(){
     then
 
         # Creates a new log file.
-        create_log_file "start_audio_record";
+        create_log_file "start_record";
         log_file_created=${?};
 
         # Set log level.
-        set_log_level ${log_message_type_trace};
+        # set_log_level ${log_message_type_trace};
     fi;
 
     log ${log_message_type_trace} "Starting record processes.";

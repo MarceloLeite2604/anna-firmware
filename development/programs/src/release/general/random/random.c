@@ -57,10 +57,10 @@ uint8_t* generate_random_bytes(size_t array_size) {
  * Initialized the random byte generator.
  *
  * Parameters
- *  None.
+ *  None
  *
  * Returns
- *  Nothing.
+ *  Nothing
  */
 void initialize_random_byte_generator() {
     srand((unsigned int)time(NULL));

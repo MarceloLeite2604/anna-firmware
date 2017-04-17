@@ -65,3 +65,8 @@ then
     readonly _log_level_file_path="${output_files_directory}logs/log_level";
 fi;
 
+# Path to the "start log level" file.
+if [ -z "${_log_start_log_level_file_path}" ];
+then
+    readonly _log_start_log_level_file_path="${output_files_directory}logs/start_log_level";
+fi;

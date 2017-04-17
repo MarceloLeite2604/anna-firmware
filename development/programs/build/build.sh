@@ -156,7 +156,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testdirectory\" program.";
-    gcc -o ${binary_folder}testdirectory ${objects_directory}directory.o ${objects_directory}testdirectory.o ${additional_arguments};
+    gcc -o ${binary_folder}testdirectory ${objects_directory}directory.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}testdirectory.o ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
@@ -250,7 +250,7 @@ build_programs() {
     fi;
     
     echo "Creating \"muni\" program.";
-    gcc -o ${binary_folder}muni ${objects_directory}muni.o ${objects_directory}log.o ${objects_directory}bluetooth_service.o ${objects_directory}script.o ${objects_directory}bluetooth_connection.o ${objects_directory}directory.o -lbluetooth ${additional_arguments};
+    gcc -o ${binary_folder}muni ${objects_directory}muni.o ${objects_directory}log.o ${objects_directory}bluetooth_service.o ${objects_directory}script.o ${objects_directory}bluetooth_connection.o ${objects_directory}bluetooth_communication.o ${objects_directory}bluetooth_package.o ${objects_directory}byte_array.o ${objects_directory}wait_time.o ${objects_directory}random.o ${objects_directory}directory.o ${objects_directory}audio.o ${objects_directory}file.o -lbluetooth -lm ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

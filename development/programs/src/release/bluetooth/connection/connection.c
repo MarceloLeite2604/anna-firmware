@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "../../general/return_codes.h"
 #include "connection.h"
 
 /*
@@ -40,17 +41,27 @@ const struct timeval _read_wait_time = { .tv_sec = 0, .tv_usec = 0 };
  *  socket_fd - The socket communication file descriptor to be closed.
  *
  * Returns
- *  0. If the communication was closed successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the communication was closed successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int close_socket(int socket_fd){
-    int result;
-    result = close(socket_fd);
+    LOG_TRACE_POINT;
 
-    if (result < 0 ) {
+    int result;
+    int close_result;
+    close_result = close(socket_fd);
+
+    if (close_result < 0 ) {
         LOG_ERROR("Error while closing socket.");
         LOG_ERROR("%s", strerror(errno));
+        result = GENERIC_ERROR;
     }
+    else {
+        LOG_TRACE_POINT;
+        result = SUCCESS;
+    }
+
+    LOG_TRACE_POINT;
     return result;
 }
 
@@ -62,30 +73,38 @@ int close_socket(int socket_fd){
  *  check_time - Time to wait for a content to be avilable on socket.
  *
  * Returns
- *  If there is no content on socket, it returns 0. Otherwise, it returns the content size to be read.
- *  If there was an error while checking socket content, it returns -1.
+ *  NO_CONTENT_TO_READ - If there is no content to be read.
+ *  CONTENT_TO_READ - If the socket has content to read.
+ *  GENERIC_ERROR - If there was an error checking the socket content.
  */
 int check_socket_content(int socket_fd, struct timeval check_time) {
+    LOG_TRACE_POINT;
+
     int result;
+    int select_result;
     fd_set socket_fd_set;
 
     FD_ZERO(&socket_fd_set);
     FD_SET(socket_fd, &socket_fd_set);
-    result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &check_time);
+    select_result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &check_time);
     FD_CLR(socket_fd, &socket_fd_set);
 
-    switch (result) {
+    switch (select_result) {
         case 0:
             LOG_TRACE("No content on socket.");
+            result = NO_CONTENT_TO_READ;
             break;
         case -1:
             LOG_ERROR("Error while checking socket.");
+            result = GENERIC_ERROR;
             break;
         default:
             LOG_TRACE("Found content on socket.");
+            result = CONTENT_TO_READ;
             break;
     }
 
+    LOG_TRACE_POINT;
     return result;
 }
 
@@ -116,16 +135,16 @@ byte_array_t read_socket_content(int socket_fd) {
         LOG_TRACE_POINT;
 
         switch (select_result) {
-            case 0:
+            case NO_CONTENT_TO_READ:
                 LOG_TRACE("No content to be read on socket.");
                 concluded = true;
                 break;
-            case -1:
+            case GENERIC_ERROR:
                 LOG_ERROR("Error while waiting for a content to read on socket.");
                 concluded = true;
                 error = true;
                 break;
-            default:
+            case CONTENT_TO_READ:
                 content_size = read(socket_fd, buffer, READ_CONTENT_BUFFER_SIZE);
                 LOG_TRACE("Content size: %zu.", content_size);
 
@@ -134,7 +153,10 @@ byte_array_t read_socket_content(int socket_fd) {
                     concluded = true;
                     error = true;
                 } else {
+                    LOG_TRACE_POINT;
                     if ( result_byte_array.size == 0 ) {
+                        LOG_TRACE_POINT;
+
                         result_byte_array.data = (uint8_t*)malloc(content_size);
                         if ( result_byte_array.data == NULL ) {
                             LOG_ERROR("Error while reading content from socket.");
@@ -144,6 +166,7 @@ byte_array_t read_socket_content(int socket_fd) {
                         }
                         memcpy(result_byte_array.data, buffer, content_size);
                     } else {
+                        LOG_TRACE_POINT;
                         result_byte_array.data = (uint8_t*)realloc(result_byte_array.data, result_byte_array.size + content_size);
                         if ( result_byte_array.data == NULL ) {
                             LOG_ERROR("Error while reading content from socket.");
@@ -155,15 +178,21 @@ byte_array_t read_socket_content(int socket_fd) {
                     }
                 }
                 break;
+            default:
+                LOG_ERROR("Unkown return code from \"check_socket_content\" function.");
+                concluded = true;
+                error = true;
+                break;
         }
-
     }
 
     if ( error == true ) {
+        LOG_TRACE_POINT;
         result_byte_array.size = 0;
         free(result_byte_array.data);
     }
 
+    LOG_TRACE_POINT;
     return result_byte_array;
 }
 
@@ -175,30 +204,35 @@ byte_array_t read_socket_content(int socket_fd) {
  *  byte_array_t - The byte array content to be written on socket.
  *
  * Returns
- *  0. If content was written successfully.
- *  1. Otherwise.
+ *  SUCCESS - If content was written successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int write_content_on_socket(int socket_fd, byte_array_t byte_array) {
+    LOG_TRACE_POINT;
+
     size_t write_result;
     size_t total_written = 0;
     bool concluded = false;
     int errno_value;
-    int result = 0;
+    int result = SUCCESS;
 
     while (concluded == false ) {
+        LOG_TRACE_POINT;
+
         write_result = write(socket_fd, byte_array.data, byte_array.size);
         switch (write_result) {
             case -1:
                 errno_value = errno;
                 LOG_ERROR("Error while writing content on socket.");
                 LOG_ERROR("%s", strerror(errno_value));
-                result = -1;
+                result = GENERIC_ERROR;
                 concluded = true;
                 break;
             case 0:
+                LOG_TRACE_POINT;
                 if ( byte_array.size != 0 ) {
                     LOG_ERROR("The content was not written on socket.");
-                    result = -1;
+                    result = GENERIC_ERROR;
                     concluded = true;
                 }
                 break;
@@ -210,9 +244,12 @@ int write_content_on_socket(int socket_fd, byte_array_t byte_array) {
         total_written += write_result;
         LOG_TRACE("%zu of %zu byte(s) written on socket.", total_written, byte_array.size);
         if ( total_written >= byte_array.size ) {
+            LOG_TRACE_POINT;
             concluded = true;
+            result = SUCCESS;
         }
     }
 
+    LOG_TRACE_POINT;
     return result;
 }

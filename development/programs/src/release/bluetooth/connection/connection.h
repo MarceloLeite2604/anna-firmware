@@ -16,6 +16,16 @@
 #include "../../general/byte_array/byte_array.h"
 
 /*
+ * Definitions.
+ */
+
+/* Code returned when there is not content to be read on socket. */
+#define NO_CONTENT_TO_READ 50
+
+/* Code returned when the socket has content to read. */
+#define CONTENT_TO_READ 51
+
+/*
  * Function headers.
  */
 

@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../general/return_codes.h"
 #include "../log/log.h"
 #include "../script/script.h"
 #include "../directory/directory.h"
@@ -69,7 +70,7 @@ char* get_latest_audio_record(){
 
     script_result = execute_script(FIND_LATEST_AUDIO_RECORD_SCRIPT_NAME);
 
-    if ( script_result == 0 ) {
+    if ( script_result == SUCCESS ) {
         output_directory = get_output_directory();
         larfn_file_path_length = strlen(output_directory);
         larfn_file_path_length += strlen(AUDIO_DIRECTORY);
@@ -134,18 +135,18 @@ char* get_latest_audio_record(){
  *  None.
  *
  * Returns
- *  0. If device is recording.
- *  1. Otherwise.
+ *  SUCCESS - If device is recording.
+ *  GENERIC ERROR - Otherwise.
  */
 int is_recording() {
     LOG_TRACE_POINT;
     int result;
     int script_result = execute_script(CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME);
 
-    if (script_result == 0 ) {
-        result = 0;
+    if (script_result == SUCCESS ) {
+        result = SUCCESS;
     } else {
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     return result;
@@ -158,15 +159,15 @@ int is_recording() {
  *  None.
  *
  * Returns:
- *  0. If audio record was started successfully.
- *  1. Otherwise.
+ *  SUCCESS - If audio record was started successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int start_audio_record(){
     int script_result = execute_script(START_AUDIO_RECORD_SCRIPT_NAME);
 
-    if ( script_result != 0 ){
+    if ( script_result != SUCCESS ){
         LOG_ERROR("Error executing start record script. Execution returned: %d.", script_result);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     return script_result;
@@ -179,15 +180,15 @@ int start_audio_record(){
  *  None.
  *
  * Returns:
- *  0. If audio record was started successfully.
- *  1. Otherwise.
+ *  SUCCESS - If audio record was started successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int stop_audio_record(){
     int script_result = execute_script(STOP_AUDIO_RECORD_SCRIPT_NAME);
 
-    if ( script_result != 0 ){
+    if ( script_result != SUCCESS ){
         LOG_ERROR("Error executing stop record script. Execution returned: %d.", script_result);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     return script_result;

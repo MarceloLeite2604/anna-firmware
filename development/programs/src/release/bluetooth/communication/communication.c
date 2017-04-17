@@ -10,6 +10,7 @@
  */
 #include <libgen.h>
 #include <errno.h>
+#include "../../general/return_codes.h"
 #include "../../general/wait_time/wait_time.h"
 #include "../../general/file/file.h"
 #include "../package/codes/codes.h"
@@ -66,13 +67,13 @@ int send_package(int, package_t);
  *  socket_fd - The device's connection socket file descriptor.
  *
  * Returns
- *  0. If the device responded the connection check.
- *  1. If the device did not respond the connection check or there was an error while chekcing connection.
+ *  SUCCESS - If the device responded the connection check.
+ *  GENERIC_ERROR - If the device did not respond the connection check or there was an error while chekcing connection.
  */
 int check_connection(int socket_fd) {
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
 
     package_t check_connection_package;
@@ -84,9 +85,9 @@ int check_connection(int socket_fd) {
     send_package_result = send_package(socket_fd, check_connection_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending a check connection package.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(check_connection_package);
@@ -103,8 +104,8 @@ int check_connection(int socket_fd) {
  *  package   - The package awaiting to be confirmed.
  *
  * Returns
- *  0. If the confirmation package was received successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the confirmation package was received successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int receive_confirmation(int socket_fd, package_t package) {
     LOG_TRACE_POINT;
@@ -138,10 +139,10 @@ int receive_confirmation(int socket_fd, package_t package) {
             convertion_result = convert_byte_array_to_package(&package_received, byte_array_readed);
             LOG_TRACE_POINT;
 
-            if ( convertion_result == 1 ) {
+            if ( convertion_result == GENERIC_ERROR ) {
                 LOG_TRACE_POINT;
                 LOG_ERROR("Error while converting byte array to package.");
-                result = 1;
+                result = GENERIC_ERROR;
                 read_concluded = true;
             }
             else {
@@ -152,7 +153,7 @@ int receive_confirmation(int socket_fd, package_t package) {
                     if ( package_received.content.confirmation_content->package_id == package.id ) {
                         LOG_TRACE_POINT;
                         read_concluded = true;
-                        result = 0;
+                        result = SUCCESS;
                     }
                 }
             }
@@ -165,18 +166,23 @@ int receive_confirmation(int socket_fd, package_t package) {
             LOG_TRACE_POINT;
 
             switch (wait_result) {
-                case -1:
+                case SUCCESS:
+                    LOG_TRACE_POINT
+                    break;
+                case GENERIC_ERROR:
                     LOG_ERROR("Error while waiting to read the package confirmation from connection.");
                     read_concluded = true;
-                    result = 1;
+                    result = GENERIC_ERROR;
                     break;
-                case 1:
+                case MAXIMUM_RETRY_ATTEMPTS_REACHED:
                     LOG_ERROR("Maximum read attempts reached.");
                     read_concluded = true;
-                    result = 1;
+                    result = GENERIC_ERROR;
                     break;
                 default:
-                    LOG_TRACE_POINT;
+                    LOG_ERROR("Unknown return code from \"wait_time\" function.");
+                    read_concluded = true;
+                    result = GENERIC_ERROR;
                     break;
             }
         }
@@ -199,14 +205,14 @@ int receive_confirmation(int socket_fd, package_t package) {
  *  package - Returns the package received.
  *
  * Returns
- *  0. If package was received.
- *  1. If there was an error receiving the package.
- *  2. If no package was received.
+ *  SUCCESS - If package was received.
+ *  GENERIC_ERROR - If there was an error receiving the package.
+ *  NO_PACKAGE_RECEIVED - If not package was received.
  */
 int receive_package(int socket_fd, package_t* package) {
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     byte_array_t received_byte_array;
     retry_informations_t retry_informations;
     bool receive_concluded;
@@ -225,7 +231,7 @@ int receive_package(int socket_fd, package_t* package) {
         received_byte_array = read_socket_content(socket_fd);
         LOG_TRACE_POINT;
 
-        if ( received_byte_array.size != 0 ) {
+        if ( received_byte_array.size != SUCCESS ) {
             LOG_TRACE_POINT;
             receive_concluded = true;
         }
@@ -236,18 +242,18 @@ int receive_package(int socket_fd, package_t* package) {
             LOG_TRACE_POINT;
 
             switch (wait_result) {
-                case -1:
-                    LOG_ERROR("Error while waiting to receive a package.");
-                    receive_concluded = true;
-                    result = 1;
+                case SUCCESS:
+                    LOG_TRACE_POINT;
                     break;
-                case 1:
+                case MAXIMUM_RETRY_ATTEMPTS_REACHED:
                     LOG_TRACE("Maximum receive attempts reached.");
                     receive_concluded = true;
-                    result = 2;
+                    result = NO_PACKAGE_RECEIVED;
                     break;
                 default:
-                    LOG_TRACE_POINT;
+                    LOG_ERROR("Error while waiting to receive a package.");
+                    receive_concluded = true;
+                    result = GENERIC_ERROR;
                     break;
             }
         }
@@ -259,9 +265,9 @@ int receive_package(int socket_fd, package_t* package) {
         convertion_result = convert_byte_array_to_package(package, received_byte_array);
         LOG_TRACE_POINT;
 
-        if ( convertion_result == 1 ) {
+        if ( convertion_result == GENERIC_ERROR ) {
             LOG_ERROR("Error while converting received byte array to package.");
-            result = 1;
+            result = GENERIC_ERROR;
         }
     }
 
@@ -279,8 +285,8 @@ int receive_package(int socket_fd, package_t* package) {
  *  package - The package to be confirmed.
  *
  * Returns
- *  0. If the confirmation package was send successfully.
- *  1. Otherwise
+ *  SUCCESS - If the confirmation package was send successfully.
+ *  GENERIC_ERROR - Otherwise
  */
 int send_confirmation(int socket_fd, package_t package_to_confirm) {
     LOG_TRACE_POINT;
@@ -300,9 +306,9 @@ int send_confirmation(int socket_fd, package_t package_to_confirm) {
     convertion_result = convert_package_to_byte_array(&confirmation_package_byte_array, confirmation_package);
     LOG_TRACE_POINT;
 
-    if ( convertion_result == 1 ) {
+    if ( convertion_result == GENERIC_ERROR ) {
         LOG_ERROR("Error converting confirmation package to byte array.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
     else {
         LOG_TRACE_POINT;
@@ -316,31 +322,30 @@ int send_confirmation(int socket_fd, package_t package_to_confirm) {
             write_result = write_content_on_socket(socket_fd, confirmation_package_byte_array); 
             LOG_TRACE_POINT;
 
-            if ( write_result == 1 ) {
+            if ( write_result == GENERIC_ERROR ) {
                 LOG_ERROR("Error while writing confirmaton package on socket.");
                 wait_result = wait_time(&retry_informations);
                 LOG_TRACE_POINT;
                 switch (wait_result) {
-                    case -1:
-                        LOG_ERROR("Error while waiting to read the package confirmation from connection.");
-                        send_concluded = true;
-                        result = 1;
+                    case SUCCESS:
+                        LOG_TRACE_POINT;
                         break;
-                    case 1:
+                    case MAXIMUM_RETRY_ATTEMPTS_REACHED:
                         LOG_ERROR("Maximum read attempts reached.");
                         send_concluded = true;
-                        result = 1;
+                        result = GENERIC_ERROR;
                         break;
                     default:
-                        LOG_TRACE_POINT;
+                        LOG_ERROR("Error while waiting to read the package confirmation from connection.");
+                        send_concluded = true;
+                        result = GENERIC_ERROR;
                         break;
                 }
             }
             else {
                 LOG_TRACE_POINT;
-
                 send_concluded = true;
-                result = 0;
+                result = SUCCESS;
             }
         }
     }
@@ -361,8 +366,8 @@ int send_confirmation(int socket_fd, package_t package_to_confirm) {
  *  socket_fd - The connection socket file descriptot to send the disconnect signal.
  *
  * Returns
- *  0. If disconnect signal was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If disconnect signal was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_disconnect_signal(int socket_fd) {
     LOG_TRACE_POINT;
@@ -374,11 +379,11 @@ int send_disconnect_signal(int socket_fd) {
 
     send_result = send_package(socket_fd, disconnect_package);
 
-    if ( send_result == 0 ) {
-        result = 0;
+    if ( send_result == SUCCESS ) {
+        result = SUCCESS;
     }
     else {
-        result = 1;
+        result = GENERIC_ERROR;
     }
     
     return result;
@@ -392,8 +397,8 @@ int send_disconnect_signal(int socket_fd) {
  *  file_path - Path to the file to be sent.
  *
  * Returns
- *  0. If the file was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the file was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_file(int socket_fd, char* file_path) {
     LOG_TRACE_POINT;
@@ -404,12 +409,12 @@ int send_file(int socket_fd, char* file_path) {
 
     if ( file_exists(file_path) == false ) {
         LOG_ERROR("File \"%s\" does not exist.", file_path);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     if ( file_is_readable(file_path) == false ) {
         LOG_ERROR("File \"%s\" is not readable.", file_path);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     file_size = get_file_size(file_path);
@@ -417,7 +422,7 @@ int send_file(int socket_fd, char* file_path) {
 
     if ( file_size == -1 ) {
         LOG_ERROR("Could not determine the \"%s\" file size.", file_path);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     file_name = basename(file_path);
@@ -426,29 +431,29 @@ int send_file(int socket_fd, char* file_path) {
     send_result = send_file_header(socket_fd, file_size, file_name);
     LOG_TRACE_POINT;
 
-    if ( send_result == 1 ) {
+    if ( send_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending file header.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     send_result = send_file_content(socket_fd, file_name, file_size);
     LOG_TRACE_POINT;
 
-    if ( send_result == 1 ) {
+    if ( send_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending file content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     send_result = send_file_trailer(socket_fd);
     LOG_TRACE_POINT;
 
-    if ( send_result == 1 ) {
+    if ( send_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending file trailer.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -459,13 +464,13 @@ int send_file(int socket_fd, char* file_path) {
  *  package   - The package to be sent.
  *
  *  Returns
- *   0. If the package was sent successfuly.
- *   1. Otherwise.
+ *   SUCCESS - If the package was sent successfuly.
+ *   GENERIC_ERROR - Otherwise.
  */
 int send_package(int socket_fd, package_t package) {
     LOG_TRACE_POINT;
 
-    int result = 1;
+    int result = GENERIC_ERROR;
     int write_result;
     int wait_result;
     int receive_confirmation_result;
@@ -480,9 +485,9 @@ int send_package(int socket_fd, package_t package) {
     convertion_result = convert_package_to_byte_array(&package_byte_array, package);
     LOG_TRACE_POINT;
 
-    if ( convertion_result == 1 ) {
+    if ( convertion_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while converting package to byte array.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     while (write_concluded == false ) {
@@ -490,21 +495,21 @@ int send_package(int socket_fd, package_t package) {
 
         write_result = write_content_on_socket(socket_fd, package_byte_array);
 
-        if ( write_result == 0 ) {
+        if ( write_result == SUCCESS ) {
             LOG_TRACE_POINT;
 
             receive_confirmation_result = receive_confirmation(socket_fd, package);
             LOG_TRACE_POINT;
 
-            if ( receive_confirmation_result == 0 ) {
+            if ( receive_confirmation_result == SUCCESS ) {
                 LOG_TRACE_POINT;
                 write_concluded = true;
-                result = 0;
+                result = SUCCESS;
             }
             else {
                 LOG_ERROR("Did not receive confirmation o package id 0x%x.", package.id);
                 write_concluded = true;
-                result = 1;
+                result = GENERIC_ERROR;
             }
         } else {
             LOG_TRACE_POINT;
@@ -513,20 +518,19 @@ int send_package(int socket_fd, package_t package) {
             LOG_TRACE_POINT;
 
             switch (wait_result) {
-                case -1:
-                    LOG_ERROR("Error while waiting to retry writing package.");
-                    write_concluded = true;
-                    result = 1;
-                    break;
-                case 1:
-                    LOG_ERROR("Maximum write attempts reached.");
-                    write_concluded = true;
-                    result = 1;
-                    break;
-                default:
+                case SUCCESS:
                     LOG_TRACE_POINT;
                     break;
-
+                case MAXIMUM_RETRY_ATTEMPTS_REACHED:
+                    LOG_ERROR("Maximum write attempts reached.");
+                    write_concluded = true;
+                    result = GENERIC_ERROR;
+                    break;
+                default:
+                    LOG_ERROR("Error while waiting to retry writing package.");
+                    write_concluded = true;
+                    result = GENERIC_ERROR;
+                    break;
             }
         }
     }
@@ -544,8 +548,8 @@ int send_package(int socket_fd, package_t package) {
  *  file_path - The file path to send its content. 
  *
  * Returns
- *  0. If the content was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_file_content(int socket_fd, char* file_path, size_t file_size) {
     LOG_TRACE_POINT;
@@ -566,7 +570,7 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         errno_value = errno;
         LOG_ERROR("Could not open file \"%s\".", file_path);
         LOG_ERROR("%s", strerror(errno_value));
-        return 1;
+        return GENERIC_ERROR;
     }
 
 
@@ -578,7 +582,7 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         if ( ferror(file) != 0 ) {
             LOG_ERROR("Error while reading \"%s\" file data chunk.", file_path);
             send_content_concluded = true;
-            result = 1;
+            result = GENERIC_ERROR;
         }
 
         total_bytes_read += bytes_read;
@@ -591,20 +595,20 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
             if ( total_bytes_read != file_size ) {
                 LOG_ERROR("File reading concluded, but the total bytes sent is different from file size");
                 LOG_ERROR("File size: %zu, total read: %zu.", file_size, total_bytes_read);
-                result = 1;
+                result = GENERIC_ERROR;
             } else {
                 LOG_TRACE_POINT;
-                result = 0;
+                result = SUCCESS;
             }
         }
 
         send_result = send_file_chunk(socket_fd, bytes_read, data_chunk_buffer);
         LOG_TRACE_POINT;
 
-        if ( send_result == 1 ) {
+        if ( send_result == GENERIC_ERROR ) {
             LOG_ERROR("Error while sending file data chunk.");
             send_content_concluded = true;
-            result = 1;
+            result = GENERIC_ERROR;
         }
     }
 
@@ -614,7 +618,7 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         errno_value = errno;
         LOG_ERROR("Error while closing file \"%s\".", file_path);
         LOG_ERROR("%s", strerror(errno_value));
-        return 1;
+        return GENERIC_ERROR;
     }
 
     LOG_TRACE_POINT;
@@ -630,13 +634,13 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
  *  chunk_data - The chunk of data to be sent.
  *
  * Returns
- *  0. If the file chunk was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the file chunk was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
     package_t send_file_chunk_package;
 
@@ -646,9 +650,9 @@ int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
     send_package_result = send_package(socket_fd, send_file_chunk_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending the file chunk.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(send_file_chunk_package);
@@ -665,13 +669,13 @@ int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
  *  file_name - The name of the file to be sent.
  *
  * Returns
- *  0. If the file header was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the file header was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_file_header(int socket_fd, size_t file_size, const char* file_name){
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
     package_t send_file_header_package;
 
@@ -681,9 +685,9 @@ int send_file_header(int socket_fd, size_t file_size, const char* file_name){
     send_package_result = send_package(socket_fd, send_file_header_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending the file header.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(send_file_header_package);
@@ -698,13 +702,13 @@ int send_file_header(int socket_fd, size_t file_size, const char* file_name){
  *  socket_fd - The connection socket file descriptor to send the file trailer.
  *
  * Returns
- *  0. If the file trailer was sent successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the file trailer was sent successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int send_file_trailer(int socket_fd){
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
     package_t send_file_trailer_package;
 
@@ -714,9 +718,9 @@ int send_file_trailer(int socket_fd){
     send_package_result = send_package(socket_fd, send_file_trailer_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending the file trailer.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(send_file_trailer_package);
@@ -733,13 +737,13 @@ int send_file_trailer(int socket_fd){
  *  command_result - The command result to be sent.
  *
  * Returns
- *  0. If the command result was send sucessfully.
- *  1. Otherwise.
+ *  SUCCESS - If the command result was send sucessfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int transmit_command_result(int socket_fd, int command_result) {
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
     package_t command_result_package;
 
@@ -749,9 +753,9 @@ int transmit_command_result(int socket_fd, int command_result) {
     send_package_result = send_package(socket_fd, command_result_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending the command result.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(command_result_package);
@@ -770,13 +774,13 @@ int transmit_command_result(int socket_fd, int command_result) {
  *  error_message - The error message to be send.
  *
  * Returns
- *  0. If the error message was transmitted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the error message was transmitted successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int transmit_error(int socket_fd, int error_code, const char* error_message) {
     LOG_TRACE_POINT;
 
-    int result = 0;
+    int result = SUCCESS;
     int send_package_result;
     package_t error_package;
 
@@ -786,9 +790,9 @@ int transmit_error(int socket_fd, int error_code, const char* error_message) {
     send_package_result = send_package(socket_fd, error_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == 1 ) {
+    if ( send_package_result == GENERIC_ERROR ) {
         LOG_ERROR("Error while sending the error message.");
-        result = 1;
+        result = GENERIC_ERROR;
     }
 
     delete_package(error_package);

@@ -198,6 +198,14 @@ create_log_file() {
         _log_file_creation_result=${generic_error};
     fi;
 
+    # Initializes the log level.
+    _log_initialize_log_level;
+    initialize_log_level_result=${?};
+    if [ ${initialize_log_level_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
+
     _log_file_location=${temporary_log_file_location};
     _log_file_creation_result=${success};
 
@@ -208,6 +216,7 @@ create_log_file() {
     _log_store_log_level;
 
     _log_write_on_file ${_log_file_location} "[$(_log_get_current_time)] Log started.";
+
     return ${success};
 
 }
@@ -422,7 +431,7 @@ set_log_level(){
         return ${generic_error};
     fi;
 
-    local readonly temporary_log_level=$1;
+    local readonly temporary_log_level=${1};
 
     if ! [[ ${temporary_log_level} =~ ${numeric_regex} ]];
     then
@@ -755,9 +764,140 @@ _log_is_log_level_file_defined() {
     # Checks if "log level" file exists.
     if [ -f "${_log_level_file_path}" ];
     then
-        # Check if "log path" file has content.
+        # Check if "log level" file has content.
         log_level_file_defined=$(cat ${_log_level_file_path} | wc -l);
         if [ ${log_level_file_defined} -eq 1 ];
+        then
+            result=${success};
+        else
+            result=${generic_error};
+        fi;
+    else
+        result=${generic_error};
+    fi; 
+
+    return ${result};
+}
+
+# Sets the start log level on "start log level" file.
+#
+# Parameters
+#   The start log level value.
+#
+# Returns
+#  0. If start log level was defined successfully.
+#  1. Otherwise.
+set_start_log_level() {
+    local result;
+    local echo_result;
+
+    if [ ${#} -ne 1 ];
+    then
+        return ${generic_error};
+    else
+        start_log_level=${1};
+    fi;
+
+    echo -e "${start_log_level}" > ${_log_start_log_level_file_path};
+    echo_result=${?};
+
+    if [ ${echo_result} -eq ${success} ];
+    then
+        result=${success};
+    else
+        result=${failure};
+    fi;
+
+    return ${result};
+}
+
+# Retrieves the start log level from "start log level" file.
+#
+# Parameters
+#   None.
+#
+# Returns
+#  0. If start log level was retrieved successfully.
+#  1. Otherwise.
+#  It also returns the start log level through "echo".
+_log_retrieve_start_log_level() {
+    local result;
+    local is_start_log_level_file_defined_result;
+    local start_log_level;
+
+    # Check if "start log level" file is defined.
+    _log_is_start_log_level_file_defined;
+    is_start_log_level_file_defined_result=${?};
+    if [ ${is_start_log_level_file_defined_result} -eq ${success} ];
+    then
+
+        # Retrieves start log level from "start log level" file.
+        start_log_level=$(cat "${_log_start_log_level_file_path}");
+        cat_result=${?};
+        if [ ${cat_result} -eq ${success} ];
+        then
+            # Define the log file path.
+            echo "${start_log_level}";
+            result=${success};
+        else
+            result=${generic_error};
+        fi;
+    else
+        result=${generic_error};
+    fi;
+
+    return ${result};
+}
+
+# Deletes the "start log level" file.
+#
+# Parameters
+#   None.
+#
+# Returns
+#   0. If "start log level" file was deleted successfully.
+#   1. Otherwise.
+delete_start_log_level_file() {
+    local result;
+    local rm_result;
+
+    # Checks if "start log level" file exists.
+    if [ -f "${_log_start_log_level_file_path}" ];
+    then
+
+        # Deletes "start log level" file.
+        rm -f "${_log_start_log_level_file_path}";
+        rm_result=${?};
+        if [ ${rm_result} -eq ${success} ];
+        then
+            result=${success};
+        else
+            result=${generic_error};
+        fi;
+    fi;
+
+    return ${result};
+}
+
+# Checks if "start log level" file is defined.
+#
+# Parameters
+#   None.
+#
+# Returns
+#   0. If "start log level" is defined.
+#   1. If "start log level" is not defined.
+#   2. If there was an error.
+_log_is_start_log_level_file_defined() {
+    local result;
+    local log_level_file_defined;
+
+    # Checks if "start log level" file exists.
+    if [ -f "${_log_start_log_level_file_path}" ];
+    then
+        # Check if "start log level" file has content.
+        start_log_level_file_defined=$(cat ${_log_start_log_level_file_path} | wc -l);
+        if [ ${start_log_level_file_defined} -eq 1 ];
         then
             result=${success};
         else
@@ -808,6 +948,7 @@ continue_log_file(){
     local is_log_defined_result;
     local retrieve_log_file_path_result;
     local retrieve_log_level_result;
+    local intialize_log_level_result;
 
     # Checks if log file is defined.
     is_log_defined;
@@ -829,11 +970,18 @@ continue_log_file(){
             if [ ${retrieve_log_level_result} -ne ${success} ];
             then
 
-                # Set log level to "trace".
-                set_log_level ${log_message_type_trace};
+                # Initializes log level.
+                _log_initialize_log_level;
+                initialize_log_level_result=${?};
+                if [ ${initialize_log_level_result} -ne ${success} ];
+                then
+                    result=${generic_error};
+                fi;
+            else
+                result=${success};
             fi;
-
-            result=${success};
+        else
+            result=${generic_error};
         fi;
     else
         result=${generic_error};
@@ -842,4 +990,42 @@ continue_log_file(){
     _log_file_creation_result=${result};
 
     return ${result};
+}
+
+# Initializes the log level.
+#
+# Parameters
+#   None.
+#
+# Returns
+#   0. If log level was initialized successfully.
+#   1. Otherwise
+_log_initialize_log_level() {
+    local is_start_log_level_defined;
+    local start_log_level;
+    local retrieve_start_log_level_result;
+    local new_log_level;
+
+    # Checks if "start log level" file is defined.
+    _log_is_start_log_level_file_defined;
+    is_start_log_level_file_defined_result=${?};
+    if [ ${is_start_log_level_file_defined_result} -eq ${success} ];
+    then
+
+        # Retrieves the start log level.
+        start_log_level=$(_log_retrieve_start_log_level);
+        retrieve_start_log_level_result=${?};
+        if [ ${retrieve_start_log_level_result} -eq ${success} -a -n "${start_log_level}" ];
+        then
+            new_log_level=${start_log_level};
+        else
+            new_log_level=${log_message_type_trace};
+        fi;
+    else
+        new_log_level=${log_message_type_trace};
+    fi;
+    
+    set_log_level ${new_log_level};
+
+    return ${success};
 }

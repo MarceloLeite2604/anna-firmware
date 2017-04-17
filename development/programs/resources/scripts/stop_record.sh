@@ -34,10 +34,10 @@ stop_record(){
     local stop_audio_encoder_process_result;
 
     # Set log level.
-    set_log_level ${log_message_type_trace};
+    # set_log_level ${log_message_type_trace};
 
     # Set log directory.
-    #set_log_directory "$(dirname ${BASH_SOURCE})/../logs/";
+    # set_log_directory "$(dirname ${BASH_SOURCE})/../logs/";
 
     continue_log_file_result=1;
     log_file_created=1;
@@ -58,7 +58,7 @@ stop_record(){
     then
 
         # Creates a new log file.
-        create_log_file "stop_audio_record";
+        create_log_file "stop_record";
         log_file_created=${?};
     fi;
 

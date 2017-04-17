@@ -8,6 +8,7 @@
 /*
  * Includes.
  */
+#include "../return_codes.h"
 #include <stdlib.h>
 #include "byte_array.h"
 
@@ -19,8 +20,8 @@
  *  The byte array to be deleted.
  *
  * Returns
- *  0. If the byte array was deleted correctly.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was deleted correctly.
+ *  GENRIC_ERROR - Otherwise.
  */
 int delete_byte_array(byte_array_t byte_array){
     LOG_TRACE_POINT;
@@ -31,6 +32,6 @@ int delete_byte_array(byte_array_t byte_array){
     }
 
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 

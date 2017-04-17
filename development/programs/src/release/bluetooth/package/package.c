@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include "package.h"
 #include "codes/codes.h"
+#include "../../general/return_codes.h"
 #include "../../general/random/random.h"
 #include "../../log/log.h"
 
@@ -136,13 +137,13 @@ int delete_send_file_trailer_content(content_t);
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_check_connection_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     /* This package type does not have a content. */
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -153,8 +154,8 @@ int convert_byte_array_to_check_connection_content(content_t* content, byte_arra
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_confirmation_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -164,12 +165,12 @@ int convert_byte_array_to_confirmation_content(content_t* content, byte_array_t 
 
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array size does not match a confirmation content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     content->confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t));
     memcpy(&content->confirmation_content->package_id, byte_array.data, sizeof(uint32_t));
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -180,8 +181,8 @@ int convert_byte_array_to_confirmation_content(content_t* content, byte_array_t 
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_command_result_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -191,12 +192,12 @@ int convert_byte_array_to_command_result_content(content_t* content, byte_array_
 
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array size does not match a command result content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     content->command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
     memcpy(&content->command_result_content->result_code, byte_array.data, sizeof(uint32_t));
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -208,8 +209,8 @@ int convert_byte_array_to_command_result_content(content_t* content, byte_array_
  *  package_type_code - The package type of the content byte array.
  *
  * Returns
- *  0. If the content was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, uint32_t package_type_code){
     LOG_TRACE("Byte array size: %zu, package type: 0x%x.", byte_array.size, package_type_code);
@@ -264,17 +265,17 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
             break;
         default:
             LOG_ERROR("Unknown package type: 0x%x.", package_type_code);
-            convertion_result = 1;
+            convertion_result = GENERIC_ERROR;
             break;
     }
 
-    if ( convertion_result != 0 ) {
+    if ( convertion_result != SUCCESS ) {
         LOG_ERROR("Error while converting byte array to content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     content->confirmation_content = temporary_content.confirmation_content;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -285,13 +286,13 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_disconnect_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     /* This package type does not have a content. */
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -302,8 +303,8 @@ int convert_byte_array_to_disconnect_content(content_t* content, byte_array_t by
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -316,7 +317,7 @@ int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_ar
 
     if ( byte_array.size < content_size ) {
         LOG_ERROR("The byte array size does not match an error content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer = byte_array.data;
@@ -335,7 +336,7 @@ int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_ar
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array error message length does not match it's message length.");
         free(temporary_content.error_content);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     temporary_content.error_content->error_message = (uint8_t*)malloc(temporary_content.error_content->error_message_size*sizeof(uint8_t));
@@ -343,7 +344,7 @@ int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_ar
 
     content->error_content = temporary_content.error_content;
 
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -354,13 +355,13 @@ int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_ar
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_request_audio_file_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     /* This package type does not have a content. */
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -371,8 +372,8 @@ int convert_byte_array_to_request_audio_file_content(content_t* content, byte_ar
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -385,7 +386,7 @@ int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array
 
     if ( byte_array.size < content_size ) {
         LOG_ERROR("The byte array size does not match a send file chunk content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer = byte_array.data;
@@ -396,7 +397,7 @@ int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array
 
     if ( temporary_content.send_file_chunk_content->file_content != SEND_FILE_CHUNK_CONTENT_CODE ) {
         LOG_ERROR("Could not find the send file chunk content code.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer += sizeof(uint32_t);
@@ -408,7 +409,7 @@ int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The chunk size informed on byte array does not match it's chunk size.");
         free(temporary_content.send_file_chunk_content);
-        return 1;
+        return GENERIC_ERROR;
     }
     array_pointer += sizeof(uint32_t);
 
@@ -417,7 +418,7 @@ int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array
 
     content->send_file_chunk_content = temporary_content.send_file_chunk_content;
 
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -428,8 +429,8 @@ int convert_byte_array_to_send_file_chunk_content(content_t* content, byte_array
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_send_file_header_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -443,7 +444,7 @@ int convert_byte_array_to_send_file_header_content(content_t* content, byte_arra
 
     if ( byte_array.size < content_size ) {
         LOG_ERROR("The byte array size does not match a send file header result content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer = byte_array.data;
@@ -453,7 +454,7 @@ int convert_byte_array_to_send_file_header_content(content_t* content, byte_arra
 
     if ( temporary_content.send_file_header_content->file_header != SEND_FILE_HEADER_CONTENT_CODE ) {
         LOG_ERROR("The content header does not match a send file header content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer += sizeof(uint32_t);
@@ -468,7 +469,7 @@ int convert_byte_array_to_send_file_header_content(content_t* content, byte_arra
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The file name size on byte array does not match is content.");
         free(temporary_content.send_file_header_content);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer += sizeof(uint32_t);
@@ -478,7 +479,7 @@ int convert_byte_array_to_send_file_header_content(content_t* content, byte_arra
 
     content->send_file_header_content = temporary_content.send_file_header_content;
 
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -489,8 +490,8 @@ int convert_byte_array_to_send_file_header_content(content_t* content, byte_arra
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_send_file_trailer_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -500,12 +501,12 @@ int convert_byte_array_to_send_file_trailer_content(content_t* content, byte_arr
 
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array size does not match a send file trailer content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     content->send_file_trailer_content = (send_file_trailer_content_t*)malloc(sizeof(send_file_trailer_content_t));
     memcpy(&content->send_file_trailer_content->file_trailer, byte_array.data, sizeof(uint32_t));
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -516,13 +517,13 @@ int convert_byte_array_to_send_file_trailer_content(content_t* content, byte_arr
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_start_record_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     /* This package type does not have a content. */
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -533,13 +534,13 @@ int convert_byte_array_to_start_record_content(content_t* content, byte_array_t 
  *  byte_array - The byte array with the content informations.
  *
  * Returns
- *  0. If the byte array was converted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the byte array was converted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_byte_array_to_stop_record_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     /* This package type does not have a content. */
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -568,7 +569,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
 
     if ( byte_array.size < package_size ) {
         LOG_ERROR("Invalid package size. It must be at least %zu bytes to be a package.", package_size);
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer = byte_array.data;
@@ -576,7 +577,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
 
     if (temporary_package.header != PACKAGE_HEADER) {
         LOG_ERROR("Byte array is not a package.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer += sizeof(uint32_t);
@@ -598,9 +599,9 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     }
 
     convert_byte_array_to_content_result = convert_byte_array_to_content(&temporary_package.content, content_byte_array, temporary_package.type_code);
-    if ( convert_byte_array_to_content_result != 0 ) {
+    if ( convert_byte_array_to_content_result != SUCCESS ) {
         LOG_ERROR("Error while converting byte array data to package content.");
-        return 1;
+        return GENERIC_ERROR;
     }
 
     array_pointer += content_byte_array.size*sizeof(uint8_t);
@@ -616,7 +617,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     package->content = temporary_package.content;
     package->trailer = temporary_package.trailer;
 
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -627,8 +628,8 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
  *  package - The package with the informations to be copied to the byte array.
  *
  * Returns
- *  0. If the conversion was made successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the conversion was made successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
     LOG_TRACE_POINT;
@@ -667,7 +668,7 @@ int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
     delete_byte_array(temporary_byte_array);
 
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1253,13 +1254,13 @@ package_t create_send_file_trailer_package() {
  *  content - The command result package content to be deleted.
  *
  * Returns
- *  0. If the content was delete successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was delete successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_command_result_content(content_t content) {
     /* This package content does not contain any allocated memory to be deleted. */
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1269,13 +1270,13 @@ int delete_command_result_content(content_t content) {
  *  content - The confirmation package content to be deleted.
  *
  * Returns
- *  0. If the content was delted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was delted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_confirmation_content(content_t content) {
     /* This package content does not contain any allocated memory to be deleted. */
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1285,8 +1286,8 @@ int delete_confirmation_content(content_t content) {
  *  content - The package content to be deleted.
  *
  * Returns
- *  0. If the package content was deleted correctly.
- *  1. Otherwise.
+ *  SUCCESS - If the package content was deleted correctly.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_content(uint32_t package_type, content_t content){
     LOG_TRACE("Package type: 0x%x.", package_type);
@@ -1339,7 +1340,7 @@ int delete_content(uint32_t package_type, content_t content){
             break;
         default:
             LOG_ERROR("Unknown package type.");
-            result = 1;
+            result = GENERIC_ERROR;
             break;
     }
 
@@ -1354,15 +1355,15 @@ int delete_content(uint32_t package_type, content_t content){
  *  content - The error package content to be deleted.
  *
  * Returns
- *  0. If the content was deleted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was deleted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_error_content(content_t content) {
     LOG_TRACE_POINT;
 
     free(content.error_content->error_message);
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1372,8 +1373,8 @@ int delete_error_content(content_t content) {
  *  package - The package to be deleted.
  *
  * Returns
- *  0. If the package was deleted successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the package was deleted successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_package(package_t package) {
     LOG_TRACE_POINT;
@@ -1392,15 +1393,15 @@ int delete_package(package_t package) {
  *  content - The send file chunk package content to be deleted.
  *
  * Returns
- *  0. If the content was delete successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was delete successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_send_file_chunk_content(content_t content){
     LOG_TRACE_POINT;
 
     free(content.send_file_chunk_content->chunk_data);
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1410,14 +1411,14 @@ int delete_send_file_chunk_content(content_t content){
  *  content - The send file header package content to be deleted.
  *
  * Returns
- *  0. If the content was delete successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was delete successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_send_file_header_content(content_t content) {
     LOG_TRACE_POINT;
     free(content.send_file_header_content->file_name);
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 
 /*
@@ -1427,12 +1428,12 @@ int delete_send_file_header_content(content_t content) {
  *  content - The send file trailer package content to be deleted.
  *
  * Returns
- *  0. If the content was delete successfully.
- *  1. Otherwise.
+ *  SUCCESS - If the content was delete successfully.
+ *  GENERIC ERROR - Otherwise.
  */
 int delete_send_file_trailer_content(content_t content){
     /* This package content does not contain any allocated memory to be deleted. */
     LOG_TRACE_POINT;
-    return 0;
+    return SUCCESS;
 }
 

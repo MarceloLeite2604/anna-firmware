@@ -14,9 +14,6 @@ source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 # Default log file preffix.
 default_log_file_preffix="start_log";
 
-# Default log level.
-default_log_level=${log_message_type_trace};
-
 # Starts a new log.
 #
 # Parameters
@@ -46,10 +43,8 @@ start_log(){
         if [ ${#} -eq 1 ];
         then
             log_file_preffix=${1};
-            log_level=${default_log_level};
         else
             log_file_preffix=${default_log_file_preffix};
-            log_level=${default_log_level};
         fi;
     fi;
 
@@ -74,17 +69,22 @@ start_log(){
 
     if [ ${result} -eq ${success} ];
     then
-        set_log_level ${log_level};
-        set_log_level_result=${?};
-        if [ ${set_log_level_result} -eq ${success} ];
+        create_log_file "${log_file_preffix}";
+        create_log_file_result=${?};
+        if [ ${create_log_file_result} -eq ${success} ];
         then
-            create_log_file "${log_file_preffix}";
-            create_log_file_result=${?};
-            if [ ${create_log_file_result} -eq ${success} ];
+            if [ -n "${log_level}" ];
             then
-                result=${success};
+                set_log_level ${log_level};
+                set_log_level_result=${?};
+                if [ ${set_log_level_result} -eq ${success} ];
+                then
+                    result=${success};
+                else
+                    result=${generic_error};
+                fi;
             else
-                result=${generic_error};
+                result=${success};
             fi;
         else
             result=${generic_error};

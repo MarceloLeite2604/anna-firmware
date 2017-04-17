@@ -5,6 +5,9 @@
  * Author: Marcelo Leite
  */
 
+#ifndef BLUETOOTH_PACKAGE_H
+#define BLUETOOTH_PACKAGE_H
+
 /*
  * Includes.
  */
@@ -107,3 +110,5 @@ package_t create_send_file_trailer_package();
 
 /* Deletes a package. */
 int delete_package(package_t);
+
+#endif

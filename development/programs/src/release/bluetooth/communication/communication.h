@@ -14,6 +14,13 @@
 #include "../connection/connection.h"
 
 /*
+ * Definitions.
+ */
+
+/* Code returned when no package was received. */
+#define NO_PACKAGE_RECEIVED 50
+
+/*
  * Function headers.
  */
 

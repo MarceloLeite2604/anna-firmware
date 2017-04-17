@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "../return_codes.h"
 #include "../../log/log.h"
 #include "wait_time.h"
 
@@ -21,6 +22,7 @@
 
 /* Minimum time to wait on a retry (in miliseconds). */
 #define MINIMUM_WAIT_TIME 100
+
 /* Wait time added for every retry realized (in miliseconds). */
 #define WAIT_TIME_STEP 700
 
@@ -49,15 +51,15 @@ retry_informations_t create_retry_informations(int maximum_attempts) {
  *  retry_informations - The retry informations.
  *
  * Return
- *  0. If the number of attempts is lower or equal than maximum attempts and no errors occurred.
- *  1. If maximum attempts reached.
- *  -1. If an error occurred while waiting.
+ *  SUCCESS - If the number of attempts is lower or equal than maximum attempts and no errors occurred.
+ *  MAXIMUM_RETRY_ATTEMPTS_REACHED - If maximum retry attempts reached.
+ *  GENERIC_ERROR - If an error occurred while waiting.
  */
 int wait_time(retry_informations_t* retry_informations) {
     LOG_TRACE("Attempts: %d, maximum attempts: %d", retry_informations->attempts, retry_informations->maximum);
     if ( retry_informations->attempts >= retry_informations->maximum ) {
         LOG_TRACE("Maximum retries attempt reached.");
-        return 1;
+        return MAXIMUM_RETRY_ATTEMPTS_REACHED;
     }
 
     int error_code;
@@ -85,10 +87,10 @@ int wait_time(retry_informations_t* retry_informations) {
             char* error_message = strerror(error_code);
             LOG_ERROR("%s", error_message);
             free(error_message);
-            return -1;
+            return GENERIC_ERROR;
         }
     }
 
     retry_informations->attempts++;
-    return 0;
+    return SUCCESS;
 }

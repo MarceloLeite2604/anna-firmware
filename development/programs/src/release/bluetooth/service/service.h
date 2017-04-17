@@ -12,13 +12,23 @@
  */
 #include <stdbool.h>
 
+/*
+ * Definitions.
+ */
+
+/* Code used to indicate that a connection to a remote device was stablished. */
+#define CONNECTION_STABLISHED 50
+
+/* Code used to indicate that no connection attempt was realized. */
+#define NO_CONNECTION 51
+
 
 /*
  * Function headers.
  */
 
 /* Checks if there is a bluetooth connection attempt. */
-int check_connection_attempt();
+int check_connection_attempt(int*);
 
 /* Checks is bluetooth service is registered. */
 bool is_bluetooth_service_registered();
