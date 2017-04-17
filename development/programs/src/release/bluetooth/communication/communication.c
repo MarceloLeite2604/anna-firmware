@@ -121,6 +121,11 @@ int receive_confirmation(int socket_fd, package_t package) {
     retry_informations = create_retry_informations(MAXIMUM_READ_ATTEMPTS);
     LOG_TRACE_POINT;
 
+    memset(package_received, 0, sizeof(package_t));
+
+    byte_array_readed.size = 0;
+    byte_array_readed.data = NULL;
+
     while ( read_concluded == false ) {
         LOG_TRACE_POINT;
 
@@ -221,6 +226,9 @@ int receive_package(int socket_fd, package_t* package) {
 
     retry_informations = create_retry_informations(MAXIMUM_READ_ATTEMPTS);
     LOG_TRACE_POINT;
+
+    received_byte_array.size = 0;
+    received_byte_array.data = NULL;
 
     while ( receive_concluded == false ) {
         LOG_TRACE_POINT;

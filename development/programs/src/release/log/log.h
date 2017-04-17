@@ -53,10 +53,8 @@
 
 // Macro to register a trace message.
 #define LOG_TRACE(...) if (_log_writing_message == false){\
-    _log_writing_message=true;\
     sprintf(_log_message_buffer, __VA_ARGS__);\
     LOG_TRACE_POINT;\
-    _log_writing_message=false;\
 }
 
 // Macro to register a trace point.

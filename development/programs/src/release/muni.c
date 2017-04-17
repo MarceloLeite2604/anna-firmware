@@ -755,6 +755,24 @@ int program_execution_loop(){
         } else {
             LOG_TRACE_POINT;
             remote_device_communication_loop_result = remote_device_communication_loop(btc_socket_fd);
+            LOG_TRACE_POINT;
+
+            switch ( remote_device_communication_loop_result ) {
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+                    break;
+                case RESTART_PROGRAM_CODE:
+                case RESTART_RASPBERRY_CODE:
+                case SHUT_DOWN_RASPBERRY_CODE:
+                    LOG_TRACE_POINT;
+                    program_finished = true;
+                    result = remote_device_communication_loop_result;
+                    break;
+                default:
+                    LOG_ERROR("Unknown return code received from function \"remote_device_communication_loop\".");
+                    /* TODO: What sould be done? */
+                    break;
+            }
         }
     }
 
@@ -769,6 +787,7 @@ int program_execution_loop(){
  *  btc_socket_fd - The bluetooth communication's socket file descriptor to the remote device.
  *
  * Returns
+ *  DEVICE_DISCONNECTED - If remote device has disconnected.
  *  RESTART_PROGRAM_CODE - If the program requested to restart.
  *  RESTART_RASPBERRY_CODE - If the program requested the Raspberry to restart.
  *  SHUT_DOWN_RASPBERRY_CODE - If the program requested the Raspberry to shut down.
@@ -783,6 +802,7 @@ int remote_device_communication_loop(int btc_socket_fd) {
     int receive_package_result;
     int check_command_received_result;
     int close_socket_result;
+    int check_connection_result;
     package_t package;
     bool device_connected = true;
 
@@ -841,6 +861,19 @@ int remote_device_communication_loop(int btc_socket_fd) {
                 break;
             case NO_PACKAGE_RECEIVED:
                 LOG_TRACE_POINT;
+                check_connection_result = check_connection(btc_socket_fd);
+                LOG_TRACE_POINT;
+
+                if ( check_connection_result != SUCCESS ) {
+                    LOG_TRACE_POINT;
+
+                    close_socket(btc_socket_fd);
+                    LOG_TRACE_POINT;
+
+                    device_connected = false;
+                    result = DEVICE_DISCONNECTED;
+                }
+
                 break;
             default:
                 LOG_ERROR("Unknown code returned from \"receive_package\" function.");
@@ -927,6 +960,7 @@ int wait_connection(int* btc_socket_fd) {
             case CONNECTION_STABLISHED:
                 LOG_TRACE_POINT;
                 *btc_socket_fd = temporary_btc_socket_fd;
+                wait_connection_concluded = true;
                 result = SUCCESS;
                 break;
             case NO_CONNECTION:
