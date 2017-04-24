@@ -7,4 +7,4 @@
 log_preffix="muni_program";
 print_size=80
 
-ls -A1rt ${log_preffix}*.log | tail -n 1 | xargs tail -n ${print_size};
+ls -A1rt ${log_preffix}*.log | tail -n 1 | xargs vi ;

@@ -20,11 +20,11 @@
  * Definitions.
  */
 
-/* Minimum time to wait on a retry (in miliseconds). */
-#define MINIMUM_WAIT_TIME 100
+/* Minimum time to wait on a retry (in microseconds). */
+#define MINIMUM_WAIT_TIME 150000
 
-/* Wait time added for every retry realized (in miliseconds). */
-#define WAIT_TIME_STEP 700
+/* Wait time added for every retry realized (in microseconds). */
+#define WAIT_TIME_STEP 10000
 
 /*
  * Function elaborations.

@@ -357,7 +357,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
         case START_RECORD_CODE:
             LOG_TRACE_POINT;
 
-            command_execution_result = command_start_audio_record();
+            command_execution_result = command_start_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
             break;
@@ -423,22 +423,28 @@ int command_disconnect(int btc_socket_fd) {
  * Starts audio record.
  *
  * Parameters
- *  None.
+ *  socket_fd - The bluetooth connection socket file descriptor to send the result of the "start audio record" command.
  *
  * Result
  *  SUCCESS - If audio record started successfully.
  *  GENERIC_ERROR - Otherwise.
  */
-int command_start_audio_record(){
+int command_start_audio_record(int socket_fd){
     LOG_TRACE_POINT;
 
     int result;
     int start_audio_record_result;
+    int send_package_result;
+
+    package_t command_result_package;
 
     start_audio_record_result = start_audio_record();
     LOG_TRACE_POINT;
 
-    if ( start_audio_record_result == SUCCESS ) {
+    command_result_package = create_command_result_package(start_audio_record_result);
+    send_package_result = send_package(socket_fd, command_result_package);
+
+    if ( send_package_result == SUCCESS ) {
         LOG_TRACE_POINT;
         result = SUCCESS;
     }

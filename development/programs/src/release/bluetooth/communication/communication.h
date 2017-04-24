@@ -39,6 +39,9 @@ int send_disconnect(int);
 /* Sends a file through a connection. */
 int send_file(int, char*);
 
+/* Sends a package through a connection. */
+int send_package(int, package_t);
+
 /* Transmits a command result. */
 int transmit_command_result(int, int);
 

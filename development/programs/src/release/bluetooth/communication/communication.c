@@ -22,10 +22,10 @@
  */
 
 /* Maximum attempts to write a package content on a connection socket. */
-#define MAXIMUM_WRITE_ATTEMPTS 30
+#define MAXIMUM_WRITE_ATTEMPTS 10
 
 /* Maximum attempts to read a package content on a connection socket. */
-#define MAXIMUM_READ_ATTEMPTS 30
+#define MAXIMUM_READ_ATTEMPTS 10
 
 /* Size of the buffer to store file data chunks. */
 #define DATA_CHUNK_BUFFER_SIZE 1024
@@ -52,10 +52,6 @@ int send_file_header(int, size_t, const char*);
 /* Sends a file trailer. */
 int send_file_trailer(int);
 
-/* Sends a package through a connection. */
-int send_package(int, package_t);
-
-
 /*
  * Function elaborations.
  */
@@ -78,7 +74,7 @@ int check_connection(int socket_fd) {
 
     package_t check_connection_package;
     byte_array_t check_connection_package_byte_array;
-
+    /*
     check_connection_package = create_check_connection_package();
     LOG_TRACE_POINT;
 
@@ -91,7 +87,7 @@ int check_connection(int socket_fd) {
     }
 
     delete_package(check_connection_package);
-
+    */
     LOG_TRACE_POINT;
     return result;
 }
@@ -121,7 +117,7 @@ int receive_confirmation(int socket_fd, package_t package) {
     retry_informations = create_retry_informations(MAXIMUM_READ_ATTEMPTS);
     LOG_TRACE_POINT;
 
-    memset(package_received, 0, sizeof(package_t));
+    memset(&package_received, 0, sizeof(package_t));
 
     byte_array_readed.size = 0;
     byte_array_readed.data = NULL;
@@ -229,6 +225,7 @@ int receive_package(int socket_fd, package_t* package) {
 
     received_byte_array.size = 0;
     received_byte_array.data = NULL;
+    receive_concluded = false;
 
     while ( receive_concluded == false ) {
         LOG_TRACE_POINT;
@@ -515,7 +512,7 @@ int send_package(int socket_fd, package_t package) {
                 result = SUCCESS;
             }
             else {
-                LOG_ERROR("Did not receive confirmation o package id 0x%x.", package.id);
+                LOG_ERROR("Did not receive confirmation of package id 0x%x.", package.id);
                 write_concluded = true;
                 result = GENERIC_ERROR;
             }
