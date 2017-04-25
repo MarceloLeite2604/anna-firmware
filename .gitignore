@@ -27,3 +27,8 @@ objects/
 
 # Ignore "fuse_hidden" files
 .fuse_hidden*
+
+# Ignore log configuration files.
+*/log/log_level
+*/log/log_path
+*/log/start_log_level

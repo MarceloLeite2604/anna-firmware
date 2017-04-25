@@ -60,10 +60,10 @@ int check_command_received(int, package_t);
 int command_disconnect();
 
 /* Starts audio record. */
-int command_start_audio_record();
+int command_start_audio_record(int);
 
 /* Stops audio record. */
-int command_stop_audio_record();
+int command_stop_audio_record(int);
 
 /* Transmit latest audio recorded. */
 int command_transmit_latest_audio_record(int);
@@ -364,7 +364,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
         case STOP_RECORD_CODE:
             LOG_TRACE_POINT;
 
-            command_execution_result = command_stop_audio_record();
+            command_execution_result = command_stop_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
             break;
@@ -462,22 +462,27 @@ int command_start_audio_record(int socket_fd){
  * Stops audio record.
  *
  * Parameters
- *  None.
+ *  socket_fd - The bluetooth connection socket file descriptor to send the result of the "stop audio record" command.
  *
  * Result
  *  SUCCESS - If audio record stopped successfully.
  *  GENERIC_ERROR - Otherwise.
  */
-int command_stop_audio_record(){
+int command_stop_audio_record(int socket_fd){
     LOG_TRACE_POINT;
 
     int result;
     int stop_audio_record_result;
+    int send_package_result;
+    package_t command_result_package;
 
     stop_audio_record_result = stop_audio_record();
     LOG_TRACE_POINT;
 
-    if ( stop_audio_record_result == SUCCESS ) {
+    command_result_package = create_command_result_package(stop_audio_record_result);
+    send_package_result = send_package(socket_fd, command_result_package);
+
+    if ( send_package_result == SUCCESS ) {
         LOG_TRACE_POINT;
         result = SUCCESS;
     }

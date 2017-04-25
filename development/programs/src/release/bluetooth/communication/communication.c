@@ -74,7 +74,7 @@ int check_connection(int socket_fd) {
 
     package_t check_connection_package;
     byte_array_t check_connection_package_byte_array;
-    /*
+    
     check_connection_package = create_check_connection_package();
     LOG_TRACE_POINT;
 
@@ -87,7 +87,7 @@ int check_connection(int socket_fd) {
     }
 
     delete_package(check_connection_package);
-    */
+   
     LOG_TRACE_POINT;
     return result;
 }
@@ -236,8 +236,17 @@ int receive_package(int socket_fd, package_t* package) {
         received_byte_array = read_socket_content(socket_fd);
         LOG_TRACE_POINT;
 
-        if ( received_byte_array.size != SUCCESS ) {
+        if ( received_byte_array.size != 0 ) {
             LOG_TRACE_POINT;
+            convertion_result = convert_byte_array_to_package(package, received_byte_array);
+            LOG_TRACE_POINT;
+
+            if ( convertion_result == GENERIC_ERROR ) {
+                LOG_ERROR("Error while converting received byte array to package.");
+                result = GENERIC_ERROR;
+            } else {
+                send_confirmation(socket_fd, *package);
+            }
             receive_concluded = true;
         }
         else {
@@ -261,18 +270,6 @@ int receive_package(int socket_fd, package_t* package) {
                     result = GENERIC_ERROR;
                     break;
             }
-        }
-    }
-
-    if ( received_byte_array.size != 0 ) {
-        LOG_TRACE_POINT;
-
-        convertion_result = convert_byte_array_to_package(package, received_byte_array);
-        LOG_TRACE_POINT;
-
-        if ( convertion_result == GENERIC_ERROR ) {
-            LOG_ERROR("Error while converting received byte array to package.");
-            result = GENERIC_ERROR;
         }
     }
 
