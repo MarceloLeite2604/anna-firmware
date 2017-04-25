@@ -32,11 +32,11 @@ bool file_exists(char* file_path) {
 
     if ( access(file_path, F_OK) != 0 ) {
         LOG_TRACE("File \"%s\" does not exist.", file_path);
-        return true;
+        return false;
     }
     else {
         LOG_TRACE("File \"%s\" exists.", file_path);
-        return false;
+        return true;
     }
 }
 
@@ -53,11 +53,11 @@ bool file_is_readable(char* file_path) {
 
     if ( access(file_path, R_OK) != 0 ) {
         LOG_TRACE("Can't read file \"%s\".", file_path);
-        return true;
+        return false;
     }
     else {
         LOG_TRACE("File \"%s\" is readable.", file_path);
-        return false;
+        return true;
     }
 }
 
@@ -90,3 +90,4 @@ size_t get_file_size(char* file_path) {
 
     return result;
 }
+

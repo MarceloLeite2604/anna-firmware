@@ -30,6 +30,9 @@ typedef struct {
  * Function headers.
  */
 
+/* Copies an array content to the byte array. */
+int copy_content_to_byte_array(byte_array_t*, void*, size_t);
+
 /* Deletes a byte array. */
 int delete_byte_array(byte_array_t);
 

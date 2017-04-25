@@ -157,6 +157,9 @@ int receive_confirmation(int socket_fd, package_t package) {
                         result = SUCCESS;
                     }
                 }
+                else {
+                    LOG_TRACE("The pacakge received is being ignored. It is not a confirmation code.");
+                }
             }
         }
 
@@ -403,7 +406,7 @@ int send_disconnect_signal(int socket_fd) {
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file(int socket_fd, char* file_path) {
-    LOG_TRACE_POINT;
+    LOG_TRACE("File path: \"%s\".", file_path);
 
     char* file_name;
     size_t file_size;
@@ -438,7 +441,7 @@ int send_file(int socket_fd, char* file_path) {
         return GENERIC_ERROR;
     }
 
-    send_result = send_file_content(socket_fd, file_name, file_size);
+    send_result = send_file_content(socket_fd, file_path, file_size);
     LOG_TRACE_POINT;
 
     if ( send_result == GENERIC_ERROR ) {
@@ -554,13 +557,13 @@ int send_package(int socket_fd, package_t package) {
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file_content(int socket_fd, char* file_path, size_t file_size) {
-    LOG_TRACE_POINT;
+    LOG_TRACE("File size: %zu, file path: \"%s\".", file_size, file_path);
 
     bool send_content_concluded;
     int errno_value;
     uint8_t data_chunk_buffer[DATA_CHUNK_BUFFER_SIZE];
     size_t bytes_read;
-    size_t total_bytes_read; 
+    size_t total_bytes_read = 0; 
     FILE* file;
     int fclose_result;
     int send_result;
@@ -590,11 +593,11 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         total_bytes_read += bytes_read;
         LOG_TRACE("Bytes read: %zu, total bytes read: %zu.", bytes_read, total_bytes_read);
 
-        if ( feof(file) != 0 && total_bytes_read != file_size ) {
+        if ( feof(file) != 0 ){
             LOG_TRACE_POINT;
             send_content_concluded = true;
 
-            if ( total_bytes_read != file_size ) {
+            if (total_bytes_read != file_size) {
                 LOG_ERROR("File reading concluded, but the total bytes sent is different from file size");
                 LOG_ERROR("File size: %zu, total read: %zu.", file_size, total_bytes_read);
                 result = GENERIC_ERROR;
@@ -603,14 +606,15 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
                 result = SUCCESS;
             }
         }
+        if ( bytes_read > 0 ) {
+            send_result = send_file_chunk(socket_fd, bytes_read, data_chunk_buffer);
+            LOG_TRACE_POINT;
 
-        send_result = send_file_chunk(socket_fd, bytes_read, data_chunk_buffer);
-        LOG_TRACE_POINT;
-
-        if ( send_result == GENERIC_ERROR ) {
-            LOG_ERROR("Error while sending file data chunk.");
-            send_content_concluded = true;
-            result = GENERIC_ERROR;
+            if ( send_result == GENERIC_ERROR ) {
+                LOG_ERROR("Error while sending file data chunk.");
+                send_content_concluded = true;
+                result = GENERIC_ERROR;
+            }
         }
     }
 

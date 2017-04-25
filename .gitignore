@@ -32,3 +32,6 @@ objects/
 */log/log_level
 */log/log_path
 */log/start_log_level
+
+# Ignore audio configuration files.
+*/audio/latest_audio_record

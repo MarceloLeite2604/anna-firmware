@@ -56,6 +56,7 @@
 char* get_latest_audio_record(){
     char* output_directory;
     char* result = NULL;
+    size_t result_size;
     int script_result;
     char* larfn_file_path;
     int errno_value;
@@ -105,8 +106,17 @@ char* get_latest_audio_record(){
                 result = NULL;
             }
             else {
-                larfn_content[larfn_content_size] = 0;
-                result = larfn_content;
+                larfn_content[bytes_read] = 0;
+                result_size = strlen(output_directory);
+                result_size += strlen(AUDIO_DIRECTORY);
+                result_size += bytes_read;
+                result_size += 1;
+
+                result = (char*)malloc(result_size*sizeof(char));
+                memset(result, 0, result_size);
+                strcpy(result, output_directory);
+                strcat(result, AUDIO_DIRECTORY);
+                strcat(result, larfn_content);
             }
         }
 
