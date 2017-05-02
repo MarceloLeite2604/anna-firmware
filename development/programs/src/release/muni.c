@@ -57,7 +57,7 @@ int check_argument_debug(char*);
 int check_command_received(int, package_t);
 
 /* Executes the device disconnection processes. */
-int command_disconnect();
+int command_disconnect(int);
 
 /* Starts audio record. */
 int command_start_audio_record(int);
@@ -338,7 +338,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
         case DISCONNECT_CODE:
             LOG_TRACE_POINT;
 
-            command_execution_result = command_disconnect();
+            command_execution_result = command_disconnect(btc_socket_fd);
             LOG_TRACE_POINT;
 
             if ( command_execution_result == SUCCESS ) {
@@ -353,12 +353,30 @@ int check_command_received(int btc_socket_fd, package_t package) {
             command_execution_result = command_transmit_latest_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
+            if ( command_execution_result == SUCCESS ) {
+                LOG_TRACE_POINT;
+                result = SUCCESS;
+            }
+            else {
+                LOG_TRACE_POINT;
+                result = GENERIC_ERROR;
+            }
+
             break;
         case START_RECORD_CODE:
             LOG_TRACE_POINT;
 
             command_execution_result = command_start_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
+
+            if ( command_execution_result == SUCCESS ) {
+                LOG_TRACE_POINT;
+                result = SUCCESS;
+            }
+            else {
+                LOG_TRACE_POINT;
+                result = GENERIC_ERROR;
+            }
 
             break;
         case STOP_RECORD_CODE:
@@ -367,19 +385,20 @@ int check_command_received(int btc_socket_fd, package_t package) {
             command_execution_result = command_stop_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
+            if ( command_execution_result == SUCCESS ) {
+                LOG_TRACE_POINT;
+                result = SUCCESS;
+            }
+            else {
+                LOG_TRACE_POINT;
+                result = GENERIC_ERROR;
+            }
+
             break;
         default:
             LOG_ERROR("Unrecognized package type: 0x%08x.", package.type_code);
+            result = GENERIC_ERROR;
             break;
-    }
-
-    if ( command_execution_result == SUCCESS ) {
-        LOG_TRACE_POINT;
-        result = SUCCESS;
-    }
-    else {
-        LOG_TRACE_POINT;
-        result = GENERIC_ERROR;
     }
 
     LOG_TRACE_POINT;

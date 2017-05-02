@@ -124,6 +124,7 @@ start_audio_capture_process(){
     start_audio_capture_command+=" ${sample_format_parameter}";
     start_audio_capture_command+=" ${sampling_rate_parameter}";
     start_audio_capture_command+=" ${record_device_parameter}";
+    start_audio_capture_command+=" ${audio_format_parameter}";
     #start_audio_capture_command+=" 1> ${audio_pipe_file}";
 
     local error_file="";

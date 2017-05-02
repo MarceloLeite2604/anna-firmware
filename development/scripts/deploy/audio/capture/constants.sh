@@ -83,7 +83,7 @@ fi;
 # Path to audio capture format type configuration file.
 if [ -z ${audio_capture_format_type_configuration_file+x} ];
 then
-    readonly audio_capture_record_device_configuration_file="${audio_capture_configuration_directory}format_type";
+    readonly audio_capture_format_type_configuration_file="${audio_capture_configuration_directory}format_type";
 fi;
 
 # Audio capture processs identifier.
