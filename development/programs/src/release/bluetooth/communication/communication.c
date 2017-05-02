@@ -29,7 +29,7 @@
 #define MAXIMUM_READ_ATTEMPTS 10
 
 /* Size of the buffer to store file data chunks. */
-#define DATA_CHUNK_BUFFER_SIZE 1024*1024*64
+#define DATA_CHUNK_BUFFER_SIZE 1024*64
 
 /*
  * Function headers.
