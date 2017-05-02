@@ -81,6 +81,17 @@ start_audio_capture_process(){
 
     local readonly record_device_parameter="${audio_capture_record_device_parameter} ${record_device}";
 
+    # Reads format type configuration file for capture program.
+    local format_type;
+    format_type=$(read_audio_configuration_file "${audio_capture_format_type_configuration_file}");
+    if [ ${?} -ne ${success} -o -z "${format_type}" ];
+    then
+        log ${log_message_type_error} "Could not define the audio format type.";
+        return ${generic_error};
+    fi;
+
+    local readonly audio_format_parameter="${audio_capture_format_type_parameter} ${format_type}";
+
     # Check if temporary directory exists.
     check_file_is_directory "${temporary_directory}";
     if [ ${?} -ne ${success} ];
