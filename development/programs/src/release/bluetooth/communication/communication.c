@@ -10,6 +10,7 @@
  */
 #include <libgen.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "../../general/return_codes.h"
 #include "../../general/wait_time/wait_time.h"
 #include "../../general/file/file.h"
@@ -28,7 +29,7 @@
 #define MAXIMUM_READ_ATTEMPTS 10
 
 /* Size of the buffer to store file data chunks. */
-#define DATA_CHUNK_BUFFER_SIZE 1024
+#define DATA_CHUNK_BUFFER_SIZE 1024*1024*64
 
 /*
  * Function headers.
@@ -561,7 +562,8 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
 
     bool send_content_concluded;
     int errno_value;
-    uint8_t data_chunk_buffer[DATA_CHUNK_BUFFER_SIZE];
+    /* uint8_t data_chunk_buffer[DATA_CHUNK_BUFFER_SIZE]; */
+    uint8_t* data_chunk_buffer;
     size_t bytes_read;
     size_t total_bytes_read = 0; 
     FILE* file;
@@ -577,6 +579,8 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         LOG_ERROR("%s", strerror(errno_value));
         return GENERIC_ERROR;
     }
+
+    data_chunk_buffer = malloc(DATA_CHUNK_BUFFER_SIZE*sizeof(uint8_t));
 
 
     while (send_content_concluded == false ) {
@@ -624,8 +628,10 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
         errno_value = errno;
         LOG_ERROR("Error while closing file \"%s\".", file_path);
         LOG_ERROR("%s", strerror(errno_value));
-        return GENERIC_ERROR;
+        result =  GENERIC_ERROR;
     }
+
+    free(data_chunk_buffer);
 
     LOG_TRACE_POINT;
     return result;

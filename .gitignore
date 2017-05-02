@@ -29,9 +29,9 @@ objects/
 .fuse_hidden*
 
 # Ignore log configuration files.
-*/log/log_level
-*/log/log_path
-*/log/start_log_level
+log_level
+log_path
+start_log_level
 
 # Ignore audio configuration files.
-*/audio/latest_audio_record
+latest_audio_record

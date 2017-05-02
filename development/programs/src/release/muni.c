@@ -872,7 +872,7 @@ int remote_device_communication_loop(int btc_socket_fd) {
                 break;
             case NO_PACKAGE_RECEIVED:
                 LOG_TRACE_POINT;
-                check_connection_result = check_connection(btc_socket_fd);
+                /* check_connection_result = check_connection(btc_socket_fd);
                 LOG_TRACE_POINT;
 
                 if ( check_connection_result != SUCCESS ) {
@@ -883,7 +883,8 @@ int remote_device_communication_loop(int btc_socket_fd) {
 
                     device_connected = false;
                     result = DEVICE_DISCONNECTED;
-                }
+                } */
+                result = DEVICE_DISCONNECTED;
 
                 break;
             default:
