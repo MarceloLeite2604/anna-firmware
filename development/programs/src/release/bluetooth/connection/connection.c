@@ -140,7 +140,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
     int errno_value;
     int copy_content_result;
 
-    delete_byte_array(*byte_array);
+    delete_byte_array(byte_array);
 
     while (done_reading == false ) {
         LOG_TRACE_POINT;
@@ -201,11 +201,11 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
 
     if ( error == true ) {
         LOG_TRACE_POINT;
-        delete_byte_array(*byte_array);
+        delete_byte_array(byte_array);
     } else {
         copy_content_result = copy_content_to_byte_array(byte_array, buffer, content_size);
         if ( copy_content_result != SUCCESS ) {
-            delete_byte_array(*byte_array);
+            delete_byte_array(byte_array);
             result = GENERIC_ERROR;
         }
     }

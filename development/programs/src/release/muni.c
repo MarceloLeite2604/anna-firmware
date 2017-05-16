@@ -171,7 +171,7 @@ int check_argument_debug(char* value) {
         LOG_TRACE_POINT;
         value_integer = atoi(value);
 
-        if ( ( strcmp(value, "TRACE") == 0 ) || ( value_integer = LOG_MESSAGE_TYPE_WARNING ) ) {
+        if ( ( strcmp(value, "TRACE") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
             LOG_TRACE_POINT;
 
             log_level = LOG_MESSAGE_TYPE_TRACE;
@@ -180,7 +180,7 @@ int check_argument_debug(char* value) {
         else {
             LOG_TRACE_POINT;
 
-            if ( ( strcmp(value, "WARNING") == 0 ) || ( value_integer = LOG_MESSAGE_TYPE_WARNING ) ) {
+            if ( ( strcmp(value, "WARNING") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
                 LOG_TRACE_POINT;
 
                 log_level = LOG_MESSAGE_TYPE_WARNING;
@@ -189,7 +189,7 @@ int check_argument_debug(char* value) {
             else {
                 LOG_TRACE_POINT;
 
-                if ( ( strcmp(value, "ERROR") == 0 ) || ( value_integer = LOG_MESSAGE_TYPE_ERROR ) ) {
+                if ( ( strcmp(value, "ERROR") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_ERROR ) ) {
                     LOG_TRACE_POINT;
 
                     log_level = LOG_MESSAGE_TYPE_ERROR;
@@ -212,6 +212,7 @@ int check_argument_debug(char* value) {
 
             if ( define_start_log_level_result == SUCCESS ) {
                 LOG_TRACE_POINT;
+                set_log_level(log_level);
                 result = SUCCESS;
             }
             else {

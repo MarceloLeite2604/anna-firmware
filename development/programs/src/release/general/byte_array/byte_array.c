@@ -55,16 +55,16 @@ int copy_content_to_byte_array(byte_array_t* byte_array, void* array, size_t arr
  *  SUCCESS - If the byte array was deleted correctly.
  *  GENRIC_ERROR - Otherwise.
  */
-int delete_byte_array(byte_array_t byte_array){
+int delete_byte_array(byte_array_t* byte_array){
     LOG_TRACE_POINT;
 
-    if ( byte_array.size > 0 ) {
-        LOG_TRACE("Byte array size: %zu.", byte_array.size);
-        free(byte_array.data);
+    if ( byte_array->size > 0 ) {
+        LOG_TRACE("Byte array size: %zu.", byte_array->size);
+        free(byte_array->data);
     }
 
-    byte_array.size = 0;
-    byte_array.data = NULL;
+    byte_array->size = 0;
+    byte_array->data = NULL;
 
     LOG_TRACE_POINT;
     return SUCCESS;

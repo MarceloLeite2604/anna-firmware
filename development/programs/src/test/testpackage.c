@@ -117,7 +117,7 @@ void test_package(package_t package) {
     printf("Conversion result: %d\n", convertion_result);
     printf("Converted package:\n");
     print_package(converted_package);
-    delete_byte_array(byte_array);
+    delete_byte_array(&byte_array);
     delete_package(converted_package);
     printf("\n");
 
@@ -169,7 +169,7 @@ void print_package_content(uint32_t package_type, content_t content){
             memcpy(chunk_data.data, content.send_file_chunk_content->chunk_data, chunk_data.size);
             printf("\tChunk_data:\n");
             print_byte_array(chunk_data);
-            delete_byte_array(chunk_data);
+            delete_byte_array(&chunk_data);
             break;
         case SEND_FILE_TRAILER_CODE:
             printf("\tFile trailer code: 0x%x\n", content.send_file_trailer_content->file_trailer);

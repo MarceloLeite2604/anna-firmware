@@ -924,40 +924,43 @@ int write_log_message(const int message_type, const char* tag, const int index, 
         return GENERIC_ERROR;
     }
 
-    // Check "tag" parameter.
-    if ( tag == NULL ) {
-        LOG_ERROR("Message tag is null.");
-        return GENERIC_ERROR;
-    }
+    if ( message_type >= log_level ) {
 
-    // Check "message" parameter.
-    if ( message == NULL && message_type != LOG_MESSAGE_TYPE_TRACE ) {
-        LOG_ERROR("Message content is mandatory if its type is not \"trace\".");
-        return GENERIC_ERROR;
-    }
+        // Check "tag" parameter.
+        if ( tag == NULL ) {
+            LOG_ERROR("Message tag is null.");
+            return GENERIC_ERROR;
+        }
 
-    formatted_message = malloc(formatted_message_length*sizeof(char));
+        // Check "message" parameter.
+        if ( message == NULL && message_type != LOG_MESSAGE_TYPE_TRACE ) {
+            LOG_ERROR("Message content is mandatory if its type is not \"trace\".");
+            return GENERIC_ERROR;
+        }
 
-    format_log_message(formatted_message, formatted_message_length, message_type, tag, index, message);
-    LOG_TRACE_POINT;
+        formatted_message = malloc(formatted_message_length*sizeof(char));
 
-    if ( is_log_open() == true ) {
+        format_log_message(formatted_message, formatted_message_length, message_type, tag, index, message);
         LOG_TRACE_POINT;
-        output_file = log_file;
-    }
-    else {
-        LOG_TRACE_POINT;
-        output_file = stdout;
-    }
 
-    if ( fprintf(output_file, "%s\n", formatted_message) < 0 ) {
-        LOG_ERROR("Error printing log message.\n");
-        return GENERIC_ERROR;
+        if ( is_log_open() == true ) {
+            LOG_TRACE_POINT;
+            output_file = log_file;
+        }
+        else {
+            LOG_TRACE_POINT;
+            output_file = stdout;
+        }
+
+        if ( fprintf(output_file, "%s\n", formatted_message) < 0 ) {
+            LOG_ERROR("Error printing log message.\n");
+            return GENERIC_ERROR;
+        }
+
+        fflush(output_file);
+
+        free(formatted_message);
     }
-
-    fflush(output_file);
-
-    free(formatted_message);
 
     LOG_TRACE_POINT;
     return SUCCESS;

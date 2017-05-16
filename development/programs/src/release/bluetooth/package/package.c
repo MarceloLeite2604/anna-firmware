@@ -608,7 +608,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     memcpy(&temporary_package.trailer, array_pointer, sizeof(uint32_t));
 
     if ( content_byte_array.size > 0 ) {
-        delete_byte_array(content_byte_array);
+        delete_byte_array(&content_byte_array);
     }
 
     package->header = temporary_package.header;
@@ -659,13 +659,13 @@ int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
     array_pointer += content_byte_array.size;
     memcpy(array_pointer, &package.trailer, sizeof(uint32_t));
 
-    delete_byte_array(content_byte_array);
+    delete_byte_array(&content_byte_array);
 
     byte_array->size = temporary_byte_array.size;
     byte_array->data = (uint8_t*)malloc(temporary_byte_array.size*sizeof(uint8_t));
     memcpy(byte_array->data, temporary_byte_array.data, temporary_byte_array.size*sizeof(uint8_t));
 
-    delete_byte_array(temporary_byte_array);
+    delete_byte_array(&temporary_byte_array);
 
     LOG_TRACE_POINT;
     return SUCCESS;

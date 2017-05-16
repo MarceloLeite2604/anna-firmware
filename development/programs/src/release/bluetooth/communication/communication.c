@@ -26,7 +26,7 @@
 #define MAXIMUM_WRITE_ATTEMPTS 10
 
 /* Maximum attempts to read a package content on a connection socket. */
-#define MAXIMUM_READ_ATTEMPTS 10
+#define MAXIMUM_READ_ATTEMPTS 30
 
 /* Size of the buffer to store file data chunks. */
 #define DATA_CHUNK_BUFFER_SIZE 1024*64
@@ -127,7 +127,7 @@ int receive_confirmation(int socket_fd, package_t package) {
     while ( read_concluded == false ) {
         LOG_TRACE_POINT;
 
-        delete_byte_array(byte_array_readed);
+        delete_byte_array(&byte_array_readed);
         LOG_TRACE_POINT;
 
         read_socket_content_result = read_socket_content(socket_fd, &byte_array_readed);
@@ -205,7 +205,7 @@ int receive_confirmation(int socket_fd, package_t package) {
         }
     }
 
-    delete_byte_array(byte_array_readed);
+    delete_byte_array(&byte_array_readed);
     LOG_TRACE_POINT;
 
     delete_package(package_received);
@@ -247,7 +247,7 @@ int receive_package(int socket_fd, package_t* package) {
     while ( receive_concluded == false ) {
         LOG_TRACE_POINT;
 
-        delete_byte_array(received_byte_array);
+        delete_byte_array(&received_byte_array);
         LOG_TRACE_POINT;
 
         read_socket_content_result = read_socket_content(socket_fd, &received_byte_array);
@@ -303,7 +303,7 @@ int receive_package(int socket_fd, package_t* package) {
         }
     }
 
-    delete_byte_array(received_byte_array);
+    delete_byte_array(&received_byte_array);
     LOG_TRACE_POINT;
 
     return result;
@@ -385,7 +385,7 @@ int send_confirmation(int socket_fd, package_t package_to_confirm) {
     delete_package(confirmation_package);
     LOG_TRACE_POINT;
 
-    delete_byte_array(confirmation_package_byte_array);
+    delete_byte_array(&confirmation_package_byte_array);
     LOG_TRACE_POINT;
 
     return result;
@@ -567,7 +567,7 @@ int send_package(int socket_fd, package_t package) {
         }
     }
 
-    delete_byte_array(package_byte_array);
+    delete_byte_array(&package_byte_array);
     LOG_TRACE_POINT;
     return result;
 }
