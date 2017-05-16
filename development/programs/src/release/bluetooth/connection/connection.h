@@ -39,7 +39,8 @@ int check_socket_content(int, struct timeval);
 int disconnect(int);
 
 /* Reads content from the socket. */
-byte_array_t read_socket_content(int);
+/* byte_array_t read_socket_content(int); */
+int read_socket_content(int, byte_array_t*);
 
 /* Writes content on socket. */
 int write_content_on_socket(int, byte_array_t);

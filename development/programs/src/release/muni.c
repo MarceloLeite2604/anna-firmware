@@ -324,7 +324,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
     switch (package.type_code) {
         case CHECK_CONNECTION_CODE:
             LOG_TRACE("Connection checked by device.");
-            command_execution_result = SUCCESS;
+            result = SUCCESS;
             break;
         case CONFIRMATION_CODE:
         case COMMAND_RESULT_CODE:
@@ -333,7 +333,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
         case SEND_FILE_HEADER_CODE:
         case SEND_FILE_TRAILER_CODE:
             LOG_ERROR("Pacakage type recognized, but no action defined to be done. Package type: 0x%08x.", package.type_code);
-            command_execution_result = GENERIC_ERROR;
+            result = GENERIC_ERROR;
             break;
         case DISCONNECT_CODE:
             LOG_TRACE_POINT;
@@ -788,6 +788,9 @@ int program_execution_loop(){
             LOG_TRACE_POINT;
 
             switch ( remote_device_communication_loop_result ) {
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+                    break;
                 case DEVICE_DISCONNECTED:
                     LOG_TRACE_POINT;
                     break;
@@ -879,7 +882,7 @@ int remote_device_communication_loop(int btc_socket_fd) {
 
                         break;
                     default:
-                        LOG_ERROR("Unknown code returned from \"check_command_received\" function.");
+                        LOG_ERROR("Unknown code returned from \"check_command_received\" function: %d", check_command_received_result);
                         /* TODO: What should be done then? */
                         break;
                 }
@@ -887,7 +890,8 @@ int remote_device_communication_loop(int btc_socket_fd) {
                 break;
             case GENERIC_ERROR:
                 LOG_ERROR("Error while receiving package from bluetooth connection.");
-                /* TODO: What should be done then? */
+                device_connected = false;
+                result = DEVICE_DISCONNECTED;
                 break;
             case NO_PACKAGE_RECEIVED:
                 LOG_TRACE_POINT;

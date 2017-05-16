@@ -116,13 +116,18 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
  *
  * Parameters
  *  socket_fd - The socket communication file descriptor to read content.
+ *  byte_array - The structure to store content read from socket.
  *
  * Returns
- *  The content read from the socket.
+ *  SUCCESS - If a content was successfully read from socket.
+ *  NO_CONTENT_TO_READ - If there was no content to read from socket.
+ *  GENERIC_ERROR - If there was an error reading the socket.
  */
-byte_array_t read_socket_content(int socket_fd) {
+/* byte_array_t read_socket_content(int socket_fd) { */
+int read_socket_content(int socket_fd, byte_array_t* byte_array) {
     LOG_TRACE("Socket file descriptor: %d", socket_fd);
 
+    int result;
     struct timeval read_wait_time = _read_wait_time;
     int select_result;
     uint8_t buffer[READ_CONTENT_BUFFER_SIZE];
@@ -130,11 +135,12 @@ byte_array_t read_socket_content(int socket_fd) {
     uint8_t next_byte;
     ssize_t content_size = 0;
     ssize_t total_read;
-    byte_array_t result_byte_array = { .size = 0, .data = NULL };
     bool error = false;
     bool done_reading = false;
     int errno_value;
     int copy_content_result;
+
+    delete_byte_array(*byte_array);
 
     while (done_reading == false ) {
         LOG_TRACE_POINT;
@@ -146,11 +152,13 @@ byte_array_t read_socket_content(int socket_fd) {
             case NO_CONTENT_TO_READ:
                 LOG_TRACE("No content to be read on socket.");
                 done_reading = true;
+                result = NO_CONTENT_TO_READ;
                 break;
             case GENERIC_ERROR:
                 LOG_ERROR("Error while waiting for a content to read on socket.");
                 done_reading = true;
                 error = true;
+                result = GENERIC_ERROR;
                 break;
             case CONTENT_TO_READ:
                 LOG_TRACE("There is content to read on socket.");
@@ -161,71 +169,28 @@ byte_array_t read_socket_content(int socket_fd) {
                         LOG_ERROR("There is content available on socket, but it could not be read.");
                         error = true;
                         done_reading = true;
+                        result = GENERIC_ERROR;
                         break;
                     case -1:
+                        errno_value = errno;
                         LOG_ERROR("Error while reading socket content.");
+                        LOG_ERROR("%d: %s", errno_value, strerror(errno_value));
                         error = true;
                         done_reading = true;
+                        result = GENERIC_ERROR;
                         break;
                     default:
                         LOG_TRACE_POINT;
-                        /*LOG_TRACE("Array pointer: %p", array_pointer);
-                        LOG_TRACE("Buffer pointer: %p", buffer);
-                        LOG_TRACE("Next buffer pointer: %p", &buffer[1]);
-                        LOG_TRACE("Total read: %zu", total_read);
-                        LOG_TRACE("Content read: \"0x%02x\".", *array_pointer);*/
                         content_size += total_read;
                         if ( *array_pointer == PACKAGE_TRAILER ) {
                             LOG_TRACE("Found a package trailer.");
                             done_reading = true;
-                            /*
-                            total_read = pread(socket_fd, &next_byte, sizeof(uint32_t), SEEK_CUR);
-                            switch (total_read) {
-                                case 0:
-                                    LOG_TRACE("No more content to read from the socket.");
-                                    done_reading = true;
-                                    break;
-                                case -1:
-                                    errno_value = errno;
-                                    LOG_ERROR("Error while checking next available byte on socket.");
-                                    LOG_ERROR("%s", strerror(errno_value));
-                                    error = true;
-                                    done_reading = true;
-                                    break;
-                                default:
-                                    if ( next_byte == PACKAGE_HEADER ){
-                                        LOG_TRACE("Done reading socket content.");
-                                        done_reading = true;
-                                    } else {
-                                        LOG_TRACE("The data is not a package trailer. Continuing reading.");
-                                    }
-                                    break;
-                            }
-                            */
+                            result = SUCCESS;
                         }
                         array_pointer = (uint32_t*)(buffer+content_size);
                         break;
                     }
                 LOG_TRACE("Content size: %zu byte(s).", content_size);
-    /*
-                if ( content_size < 0 ) {
-                    LOG_ERROR("Error while reading content from socket.");
-                    error = true;
-                } else {
-                    LOG_TRACE_POINT;
-                    result_byte_array.data = (uint8_t*)malloc(content_size);
-                    if ( result_byte_array.data == NULL ) {
-                        LOG_ERROR("Error while reading content from socket.");
-                        LOG_ERROR("Could not allocate %zu bytes to store content read.", content_size);
-                        error = true;
-                    }
-                    else {
-                        LOG_TRACE_POINT;
-                        memcpy(result_byte_array.data, buffer, content_size);
-                        result_byte_array.size = content_size;
-                    }
-                }
-                */
                 break;
             default:
                 LOG_ERROR("Unkown return code from \"check_socket_content\" function.");
@@ -236,16 +201,17 @@ byte_array_t read_socket_content(int socket_fd) {
 
     if ( error == true ) {
         LOG_TRACE_POINT;
-        delete_byte_array(result_byte_array);
+        delete_byte_array(*byte_array);
     } else {
-        copy_content_result = copy_content_to_byte_array(&result_byte_array, buffer, content_size);
+        copy_content_result = copy_content_to_byte_array(byte_array, buffer, content_size);
         if ( copy_content_result != SUCCESS ) {
-            delete_byte_array(result_byte_array);
+            delete_byte_array(*byte_array);
+            result = GENERIC_ERROR;
         }
     }
 
     LOG_TRACE_POINT;
-    return result_byte_array;
+    return result;
 }
 
 /*

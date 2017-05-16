@@ -114,6 +114,7 @@ int receive_confirmation(int socket_fd, package_t package) {
     int wait_result;
     int convertion_result;
     int result;
+    int read_socket_content_result;
 
     retry_informations = create_retry_informations(MAXIMUM_READ_ATTEMPTS);
     LOG_TRACE_POINT;
@@ -129,67 +130,78 @@ int receive_confirmation(int socket_fd, package_t package) {
         delete_byte_array(byte_array_readed);
         LOG_TRACE_POINT;
 
-        byte_array_readed = read_socket_content(socket_fd);
+        read_socket_content_result = read_socket_content(socket_fd, &byte_array_readed);
         LOG_TRACE_POINT;
 
-        if ( byte_array_readed.size > 0 ) {
-            LOG_TRACE_POINT;
+        switch (read_socket_content_result) {
 
-            delete_package(package_received);
-            LOG_TRACE_POINT;
-
-            convertion_result = convert_byte_array_to_package(&package_received, byte_array_readed);
-            LOG_TRACE_POINT;
-
-            if ( convertion_result == GENERIC_ERROR ) {
-                LOG_TRACE_POINT;
-                LOG_ERROR("Error while converting byte array to package.");
-                result = GENERIC_ERROR;
-                read_concluded = true;
-            }
-            else {
+            case SUCCESS:
                 LOG_TRACE_POINT;
 
-                if ( package_received.type_code == CONFIRMATION_CODE ) {
+                delete_package(package_received);
+                LOG_TRACE_POINT;
+
+                convertion_result = convert_byte_array_to_package(&package_received, byte_array_readed);
+                LOG_TRACE_POINT;
+
+                if ( convertion_result == GENERIC_ERROR ) {
                     LOG_TRACE_POINT;
-                    if ( package_received.content.confirmation_content->package_id == package.id ) {
-                        LOG_TRACE_POINT;
-                        read_concluded = true;
-                        result = SUCCESS;
-                    }
+                    LOG_ERROR("Error while converting byte array to package.");
+                    result = GENERIC_ERROR;
+                    read_concluded = true;
                 }
                 else {
-                    LOG_TRACE("The pacakge received is being ignored. It is not a confirmation code.");
+                    LOG_TRACE_POINT;
+
+                    if ( package_received.type_code == CONFIRMATION_CODE ) {
+                        LOG_TRACE_POINT;
+                        if ( package_received.content.confirmation_content->package_id == package.id ) {
+                            LOG_TRACE_POINT;
+                            read_concluded = true;
+                            result = SUCCESS;
+                        }
+                    }
+                    else {
+                        LOG_TRACE("The pacakge received is being ignored. It is not a confirmation code.");
+                    }
                 }
-            }
-        }
+                break;
 
-        if ( read_concluded == false ) {
-            LOG_TRACE_POINT;
+            case NO_CONTENT_TO_READ:
+                LOG_TRACE_POINT;
+                wait_result = wait_time(&retry_informations);
 
-            wait_result = wait_time(&retry_informations);
-            LOG_TRACE_POINT;
-
-            switch (wait_result) {
-                case SUCCESS:
-                    LOG_TRACE_POINT
-                    break;
-                case GENERIC_ERROR:
-                    LOG_ERROR("Error while waiting to read the package confirmation from connection.");
-                    read_concluded = true;
-                    result = GENERIC_ERROR;
-                    break;
-                case MAXIMUM_RETRY_ATTEMPTS_REACHED:
-                    LOG_ERROR("Maximum read attempts reached.");
-                    read_concluded = true;
-                    result = GENERIC_ERROR;
-                    break;
-                default:
-                    LOG_ERROR("Unknown return code from \"wait_time\" function.");
-                    read_concluded = true;
-                    result = GENERIC_ERROR;
-                    break;
-            }
+                switch (wait_result) {
+                    case SUCCESS:
+                        LOG_TRACE_POINT
+                        break;
+                    case GENERIC_ERROR:
+                        LOG_ERROR("Error while waiting to read the package confirmation from connection.");
+                        read_concluded = true;
+                        result = GENERIC_ERROR;
+                        break;
+                    case MAXIMUM_RETRY_ATTEMPTS_REACHED:
+                        LOG_ERROR("Maximum read attempts reached.");
+                        read_concluded = true;
+                        result = GENERIC_ERROR;
+                        break;
+                    default:
+                        LOG_ERROR("Unknown return code from \"wait_time\" function.");
+                        read_concluded = true;
+                        result = GENERIC_ERROR;
+                        break;
+                }
+                break;
+            case GENERIC_ERROR:
+                LOG_ERROR("Error while reading socket content.");
+                read_concluded = true;
+                result = GENERIC_ERROR;
+                break;
+            default:
+                LOG_ERROR("Unknown result received from \"read_socket_content\" function: %d.", read_socket_content_result);
+                read_concluded = true;
+                result = GENERIC_ERROR;
+                break;
         }
     }
 
@@ -223,6 +235,7 @@ int receive_package(int socket_fd, package_t* package) {
     bool receive_concluded;
     int wait_result;
     int convertion_result;
+    int read_socket_content_result;
 
     retry_informations = create_retry_informations(MAXIMUM_READ_ATTEMPTS);
     LOG_TRACE_POINT;
@@ -237,43 +250,56 @@ int receive_package(int socket_fd, package_t* package) {
         delete_byte_array(received_byte_array);
         LOG_TRACE_POINT;
 
-        received_byte_array = read_socket_content(socket_fd);
+        read_socket_content_result = read_socket_content(socket_fd, &received_byte_array);
         LOG_TRACE_POINT;
 
-        if ( received_byte_array.size != 0 ) {
-            LOG_TRACE_POINT;
-            convertion_result = convert_byte_array_to_package(package, received_byte_array);
-            LOG_TRACE_POINT;
+        switch (read_socket_content_result) {
+            case SUCCESS:
+                LOG_TRACE_POINT;
+                convertion_result = convert_byte_array_to_package(package, received_byte_array);
+                LOG_TRACE_POINT;
 
-            if ( convertion_result == GENERIC_ERROR ) {
-                LOG_ERROR("Error while converting received byte array to package.");
-                result = GENERIC_ERROR;
-            } else {
-                send_confirmation(socket_fd, *package);
-            }
-            receive_concluded = true;
-        }
-        else {
-            LOG_TRACE_POINT;
-
-            wait_result = wait_time(&retry_informations);
-            LOG_TRACE_POINT;
-
-            switch (wait_result) {
-                case SUCCESS:
-                    LOG_TRACE_POINT;
-                    break;
-                case MAXIMUM_RETRY_ATTEMPTS_REACHED:
-                    LOG_TRACE("Maximum receive attempts reached.");
-                    receive_concluded = true;
-                    result = NO_PACKAGE_RECEIVED;
-                    break;
-                default:
-                    LOG_ERROR("Error while waiting to receive a package.");
-                    receive_concluded = true;
+                if ( convertion_result == GENERIC_ERROR ) {
+                    LOG_ERROR("Error while converting received byte array to package.");
                     result = GENERIC_ERROR;
-                    break;
-            }
+                } else {
+                    send_confirmation(socket_fd, *package);
+                }
+                receive_concluded = true;
+                break;
+
+            case NO_CONTENT_TO_READ:
+                LOG_TRACE_POINT;
+
+                wait_result = wait_time(&retry_informations);
+                LOG_TRACE_POINT;
+
+                switch (wait_result) {
+                    case SUCCESS:
+                        LOG_TRACE_POINT;
+                        break;
+                    case MAXIMUM_RETRY_ATTEMPTS_REACHED:
+                        LOG_TRACE("Maximum receive attempts reached.");
+                        receive_concluded = true;
+                        result = NO_PACKAGE_RECEIVED;
+                        break;
+                    default:
+                        LOG_ERROR("Error while waiting to receive a package.");
+                        receive_concluded = true;
+                        result = GENERIC_ERROR;
+                        break;
+                }
+                break;
+            case GENERIC_ERROR:
+                LOG_ERROR("Error while reading socket content.");
+                receive_concluded = true;
+                result = GENERIC_ERROR;
+                break;
+            default:
+                LOG_ERROR("Unknown result received from \"read_socket_content\" function: %d.", read_socket_content_result);
+                receive_concluded = true;
+                result = GENERIC_ERROR;
+                break;
         }
     }
 

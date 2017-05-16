@@ -59,9 +59,12 @@ int delete_byte_array(byte_array_t byte_array){
     LOG_TRACE_POINT;
 
     if ( byte_array.size > 0 ) {
-        LOG_TRACE_POINT;
+        LOG_TRACE("Byte array size: %zu.", byte_array.size);
         free(byte_array.data);
     }
+
+    byte_array.size = 0;
+    byte_array.data = NULL;
 
     LOG_TRACE_POINT;
     return SUCCESS;
