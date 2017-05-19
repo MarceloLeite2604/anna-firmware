@@ -14,7 +14,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
-#include <time.h>
+#include "../general/time/time.h"
 #include "../directory/directory.h"
 #include "../general/return_codes.h"
 #include "../script/script.h"
@@ -52,12 +52,6 @@
 /* Script to undefine start log level. */
 #define SHELL_SCRIPT_UNDEFINE_START_LOG_LEVEL "undefine_start_log_level.sh"
 
-/* Length of time string formatted to read. */
-#define TIME_STRING_READ_LENGTH 19
-
-/* Length of time string formatted to identify files. */
-#define TIME_STRING_FILE_LENGTH 15
-
 /* Suffix to identify log files. */
 #define LOG_FILE_SUFFIX ".log"
 
@@ -68,7 +62,7 @@
 #define LOG_DIRECTORY_SIZE 512
 
 /* Macro to print an error message. */
-#define _LOG_PRINT_ERROR(x) fprintf(stderr, "[%s] %s: (%s, %d): %s\n", get_current_time_read_formatted(), LOG_ERROR_PREFFIX, __func__, __LINE__, (x))
+#define _LOG_PRINT_ERROR(x) fprintf(stderr, "[%s] %s: (%s, %d): %s\n", get_instant_read_formatted(), LOG_ERROR_PREFFIX, __func__, __LINE__, (x))
 
 /*
  * Global variables.
@@ -112,12 +106,6 @@ bool _log_writing_message = false;
 /* Format a message to be logged. */
 int format_log_message(char*, int, const int, const char*, const int, const char*);
 
-/* Returns the current time formatted to sort file names. */
-char* get_current_time_file_formatted();
-
-/* Returns the current time in a readable format. */
-char* get_current_time_read_formatted();
-
 /* Initializes log directory. */
 int initialize_log_directory();
 
@@ -150,11 +138,11 @@ int close_log_file() {
         return GENERIC_ERROR;
     }
 
-    char* current_time_read_formatted = get_current_time_read_formatted();
+    char* instant_read_formatted = get_instant_read_formatted();
     LOG_TRACE_POINT;
 
-    fprintf(log_file, "[%s] Log finished.\n", current_time_read_formatted);
-    free(current_time_read_formatted);
+    fprintf(log_file, "[%s] Log finished.\n", instant_read_formatted);
+    free(instant_read_formatted);
 
     if ( fclose(log_file) != 0 ) {
         LOG_ERROR("Error while closing log file.\n");
@@ -293,7 +281,7 @@ char* create_log_file_name(char* log_file_preffix){
 
     strcpy(result, log_file_preffix);
     strcat(result, "_");
-    char* current_time_file_formatted = get_current_time_file_formatted();
+    char* current_time_file_formatted = get_instant_file_formatted();
     strcat(result, current_time_file_formatted);
     free(current_time_file_formatted);
     strcat(result, LOG_FILE_SUFFIX);
@@ -399,16 +387,16 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
     temporary_buffer_length=TIME_STRING_READ_LENGTH+preffix_length+tag_length+string_index_length+message_length+additional_characters+1;
     temporary_buffer = malloc(temporary_buffer_length*sizeof(char));
 
-    char* current_time_read_formatted = get_current_time_read_formatted();
+    char* instant_read_formatted = get_instant_read_formatted();
     if ( message != NULL && strlen(message) > 0 ) {
         LOG_TRACE_POINT;
-        sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", current_time_read_formatted, preffix, tag, string_index, message);
+        sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", instant_read_formatted, preffix, tag, string_index, message);
     }
     else {
         LOG_TRACE_POINT;
-        sprintf(temporary_buffer, "[%s] %s: %s (%s)", current_time_read_formatted, preffix, tag, string_index);
+        sprintf(temporary_buffer, "[%s] %s: %s (%s)", instant_read_formatted, preffix, tag, string_index);
     }
-    free(current_time_read_formatted);
+    free(instant_read_formatted);
 
     if ( temporary_buffer_length > buffer_size ) {
         LOG_TRACE_POINT;
@@ -428,65 +416,6 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
 
     LOG_TRACE_POINT;
     return SUCCESS;
-}
-
-/*
- * Returns the current time formatted to sort file names.
- *
- * Parameters:
- *  None.
- * 
- * Returns:
- *  The current time formatted as a string.
- *
- *  Observation:
- *   Time will be formatted as <YEAR><MONTHS><DAYS>_<HOURS><MINUTES><SECONDS>. 
- *   This format is used mostly on log file names.
- */
-char* get_current_time_file_formatted(){
-    LOG_TRACE_POINT;
-
-    char* result;
-    time_t rawtime;
-    struct tm* timeinfo;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    result = malloc((TIME_STRING_FILE_LENGTH+1)*sizeof(char)); 
-    strftime(result, TIME_STRING_FILE_LENGTH+1, "%d%m%Y_%H%M%S", timeinfo);
-
-    LOG_TRACE_POINT;
-    return result;
-}
-
-/*
- * Returns the current time in a readable format.
- *
- * Parameters:
- *  None.
- * 
- * Returns:
- *  The current time formatted as a string.
- *
- * Observation:
- *  This function will format time as "<DAYS>/<MONTHS>/<YEAR> <HOURS>:<MINUTES>:<SECONDS>".
- */
-char* get_current_time_read_formatted(){
-    LOG_TRACE_POINT;
-
-    char* result;
-    time_t rawtime;
-    struct tm* timeinfo;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    result = malloc((TIME_STRING_READ_LENGTH+1)*sizeof(char)); 
-    strftime(result, TIME_STRING_READ_LENGTH+1, "%d/%m/%Y %H:%M:%S", timeinfo);
-
-    LOG_TRACE_POINT;
-    return result;
 }
 
 /*
@@ -721,9 +650,9 @@ int open_log_file(char* log_file_preffix){
         return GENERIC_ERROR;
     }
 
-    char* current_time_read_formatted = get_current_time_read_formatted();
-    fprintf(log_file, "[%s] Log started.\n", current_time_read_formatted);
-    free(current_time_read_formatted);
+    char* instant_read_formatted = get_instant_read_formatted();
+    fprintf(log_file, "[%s] Log started.\n", instant_read_formatted);
+    free(instant_read_formatted);
 
     LOG_TRACE_POINT;
     return SUCCESS;
