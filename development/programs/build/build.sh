@@ -295,20 +295,20 @@ build_programs() {
         return 1;
     fi;
 
-    echo "Creating \"register_instant\" object.";
-    gcc -c ${release_source_directory}register_instant.c -o ${objects_directory}register_instant.o ${additional_arguments};
+    echo "Creating \"store_instant\" object.";
+    gcc -c ${release_source_directory}store_instant.c -o ${objects_directory}store_instant.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"register_instant\" object.";
+        echo "Error creating \"store_instant\" object.";
         return 1;
     fi;
     
-    echo "Creating \"register_instant\" program.";
-    gcc -o ${binary_folder}register_instant ${objects_directory}register_instant.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}directory.o ${additional_arguments};
+    echo "Creating \"store_instant\" program.";
+    gcc -o ${binary_folder}store_instant ${objects_directory}store_instant.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}directory.o ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"register_instant\" program.";
+        echo "Error creating \"store_instant\" program.";
         return 1;
     fi;
 }

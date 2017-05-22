@@ -9,6 +9,37 @@
 # Load directory constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
 
+# Returns the binary files directory path.
+#
+# Parameters
+#   None.
+#
+# Returns
+#   0. If binary files directory was acquired and returned correctly.
+#   1. Otherwise.
+#   It also returns the binary files directory path through "echo".
+get_binary_files_directory(){
+
+    if [ ! -f "${_directories_binaries_directory_file}" ];
+    then
+        $(>&2 echo "Could not find binaries directory file \"${_directories_binaries_directory_file}\".");
+        return 1;
+    fi;
+
+    local result=$(cat "${_directories_binaries_directory_file}");
+
+    if [ -z "${result}" ];
+    then
+        $(>&2 echo "Binaries directory file \"${_directories_binaries_directory_file}\" is empty.");
+        return 1;
+    fi;
+
+    result="$(dirname ${BASH_SOURCE})/${result}";
+
+    echo "${result}";
+    return 0;
+}
+
 # Returns the input files directory path.
 #
 # Parameters

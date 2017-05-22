@@ -5,6 +5,12 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
+# File which contains the directory path for binaries files.
+if [ -z "${_directories_binaries_directory_file}" ];
+then
+    readonly _directories_binaries_directory_file="$(dirname ${BASH_SOURCE})/binaries_directory";
+fi;
+
 # File which contains the directory path for input files.
 if [ -z "${_directories_input_directory_file}" ];
 then

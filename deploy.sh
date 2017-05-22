@@ -87,8 +87,11 @@ create_release_version_directory(){
 
     if [ ! -d "${release_version_directory}" ];
     then
+        echo "Creating release version directory.";
         mkdir -p "${release_version_directory}";
     fi;
+
+    create_directory_structure "${release_version_directory}";
 
     return 0;
 }
@@ -112,26 +115,44 @@ deploy_configuration(){
 deploy_scripts(){
     echo -e "Deploying \"scripts\" project division.";
 
+    create_release_version_directory;
 
+    echo "Deploying scripts to release version directory.";
+    rm -rf ${release_version_directory}scripts;
+    cp -r ${scripts_development_directory}deploy ${release_version_directory}scripts;
+
+    echo -e "Defining input and output directories on release version directory.";
+    define_input_output_directories "${release_version_directory}scripts/directories/" "../../"
+
+    echo "Deploying scripts to \"programs\" division.";
     rm -rf ${programs_development_directory}resources/scripts;
     cp -r ${scripts_development_directory}deploy ${programs_development_directory}resources/scripts;
 
-    create_release_version_directory;
-    rm -rf ${release_version_directory}scripts;
-    cp -r ${development_directory}scripts/deploy ${release_version_directory}scripts;
-
-    echo -e "Defining input and output directories.";
+    echo -e "Defining input and output directories on \"programs\" subdivision.";
     define_input_output_directories "${programs_development_directory}resources/scripts/directories/" "../../"
 
-    echo -e "Creating directories structure.";
     create_directory_structure "${programs_development_directory}resources/";
-    create_directory_structure "${release_version_directory}";
 
     return 0;
 }
 
-deploy_program() {
-    echo -e "To be done.";
+deploy_programs() {
+    echo -e "Deploying \"programs\" project division.";
+
+    create_release_version_directory;
+
+    echo "Deploying programs to release version directory.";
+    rm -rf ${release_version_directory}programs;
+    cp -r ${programs_development_directory}/build/release ${release_version_directory}programs;
+
+    echo "Deploying source files to release version directory."
+    rm -rf ${release_version_directory}programs/src;
+    cp -r ${programs_development_directory}/src/release ${release_version_directory}programs/src;
+
+    echo "Deploying programs to \"scripts\" division.";
+    rm -rf ${scripts_development_directory}resources/programs;
+    cp -r ${programs_development_directory}/build/release ${scripts_development_directory}resources/programs;
+
     return 0;
 }
 
@@ -160,8 +181,8 @@ deploy(){
         "scripts")
             deploy_scripts;
             ;;
-        "program")
-            deploy_program;
+        "programs")
+            deploy_programs;
             ;;
         "help"|"-h")
             print_usage;
