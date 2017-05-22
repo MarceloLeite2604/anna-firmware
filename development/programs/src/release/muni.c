@@ -16,6 +16,7 @@
 #include "bluetooth/package/package.h"
 #include "bluetooth/package/codes/codes.h"
 #include "log/log.h"
+#include "general/time/time.h"
 
 
 /*
@@ -456,13 +457,38 @@ int command_start_audio_record(int socket_fd){
     int start_audio_record_result;
     int send_package_result;
     struct timeval execution_delay;
+    char* start_audio_instant_file_path;
+    instant_t start_audio_record_instant;
+    int retrieve_instant_from_file_result;
+    instant_t current_instant;
+    instant_t difference;
+    int get_instant_difference_result;
 
     package_t command_result_package;
 
     start_audio_record_result = start_audio_record();
     LOG_TRACE_POINT;
 
-    /* TODO: Fill the execution delay variable. */
+    start_audio_instant_file_path = get_start_audio_record_instant_file_path();
+
+    retrieve_instant_from_file_result  = retrieve_instant_from_file(&start_audio_record_instant, start_audio_instant_file_path);
+    if ( retrieve_instant_from_file_result != SUCCESS ) {
+        LOG_ERROR("Error while retrieving start record instant.");
+        return GENERIC_ERROR;
+    }
+
+    current_instant = get_instant();
+    LOG_TRACE_POINT;
+
+    get_instant_difference_result = get_instant_difference(&difference, current_instant, start_audio_record_instant);
+    if ( get_instant_difference_result != SUCCESS ) {
+        LOG_ERROR("Error while calculating difference between the start audio record time and current instant.");
+        return GENERIC_ERROR;
+    }
+    LOG_TRACE_POINT;
+
+    execution_delay = convert_instant_to_timeval(difference);
+    LOG_TRACE_POINT;
 
     command_result_package = create_command_result_package(start_audio_record_result, execution_delay);
     send_package_result = send_package(socket_fd, command_result_package);
@@ -499,11 +525,37 @@ int command_stop_audio_record(int socket_fd){
     int send_package_result;
     package_t command_result_package;
     struct timeval execution_delay;
+    char* stop_audio_instant_file_path;
+    instant_t stop_audio_record_instant;
+    int retrieve_instant_from_file_result;
+    instant_t current_instant;
+    int get_instant_difference_result;
+    instant_t difference;
 
     stop_audio_record_result = stop_audio_record();
     LOG_TRACE_POINT;
 
-    /* TODO: Fill execution delay variable. */
+    stop_audio_instant_file_path = get_stop_audio_record_instant_file_path();
+
+    retrieve_instant_from_file_result  = retrieve_instant_from_file(&stop_audio_record_instant, stop_audio_instant_file_path);
+
+    if ( retrieve_instant_from_file_result != SUCCESS ) {
+        LOG_ERROR("Error while retrieving stop record instant.");
+        return GENERIC_ERROR;
+    }
+
+    current_instant = get_instant();
+    LOG_TRACE_POINT;
+
+    get_instant_difference_result = get_instant_difference(&difference, current_instant, stop_audio_record_instant);
+    if ( get_instant_difference_result != SUCCESS ) {
+        LOG_ERROR("Error while calculating difference between the stop audio record time and current instant.");
+        return GENERIC_ERROR;
+    }
+    LOG_TRACE_POINT;
+
+    execution_delay = convert_instant_to_timeval(difference);
+    LOG_TRACE_POINT;
 
     command_result_package = create_command_result_package(stop_audio_record_result, execution_delay);
     send_package_result = send_package(socket_fd, command_result_package);

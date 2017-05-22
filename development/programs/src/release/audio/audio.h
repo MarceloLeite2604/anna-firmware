@@ -23,6 +23,16 @@
 char* get_latest_audio_record();
 
 /*
+ * Returns the path of the file which the start audio record instant is stored.
+ */
+char* get_start_audio_record_instant_file_path();
+
+/*
+ * Returns the path of the file which the stop audio record instant is stored.
+ */
+char* get_stop_audio_record_instant_file_path();
+
+/*
  * Checks if device is recording.
  */
 bool is_recording();

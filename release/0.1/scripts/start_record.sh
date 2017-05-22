@@ -88,7 +88,16 @@ start_record(){
                     result=${generic_error};
                 else
                     log ${log_message_type_trace} "Audio record started.";
-                    result=${success};
+                    $(dirname ${BASH_SOURCE})/store_instant.sh "${audio_start_instant_file}";
+                    register_instant_result=${?};
+
+                    if [ ${register_instant_result} -ne ${success} ];
+                    then
+                        log ${log_message_type_error} "Could not store start audio capture instant."
+                        result=${generic_error};
+                    else
+                        result=${success};
+                    fi;
                 fi;
             fi;
         fi;

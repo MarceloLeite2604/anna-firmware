@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script stores the current instant on a temporary file.
+# This script stores the current instant on a file.
 #
 # Version: 0.1
 # Author: Marcelo Leite
@@ -14,12 +14,13 @@ source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 # Stores the current instant on a temporary file.
 #
 # Parameters
-#   None.
+#   1. File path to store the current instant.
 #
 # Returns
 #   0. If instant was stored successfully.
 #   1. Otherwise.
 store_current_instant(){
+
     local result;
     local continue_log_file_result;
     local log_file_created;
@@ -28,6 +29,7 @@ store_current_instant(){
     local is_recording_result;
     local start_audio_capture_process_result;
     local start_audio_encoder_process_result;
+    local file_path;
 
     continue_log_file_result=1;
     log_file_created=1;
@@ -37,7 +39,6 @@ store_current_instant(){
     is_log_defined_result=${?};
     if [ ${is_log_defined_result} -eq ${success} ];
     then
-
         # Continues previous log file.
         continue_log_file;
         continue_log_file_result=${?};
@@ -46,7 +47,6 @@ store_current_instant(){
     # If previous log file was not continued.
     if [ ${continue_log_file_result} -ne ${success} ];
     then
-
         # Creates a new log file.
         create_log_file "store_current_instant";
         log_file_created=${?};
@@ -55,9 +55,16 @@ store_current_instant(){
         # set_log_level ${log_message_type_trace};
     fi;
 
-    local current_instant_file_path="${_temporary_output_files_directory}instant";
+    if [ ${#} -ne 1 ];
+    then
+        log ${log_message_type_error} "File path to store current instant is not specified.";
+        return ${generic_error};
+    else
+        file_path="${1}";
+    fi;
 
-    $(BINARY_DIRECTORY)/store_current_instant "${current_instant_file_path}";
+    local log_file=$(get_log_path);
+    $(get_binary_files_directory)store_instant "${file_path}" >> ${log_file};
     store_current_instant_result=${?};
 
     if [ ${store_current_instant_result} -ne ${success} ];
@@ -65,7 +72,7 @@ store_current_instant(){
         log ${log_message_type_error} "Could not store current instant.";
         result=${generic_error};
     else
-        log ${leg_message_type_trace} "Current instant stored on file \"${current_instant_file_path}\".";
+        log ${log_message_type_trace} "Current instant stored on file \"${file_path}\".";
         result=${success}
     fi;
         
@@ -79,5 +86,5 @@ store_current_instant(){
     return ${result};
 }
 
-store_current_instant;
+store_current_instant "${@}";
 exit ${?};

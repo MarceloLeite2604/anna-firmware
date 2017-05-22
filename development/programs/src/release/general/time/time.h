@@ -40,6 +40,9 @@ typedef struct instant_t {
  * Function headers.
  */
 
+/* Converts an structure "instant" to an structure "timeval" */
+struct timeval convert_instant_to_timeval(instant_t);
+
 /* Formats an instant as a human-readable string. */
 char* format_instant_to_read(instant_t); 
 
@@ -50,7 +53,7 @@ char* format_instant_to_sort_files(instant_t);
 instant_t get_instant();
 
 /* Calculates the difference between two instants. */
-instant_t get_instant_difference (instant_t,  instant_t);
+int get_instant_difference (instant_t*, instant_t,  instant_t);
 
 /* Retrieves the current instant formatted as a string to sort files. */
 char* get_instant_file_formatted();

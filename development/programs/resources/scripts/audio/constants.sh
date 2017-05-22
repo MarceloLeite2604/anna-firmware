@@ -19,3 +19,15 @@ if [ -z "${audio_pipe_file}" ];
 then
     readonly audio_pipe_file=${temporary_directory}audio_pipe;
 fi;
+
+# File path to store start audio capture instant.
+if [ -z "${audio_start_instant_file}" ];
+then
+    readonly audio_start_instant_file="${temporary_directory}start_audio";
+fi;
+
+# File path to store stop audio capture instant.
+if [ -z "${audio_stop_instant_file}" ];
+then
+    readonly audio_stop_instant_file="${temporary_directory}stop_audio";
+fi;

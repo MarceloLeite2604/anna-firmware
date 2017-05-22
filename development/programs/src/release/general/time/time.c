@@ -14,9 +14,10 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <math.h>
 
 /*
- * Constants.
+ * Macros.
  */
 
 /* Length of a date formatted as a string */
@@ -25,10 +26,43 @@
 /* Length of miliseconds formatted as a string. */
 #define STRING_MILISECONDS_LENGTH 4
 
+/* Ratio between a microsecond and a second. */
+#define MILISECONDS_ON_A_SECOND 1000000.0
+
+/* Ratio between a microseconds and a minute. */
+#define MILISECONDS_ON_A_MINUTE MILISECONDS_ON_A_SECOND * 60.0
+
+/* Ratio between a microseconds and an hour. */
+#define MILISECONDS_ON_AN_HOUR MILISECONDS_ON_A_MINUTE * 60
+
 
 /*
  * Function elaborations.
  */
+
+/*
+ * Converts an structure "instant" to an structure "timeval"
+ *
+ * Parameters:
+ *  instant - Instant to be converted.
+ *
+ * Result:
+ *  An struct "timeval" with the current instant stored.
+ *
+ * Observations:
+ *  Currently this function only considers microseconds, seconds, minutes and hours on conversion.
+ */
+struct timeval convert_instant_to_timeval(instant_t instant) {
+    struct timeval result;
+
+    result.tv_usec = instant.useconds;
+
+    result.tv_sec  = instant.date.tm_sec;
+    result.tv_sec += instant.date.tm_min*60;
+    result.tv_sec += instant.date.tm_hour*60*60;
+
+    return result;
+}
 
 /*
  * Formats an instant as a human-readable string.
@@ -128,6 +162,67 @@ instant_t get_instant() {
 
     LOG_TRACE_POINT;
     return instant;
+}
+
+/*
+ * Returns the difference between two instants.
+ *
+ * Parameters:
+ *   result - Variable where the result will be stored.
+ *   instant_1 - First operator to calculate the difference.
+ *   instant_2 - Second operator to calculate the differente.
+ *
+ * Result:
+ *   SUCCESS - If the difference was calculated correctly.
+ *   GENERIC_ERROR - Otherwise.
+ *
+ * Observations:
+ *  Currently this function only considers microseconds, seconds, minutes and hours to calculate the difference.
+ */
+int get_instant_difference(instant_t* result, instant_t instant_1, instant_t instant_2) {
+    LOG_TRACE_POINT;
+
+    if ( result == NULL ) {
+        LOG_ERROR("Result variable pointer is null.");
+        return GENERIC_ERROR;
+    }
+
+    float total_useconds_1;
+    float total_useconds_2;
+    float total_useconds_result;
+
+    total_useconds_1 = ((float)instant_1.useconds);
+    total_useconds_1 += ((float)instant_1.date.tm_sec * MILISECONDS_ON_A_SECOND);
+    total_useconds_1 += ((float)instant_1.date.tm_min * MILISECONDS_ON_A_MINUTE);
+    total_useconds_1 += ((float)instant_1.date.tm_hour * MILISECONDS_ON_AN_HOUR);
+    LOG_TRACE("Microseconds on operator 1: %f.", total_useconds_1);
+ 
+    total_useconds_2 = ((float)instant_2.useconds);
+    total_useconds_2 += ((float)instant_2.date.tm_sec * MILISECONDS_ON_A_SECOND);
+    total_useconds_2 += ((float)instant_2.date.tm_min * MILISECONDS_ON_A_MINUTE);
+    total_useconds_2 += ((float)instant_2.date.tm_hour * MILISECONDS_ON_AN_HOUR);
+    LOG_TRACE("Microseconds on operator 2: %f.", total_useconds_2);
+
+    if ( total_useconds_2 > total_useconds_1 ) {
+        LOG_ERROR("Instant registered on second operator is later than first operator.");
+        return GENERIC_ERROR;
+    }
+
+    total_useconds_result = total_useconds_1 - total_useconds_2;
+    memset(result, 0, sizeof(instant_t));
+
+    result->date.tm_hour = (int)floor(total_useconds_result / (MILISECONDS_ON_AN_HOUR));
+    total_useconds_result -= (float)result->date.tm_hour * MILISECONDS_ON_AN_HOUR;
+
+    result->date.tm_min = (int)floor(total_useconds_result / (MILISECONDS_ON_A_MINUTE));
+    total_useconds_result -= (float)result->date.tm_min * MILISECONDS_ON_A_MINUTE;
+
+    result->date.tm_sec = (int)floor(total_useconds_result / (MILISECONDS_ON_A_SECOND));
+    total_useconds_result -= (float)result->date.tm_sec * MILISECONDS_ON_A_SECOND;
+
+    result->useconds = total_useconds_result;
+
+    return SUCCESS;
 }
 
 /*

@@ -40,6 +40,12 @@
 /* Name of the file where is stored the latest audio record file name. */
 #define LATEST_AUDIO_RECORD_FILE_NAME_FILE "latest_audio_record"
 
+/* File name which the start audio record instant is stored. */
+#define START_AUDIO_RECORD_INSTANT_FILE_NAME "start_audio_instant"
+
+/* File name which the stop audio record instant is stored. */
+#define STOP_AUDIO_RECORD_INSTANT_FILE_NAME "stop_audio_instant"
+
 /*
  * Function elaborations.
  */
@@ -134,6 +140,70 @@ char* get_latest_audio_record(){
         /* TODO: Check if "fclose" finished successfully. */
 
     }
+
+    return result;
+}
+
+/*
+ * Returns the path of the file which the start audio record instant is stored.
+ * 
+ * Parameters:
+ *  None.
+ *
+ * Result:
+ *  The path of the file which the start audio recorc instant is stored.
+ */
+char* get_start_audio_record_instant_file_path() {
+
+    char* result;
+    size_t result_size;
+    char* output_directory;
+
+    output_directory = get_output_directory();
+
+    result_size = strlen(START_AUDIO_RECORD_INSTANT_FILE_NAME);
+    result_size += strlen(output_directory);
+    result_size += 1;
+
+    result = malloc(result_size*sizeof(char));
+
+    memset(result, 0, result_size*sizeof(char));
+    strcpy(result, output_directory);
+    strcat(result, START_AUDIO_RECORD_INSTANT_FILE_NAME);
+
+    free(output_directory);
+
+    return result;
+}
+
+/*
+ * Returns the path of the file which the stop audio record instant is stored.
+ * 
+ * Parameters:
+ *  None.
+ *
+ * Result:
+ *  The path of the file which the stop audio recorc instant is stored.
+ */
+char* get_stop_audio_record_instant_file_path() {
+
+    char* result;
+    size_t result_size;
+    char* output_directory;
+
+    output_directory = get_output_directory();
+
+    result_size = strlen(STOP_AUDIO_RECORD_INSTANT_FILE_NAME);
+    result_size += strlen(output_directory);
+    result_size += 1;
+
+    result = malloc(result_size*sizeof(char));
+
+    memset(result, 0, result_size*sizeof(char));
+    strcpy(result, output_directory);
+    strcat(result, STOP_AUDIO_RECORD_INSTANT_FILE_NAME);
+
+    free(output_directory);
 
     return result;
 }
