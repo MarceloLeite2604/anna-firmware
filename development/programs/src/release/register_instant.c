@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include "general/return_codes.h"
 #include "general/time/time.h"
+#include "log/log.h"
 
 
 /*
@@ -32,54 +33,42 @@
 int main(int argc, char** argv) {
 
     if ( argc < 1 ) {
-        fprintf(stderr, "This program must receive the file name to store the current instant.\n");
+        fprintf(stderr, "This program must receive the file path to store the current instant.\n");
         return GENERIC_ERROR;
     }
 
-    char* filename;
-    size_t filename_size;
-    FILE* output_file;
-    int errno_value;
-    int fclose_result;
-    uint8_t* pointer;
+    char* file_path;
+    char* instant_read_formatted;
+    size_t file_path_size;
+    int store_current_instant_result;
+
+    file_path_size = strlen(argv[1]) + sizeof(char);
+    file_path = (char*)malloc(file_path_size);
+
+    memset(file_path, 0, file_path_size);
+    strcpy(file_path, argv[1]);
+
+    store_current_instant_result = store_current_instant(file_path);
+    if ( store_current_instant_result != SUCCESS ) {
+        LOG_ERROR("Error while storing current instant on file.");
+        return GENERIC_ERROR;
+    }
+
+    /*
     instant_t instant;
-    size_t instant_size;
-    int counter;
-
-    filename_size = strlen(argv[1]) + sizeof(char);
-    filename = (char*)malloc(filename_size);
-
-    memset(filename, 0, filename_size);
-    strcpy(filename, argv[1]);
-
-    output_file = fopen(filename, "wb");
-
-    if ( output_file == NULL ) {
-        errno_value = errno;
-        fprintf(stderr, "Error while opening file \"%s\".\n", filename);
-        fprintf(stderr, "%s\n.", strerror(errno_value));
+    int retrieve_instant_from_file_result;
+    retrieve_instant_from_file_result = retrieve_instant_from_file(&instant, file_path);
+    if ( retrieve_instant_from_file_result != SUCCESS ) {
+        LOG_ERROR("Error while retrieving instant from file.");
         return GENERIC_ERROR;
     }
 
-    instant = get_instant();
-    pointer = (uint8_t*)&instant;
-    instant_size = sizeof(instant_t);
-    for (counter = 0; counter < instant_size; counter++) {
-        /* TODO: Is this cast correct? */
-        fputc((int)*pointer, output_file);
-        pointer += sizeof(uint8_t);
-    }
+    instant_read_formatted = format_instant_to_read(instant);
+    printf("Retrieved instant is %s.\n", instant_read_formatted);
 
-    fclose_result = fclose(output_file);
+    free(instant_read_formatted);
+    */
 
-    if (fclose_result != 0 ) {
-        errno_value = errno;
-        fprintf(stderr, "Error while closing file \"%s\".\n", filename);
-        fprintf(stderr, "%s\n.", strerror(errno_value));
-        free(filename);
-        return GENERIC_ERROR;
-    }
-
-    free(filename);
+    free(file_path);
     return SUCCESS;
 }

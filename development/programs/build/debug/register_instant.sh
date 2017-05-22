@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to execute "testpackage" program.
+# Script to execute "register_instant" program.
 #
 # Version: 0.1
 # Author: Marcelo Leite
@@ -19,4 +19,7 @@ then
     fi;
 fi;
 
-${command_preffix} $(dirname $BASH_SOURCE)/bin/testpackage;
+${command_preffix} $(dirname ${BASH_SOURCE})/bin/register_instant "${OUTPUT_DIRECTORY}temporary/current_instant";
+program_exit_code=${?};
+echo "Program finished with value "${program_exit_code}".";
+exit ${program_exit_code};

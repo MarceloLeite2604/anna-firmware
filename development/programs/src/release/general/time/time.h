@@ -40,6 +40,12 @@ typedef struct instant_t {
  * Function headers.
  */
 
+/* Formats an instant as a human-readable string. */
+char* format_instant_to_read(instant_t); 
+
+/* Formats the instant as a string to sort files. */
+char* format_instant_to_sort_files(instant_t);
+
 /* Retrieves the current instant */
 instant_t get_instant();
 
@@ -51,6 +57,12 @@ char* get_instant_file_formatted();
 
 /* Retrieves the current instant formatted as a human-readable string. */
 char* get_instant_read_formatted();
+
+/* Retrieves an instant stored on a file. */
+int retrieve_instant_from_file(instant_t*, char*);
+
+/* Stores the current instant on a file. */
+int store_current_instant(char*);
 
 #endif
 

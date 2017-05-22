@@ -1,5 +1,32 @@
 #!/bin/bash
 
+create_directory() {
+
+    local mkdir_result="";
+    local result=1;
+
+    local directory="${1}";
+
+    if [ ! -d "${directory}" ];
+    then
+        # echo "Directory \"${directory}\" does not exist.";
+        mkdir -p "${directory}"
+        mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            echo "Could not create directory \"${directory}\".";
+            result=1;
+        else
+            echo "Directory \"${directory}\" created.";
+            result=0;
+        fi;
+    else
+        result=0;
+    fi;
+
+    return ${result};
+}
+
 build_programs() {
 
     local output_directory="${1}";
@@ -10,6 +37,9 @@ build_programs() {
     local test_source_directory="${source_directory}test/";
     local objects_directory="${output_directory}objects/";
     local binary_folder="${output_directory}bin/";
+
+    create_directory "${objects_directory}";
+    create_directory "${binary_folder}";
     
     echo "creating \"time\" object.";
     gcc -c ${release_source_directory}general/time/time.c -o ${objects_directory}time.o ${additional_arguments};
@@ -274,7 +304,7 @@ build_programs() {
     fi;
     
     echo "Creating \"register_instant\" program.";
-    gcc -o ${binary_folder}muni ${objects_directory}register_instant.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}directory.o ${additional_arguments};
+    gcc -o ${binary_folder}register_instant ${objects_directory}register_instant.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}directory.o ${additional_arguments};
     
     if [ $? -ne 0 ];
     then
