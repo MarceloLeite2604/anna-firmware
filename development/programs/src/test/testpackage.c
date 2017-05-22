@@ -65,8 +65,12 @@ void test_packages(){
     package_t check_connection_package = create_check_connection_package();
     test_package(check_connection_package);
     delete_package(check_connection_package);
+
+    struct timeval execution_time;
+    execution_time.tv_sec = 123;
+    execution_time.tv_usec = 456000;
     
-    package_t command_result_package  = create_command_result_package(0x2236);
+    package_t command_result_package  = create_command_result_package(0x2236, execution_time);
     test_package(command_result_package);
     delete_package(command_result_package);
 

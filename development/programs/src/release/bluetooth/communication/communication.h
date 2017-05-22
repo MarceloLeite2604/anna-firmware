@@ -10,6 +10,7 @@
 /*
  * Includes.
  */
+#include <time.h>
 #include "../package/package.h"
 #include "../connection/connection.h"
 
@@ -43,7 +44,7 @@ int send_file(int, char*);
 int send_package(int, package_t);
 
 /* Transmits a command result. */
-int transmit_command_result(int, int);
+int transmit_command_result(int, int, struct timeval);
 
 /* Transmits an error. */
 int transmit_error(int, int, const char*);

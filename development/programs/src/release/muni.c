@@ -455,13 +455,16 @@ int command_start_audio_record(int socket_fd){
     int result;
     int start_audio_record_result;
     int send_package_result;
+    struct timeval execution_delay;
 
     package_t command_result_package;
 
     start_audio_record_result = start_audio_record();
     LOG_TRACE_POINT;
 
-    command_result_package = create_command_result_package(start_audio_record_result);
+    /* TODO: Fill the execution delay variable. */
+
+    command_result_package = create_command_result_package(start_audio_record_result, execution_delay);
     send_package_result = send_package(socket_fd, command_result_package);
 
     if ( send_package_result == SUCCESS ) {
@@ -495,11 +498,14 @@ int command_stop_audio_record(int socket_fd){
     int stop_audio_record_result;
     int send_package_result;
     package_t command_result_package;
+    struct timeval execution_delay;
 
     stop_audio_record_result = stop_audio_record();
     LOG_TRACE_POINT;
 
-    command_result_package = create_command_result_package(stop_audio_record_result);
+    /* TODO: Fill execution delay variable. */
+
+    command_result_package = create_command_result_package(stop_audio_record_result, execution_delay);
     send_package_result = send_package(socket_fd, command_result_package);
 
     if ( send_package_result == SUCCESS ) {

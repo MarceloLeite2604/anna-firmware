@@ -59,7 +59,7 @@ int convert_byte_array_to_start_record_content(content_t*, byte_array_t);
 int convert_byte_array_to_stop_record_content(content_t*, byte_array_t);
 
 /* Creates a command result package content. */
-content_t create_command_result_content(uint32_t);
+content_t create_command_result_content(uint32_t, struct timeval);
 
 /* Creates a byte array containing a command result package content. */
 byte_array_t create_command_result_content_byte_array(content_t);
@@ -694,17 +694,19 @@ package_t create_check_connection_package() {
  *
  * Parameters
  *  result_code - The command result code to be stored in the content.
+ *  execution_delay - The command execution delay to be stored in the content.
  *
  * Returns
  *  A command result package content with the command result code informed.
  */
-content_t create_command_result_content(uint32_t result_code) {
-    LOG_TRACE("Result code: 0x%x", result_code);
+content_t create_command_result_content(uint32_t result_code, struct timeval execution_delay) {
+    LOG_TRACE("Result code: 0x%x, Execution delay: %ld.%06ld.", result_code, execution_delay.tv_sec, execution_delay.tv_usec);
 
     content_t content;
 
     content.command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
     content.command_result_content->result_code = result_code;
+    content.command_result_content->execution_delay = execution_delay;
     LOG_TRACE_POINT;
     return content;
 }
@@ -723,11 +725,16 @@ byte_array_t create_command_result_content_byte_array(content_t content) {
 
     byte_array_t byte_array;
 
-    byte_array.size = sizeof(uint32_t);
+    byte_array.size = sizeof(uint32_t) + sizeof(struct timeval);
 
     byte_array.data = (uint8_t*)malloc(byte_array.size*sizeof(uint8_t));
+    uint8_t* array_pointer = byte_array.data;
 
-    memcpy(byte_array.data, &content.command_result_content->result_code, sizeof(uint32_t));
+    memcpy(array_pointer, &content.command_result_content->result_code, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+
+    memcpy(array_pointer, &content.command_result_content->execution_delay, sizeof(struct timeval));
+
     LOG_TRACE_POINT;
     return byte_array;
 }
@@ -737,15 +744,16 @@ byte_array_t create_command_result_content_byte_array(content_t content) {
  * 
  * Parameters
  *  command_result - The command result to be informed on the package.
+ *  execution_delay - The command execution delay to be informed on the package.
  *
  * Returns
  *  A command result package with the information provided.
  */
-package_t create_command_result_package(uint32_t command_result) {
-    LOG_TRACE("Command result: 0x%x.", command_result);
+package_t create_command_result_package(uint32_t command_result, struct timeval execution_delay) {
+    LOG_TRACE("Command result: 0x%x, Execution delay: %ld.%06ld.", command_result, execution_delay.tv_sec, execution_delay.tv_usec);
 
     package_t package = create_package(COMMAND_RESULT_CODE);
-    package.content = create_command_result_content(command_result);
+    package.content = create_command_result_content(command_result, execution_delay);
 
     LOG_TRACE_POINT;
     return package;

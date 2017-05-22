@@ -773,19 +773,20 @@ int send_file_trailer(int socket_fd){
  *  
  *  socket_fd - The connection socket file descriptor to send the command result.
  *  command_result - The command result to be sent.
+ *  execution_delay - The command execution delay to be sent.
  *
  * Returns
  *  SUCCESS - If the command result was send sucessfully.
  *  GENERIC_ERROR - Otherwise.
  */
-int transmit_command_result(int socket_fd, int command_result) {
+int transmit_command_result(int socket_fd, int command_result, struct timeval execution_delay) {
     LOG_TRACE_POINT;
 
     int result = SUCCESS;
     int send_package_result;
     package_t command_result_package;
 
-    command_result_package = create_command_result_package(command_result);
+    command_result_package = create_command_result_package(command_result, execution_delay);
     LOG_TRACE_POINT;
 
     send_package_result = send_package(socket_fd, command_result_package);

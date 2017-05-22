@@ -264,6 +264,23 @@ build_programs() {
         echo "Error creating \"muni\" program.";
         return 1;
     fi;
+
+    echo "Creating \"register_instant\" object.";
+    gcc -c ${release_source_directory}register_instant.c -o ${objects_directory}register_instant.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"register_instant\" object.";
+        return 1;
+    fi;
+    
+    echo "Creating \"register_instant\" program.";
+    gcc -o ${binary_folder}muni ${objects_directory}register_instant.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}script.o ${objects_directory}directory.o ${additional_arguments};
+    
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"register_instant\" program.";
+        return 1;
+    fi;
 }
 
 print_usage(){

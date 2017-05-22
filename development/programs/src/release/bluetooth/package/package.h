@@ -12,6 +12,7 @@
  * Includes.
  */
 #include <stdint.h>
+#include <time.h>
 #include "../../general/byte_array/byte_array.h"
 
 /*
@@ -26,6 +27,7 @@ typedef struct {
 /* Command result package content. */
 typedef struct {
     uint32_t result_code;
+    struct timeval execution_delay;
 } command_result_content_t;
 
 /* Error package content. */
@@ -88,7 +90,7 @@ int convert_package_to_byte_array(byte_array_t*, package_t);
 package_t create_check_connection_package();
 
 /* Creates a command result package. */
-package_t create_command_result_package(uint32_t);
+package_t create_command_result_package(uint32_t, struct timeval);
 
 /* Creates a confirmation package. */
 package_t create_confirmation_package(uint32_t);
