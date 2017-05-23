@@ -41,10 +41,10 @@
 #define LATEST_AUDIO_RECORD_FILE_NAME_FILE "latest_audio_record"
 
 /* File name which the start audio record instant is stored. */
-#define START_AUDIO_RECORD_INSTANT_FILE_NAME "start_audio_instant"
+#define START_AUDIO_RECORD_INSTANT_FILE_NAME "temporary/start_audio_instant"
 
 /* File name which the stop audio record instant is stored. */
-#define STOP_AUDIO_RECORD_INSTANT_FILE_NAME "stop_audio_instant"
+#define STOP_AUDIO_RECORD_INSTANT_FILE_NAME "temporary/stop_audio_instant"
 
 /*
  * Function elaborations.

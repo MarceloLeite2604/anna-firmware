@@ -23,11 +23,11 @@ fi;
 # File path to store start audio capture instant.
 if [ -z "${audio_start_instant_file}" ];
 then
-    readonly audio_start_instant_file="${temporary_directory}start_audio";
+    readonly audio_start_instant_file="${temporary_directory}start_audio_instant";
 fi;
 
 # File path to store stop audio capture instant.
 if [ -z "${audio_stop_instant_file}" ];
 then
-    readonly audio_stop_instant_file="${temporary_directory}stop_audio";
+    readonly audio_stop_instant_file="${temporary_directory}stop_audio_instant";
 fi;

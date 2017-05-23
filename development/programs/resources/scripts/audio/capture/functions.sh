@@ -134,7 +134,9 @@ start_audio_capture_process(){
     fi;
 
     local start_process_result;
+    # start_process "${start_audio_capture_command}" "${audio_capture_process_identifier}" "" "${audio_pipe_file}" "${error_file}";
     start_process "${start_audio_capture_command}" "${audio_capture_process_identifier}" "" "${audio_pipe_file}" "${error_file}";
+    $(dirname ${BASH_SOURCE})/../../store_instant.sh "${audio_start_instant_file}";
     start_process_result=${?};
     if [ ${start_process_result} -ne ${success} ];
     then
