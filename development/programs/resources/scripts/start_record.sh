@@ -88,7 +88,6 @@ start_record(){
                     result=${generic_error};
                 else
                     log ${log_message_type_trace} "Audio record started.";
-                    # $(dirname ${BASH_SOURCE})/store_instant.sh "${audio_start_instant_file}";
                     register_instant_result=${?};
 
                     if [ ${register_instant_result} -ne ${success} ];

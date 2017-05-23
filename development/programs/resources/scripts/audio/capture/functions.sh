@@ -125,6 +125,8 @@ start_audio_capture_process(){
     start_audio_capture_command+=" ${sampling_rate_parameter}";
     start_audio_capture_command+=" ${record_device_parameter}";
     start_audio_capture_command+=" ${audio_format_parameter}";
+    # TODO: Add a new configuration file to determine the buffer length.
+    start_audio_capture_command+=" -B 5000000";
     #start_audio_capture_command+=" 1> ${audio_pipe_file}";
 
     local error_file="";

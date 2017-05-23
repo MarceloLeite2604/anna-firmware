@@ -79,6 +79,7 @@ define_input_output_directories() {
 
     echo "${input_output_directory}" > ${source_directory}input_directory;
     echo "${input_output_directory}" > ${source_directory}output_directory;
+    echo "${input_output_directory}../build/release/bin/" > ${source_directory}binaries_directory;
 
     return 0;
 }
