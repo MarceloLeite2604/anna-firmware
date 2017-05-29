@@ -1,9 +1,24 @@
 #!/bin/bash
 
-# This file contains all constants required to use log and trace functions.
+# This file contains all constants required to use log functions.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version: 
+#   0.1
+#
+# Author:
+#   Marcelo Leite
+#
+
+
+# ###
+# Constants.
+# ###
 
 # Suffix to identify log files.
 if [ -z "${_log_file_suffix}" ]; 

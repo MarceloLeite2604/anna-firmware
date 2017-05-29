@@ -84,22 +84,29 @@ get_current_time_formatted() {
 #   1. Program to be searched.
 #
 # Returns
-#   0. If the program was located.
-#   1. Otherwise.
+#   SUCCESS - If the program was located.
+#   GENERIC_ERROR - Otherwise.
 #   It also returns the program location through "echo".
+#
 find_program(){
 
+    local program;
+    local program_location;
+    local command_result;
+
+    # Check function parameters.
     if [ ${#} -ne 1 ];
     then
         log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        program="${1}";
     fi;
 
-    local program="${1}";
-
-    local program_location;
+    # Finds a program location.
     program_location=$(command -v "${program}");
-    if [ ${?} -ne ${success} -o -z "${program_location}" ];
+    command_result=${?};
+    if [ ${command_result} -ne ${success} -o -z "${program_location}" ];
     then
         log ${log_message_type_trace} "Could not find program \"${program}\".";
         return  ${generic_error};
