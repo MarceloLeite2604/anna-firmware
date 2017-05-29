@@ -2,11 +2,29 @@
 
 # This script contains all generic constants used throughout other scripts.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   1 - If this script could not find the input or ouput directories.
+#
+# Version:
+#   0.1
+#
+# Author:
+#   Marcelo Leite
+#
+
+# ###
+# Script sources.
+# ###
 
 # Loads directory functions.
 source "$(dirname ${BASH_SOURCE})/../directories/functions.sh";
+
+# ###
+# Constants.
+# ###
 
 # The company's name.
 if [ -z "${company}" ]; 
@@ -17,7 +35,7 @@ fi;
 # The project name.
 if [ -z "${project}" ]; 
 then
-	readonly project="projeto_anna";
+	readonly project="anna";
 fi;
 
 # Root directory.
@@ -29,29 +47,28 @@ fi;
 # Directory which contains the input files.
 if [ -z "${input_files_directory}" ];
 then
-    _temporary_input_files_directory=$(get_input_files_directory);
-    if [ $? -ne 0 ];
+    _temporary_input_files_directory="$(get_input_files_directory)";
+    if [ ${?} -ne 0 ];
     then
         exit 1;
     fi;
-    readonly input_files_directory=${_temporary_input_files_directory};
+    readonly input_files_directory="${_temporary_input_files_directory}";
 fi;
 
 # Directory which contains the output files.
 if [ -z "${output_files_directory}" ];
 then
-    _temporary_output_files_directory=$(get_output_files_directory);
-    if [ $? -ne 0 ];
+    _temporary_output_files_directory="$(get_output_files_directory)";
+    if [ ${?} -ne 0 ];
     then
         exit 1;
     fi;
-    readonly output_files_directory=${_temporary_output_files_directory};
+    readonly output_files_directory="${_temporary_output_files_directory}";
 fi;
 
-# Configuration directory.
+# Directory which contains the project configuration.
 if [ -z "${configuration_directory}" ];
 then
-    # readonly configuration_directory="${root_directory}configuration/";
     readonly configuration_directory="${input_files_directory}configuration/";
 fi;
 
@@ -82,14 +99,12 @@ fi;
 # Directory where audio files will be stored.
 if [ -z "${audio_directory}" ];
 then
-    # readonly audio_directory="${root_directory}audio/";
     readonly audio_directory="${output_files_directory}audio/";
 fi;
 
 # Temporary directory.
 if [ -z "${temporary_directory}" ];
 then
-    # readonly temporary_directory="${root_directory}temporary/";
     readonly temporary_directory="${output_files_directory}temporary/";
 fi;
 

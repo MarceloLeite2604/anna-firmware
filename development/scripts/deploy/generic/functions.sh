@@ -2,8 +2,22 @@
 
 # This script contains generic functions used by other scripts.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+# ###
+# Script sources.
+# ###
 
 # Load generic constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
@@ -11,40 +25,55 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 # Load log functions script.
 source "$(dirname ${BASH_SOURCE})/../log/functions.sh";
 
-# Returns current time.
+
+# ###
+# Function elaborations.
+# ###
+
+# Returns current time formatted in a readable format.
 #
-# Parameters
+# Parameters:
 #   None
 #
-# Returns
-#    The current time through "echo".
+# Returns:
+#    SUCCESS - If current time was retireved successfully.
+#    GENERIC_ERROR - Otherwise.
+#    It also returns the current time through "echo".
+#
 get_current_time(){
 
+    # Checks function parameters.
     if [ ${#} -ne 0 ];
     then
         log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
     fi;
 
+    # Retrieves current time.
     echo "$(date +"%Y/%m/%d %H:%M:%S")";
     return ${success};
 }
 
-# Return current time formatted as a string.
+# Returns current time formatted as a string to sort files.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   The current time formatted as a string through "echo".
+#   SUCCESS - If current time was retrieved successfully.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns current time formatted as a string through "echo".
+#
 get_current_time_formatted() {
 
+    # Checks function parameters.
     if [ ${#} -ne 0 ];
     then
         log ${log_message_type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
     fi;
 
+    # Retrieves current time formatted to sort files.
     echo "$(date +"%Y%m%d_%H%M%S")";
     return ${success};
 };
