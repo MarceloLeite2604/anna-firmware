@@ -26,10 +26,10 @@ source "$(dirname ${BASH_SOURCE})/../directories/functions.sh";
 # Constants.
 # ###
 
-# The company's name.
+# The company name.
 if [ -z "${company}" ]; 
 then
-	readonly company="marcelo";
+    readonly company="marcelo";
 fi;
 
 # The project name.
@@ -37,12 +37,6 @@ if [ -z "${project}" ];
 then
 	readonly project="anna";
 fi;
-
-# Root directory.
-# if [ -z "${root_directory}" ]; 
-# then
-#     readonly root_directory="$(dirname ${BASH_SOURCE})/../../";
-# fi;
 
 # Directory which contains the input files.
 if [ -z "${input_files_directory}" ];
@@ -72,7 +66,7 @@ then
     readonly configuration_directory="${input_files_directory}configuration/";
 fi;
 
-# Indicates that the process was not executed.
+# Indicates that a process was not executed.
 if [ -z "${not_executed}" ]; 
 then
     readonly not_executed=255;
@@ -93,7 +87,7 @@ fi;
 # Main directory structure used by the scripts.
 if [ -z "${directory_structure}" ]; 
 then
-	readonly directory_structure="./${company}/${project}/";
+    readonly directory_structure="./${company}/${project}/";
 fi;
 
 # Directory where audio files will be stored.

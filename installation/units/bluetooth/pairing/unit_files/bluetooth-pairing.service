@@ -1,0 +1,11 @@
+[Unit]
+Description=Bluetooth pairing service
+After=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/opt/marcelo/operating-system/services/bluetooth/pairing/scripts/bluetooth-pairing.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
