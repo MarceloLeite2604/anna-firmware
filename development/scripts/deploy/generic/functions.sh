@@ -2,8 +2,22 @@
 
 # This script contains generic functions used by other scripts.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version: 
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+# ###
+# Script sources.
+# ###
 
 # Load generic constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
@@ -11,13 +25,20 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 # Load log functions script.
 source "$(dirname ${BASH_SOURCE})/../log/functions.sh";
 
+
+# ###
+# Function elaborations.
+# ###
+
 # Returns current time.
 #
-# Parameters
+# Parameters:
 #   None
 #
-# Returns
-#    The current time through "echo".
+# Returns:
+#   0 - If current time was retrieved successfully.
+#   1 - Otherwise.
+#
 get_current_time(){
 
     if [ ${#} -ne 0 ];
