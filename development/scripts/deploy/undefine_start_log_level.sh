@@ -2,27 +2,47 @@
 
 # This script undefines the start log level for script executions.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+
+# ###
+# Script sources.
+# ###
 
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
 
+# ###
+# Functions elaboration.
+# ###
+
 # Undefines the start log level.
 #
-# Parameters
-#   None  
+# Parameters:
+#   None.
 #
-# Returns
-#   0. If start log level was undefined successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If start log level was undefined successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 undefine_start_log_level(){
-    local result;
-    local new_log_level;
-    local continue_log_file_result;
-    local set_log_level_result;
 
+    local result;
+    local delete_start_log_level_file_result;
+
+    # Deletes the start log level file.
     delete_start_log_level_file;
     delete_start_log_level_file_result=${?};
     if [ ${delete_start_log_level_file_result} -ne ${success} ];
@@ -37,5 +57,6 @@ undefine_start_log_level(){
     return ${result};
 }
 
-undefine_start_log_level ${@};
+# Requests to undefine the start log level.
+undefine_start_log_level;
 exit ${?};

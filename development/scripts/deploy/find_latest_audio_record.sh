@@ -2,9 +2,24 @@
 
 # This script finds the latest audio recorded and stores its name on "last audio" file.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
 #
+# Returns:
+#   SUCCESS - If latest audio file was retrieved successfully.
+#   GENERIC_ERROR - Otherwise.
+# 
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+
+# ###
+# Script sources.
+# ###
 
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
@@ -13,20 +28,26 @@ source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 source "$(dirname ${BASH_SOURCE})/audio/encoder/constants.sh"
 
 
+# ###
+# Functions elaboration.
+# ###
+
 # Finds the latest audio recorded and stores its name on "last audio" file.
 #
-# Parameters
+# Parameters:
+#   None.
 #
-# Returns
-#   0. If the latest audio record name was stored successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If the latest audio record name was stored successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 find_latest_audio_record(){
-    local result;
-    local latest_audio_record_file_name;
-    local echo_result;
+
     local continue_log_file_result;
     local log_file_created;
     local is_log_defined_result;
+    local latest_audio_record_file_name;
+    local echo_result;
     local log_file_created;
     local audio_file_pattern;
 
@@ -56,30 +77,30 @@ find_latest_audio_record(){
         set_log_level ${log_message_type_trace};
     fi;
 
+    # Elaborates the pattern to find audio files.
     audio_file_pattern="${audio_directory}${audio_file_preffix}*${audio_file_suffix}"
 
+    # Retrieves the latest audio record file name.
     latest_audio_record_file_name=$(eval ls -A1tr "${audio_file_pattern}" 2> /dev/null | tail -n 1);
     latest_audio_record_file_name=$(basename "${latest_audio_record_file_name}");
     if [ -z "${latest_audio_record_file_name}" ];
     then
         log ${log_message_type_error} "Could not find latest audio record file name.";
-        result=${generic_error};
-    else
-
-        log ${log_message_type_trace} "Latest audio record file name: \"${latest_audio_record_file_name}\".";
-
-
-        echo -ne "${latest_audio_record_file_name}" > ${latest_audio_record_file_name_file};
-        echo_result=${?};
-        if [ ${echo_result} -ne ${success} ];
-        then
-            log ${log_message_type_error} "Could not write latest audio record file name.";
-            result=${generic_error};
-        else
-            result=${success};
-        fi;
+        return ${generic_error};
     fi;
 
+    log ${log_message_type_trace} "Latest audio record file name: \"${latest_audio_record_file_name}\".";
+
+    # Stores the latest audio record file name on "last audio" file.
+    echo -ne "${latest_audio_record_file_name}" > ${latest_audio_record_file_name_file};
+    echo_result=${?};
+    if [ ${echo_result} -ne ${success} ];
+    then
+        log ${log_message_type_error} "Could not write latest audio record file name.";
+        return ${generic_error};
+    fi;
+
+    # If log file was created.
     if [ ${log_file_created} -eq ${success} ];
     then
 
@@ -87,7 +108,7 @@ find_latest_audio_record(){
         finish_log_file;
     fi;
 
-    return ${result};
+    return ${success};
 }
 
 find_latest_audio_record;
