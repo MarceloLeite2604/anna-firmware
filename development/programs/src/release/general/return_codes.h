@@ -1,12 +1,19 @@
 /*
- * This header file contains all return codes used on Muni execution.
+ * This header file contains all general return codes used by functions.
+ * 
+ * Version:
+ *  0.1
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef RETURN_CODES_H
 #define RETURN_CODES_H
+
+/*
+ * Macros.
+ */
 
 /* Code used when a function was executed successfully. */
 #define SUCCESS 0

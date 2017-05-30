@@ -104,13 +104,13 @@ build_programs() {
         return 1;
     fi;
     
-    echo "Creating \"bluetooth\" object.";
-    gcc -c ${release_source_directory}bluetooth/bluetooth.c -o ${objects_directory}bluetooth.o ${additional_arguments};
-    if [ $? -ne 0 ];
-    then
-        echo "Error creating \"bluetooth\" object.";
-        return 1;
-    fi;
+    # echo "Creating \"bluetooth\" object.";
+    # gcc -c ${release_source_directory}bluetooth/bluetooth.c -o ${objects_directory}bluetooth.o ${additional_arguments};
+    # if [ $? -ne 0 ];
+    # then
+    #     echo "Error creating \"bluetooth\" object.";
+    #     return 1;
+    # fi;
     
     echo "Creating \"bluetooth package codes\" object.";
     gcc -c ${release_source_directory}bluetooth/package/codes/codes.c -o ${objects_directory}bluetooth_package_codes.o ${additional_arguments};
@@ -266,22 +266,21 @@ build_programs() {
         return 1;
     fi;
 
-    echo "Creating \"testbluetooth\" object.";
-    gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
-    if [ $? -ne 0 ];
-    then
-        echo "Error creating \"testbluetooth\" object.";
-        return 1;
-    fi;
+    # echo "Creating \"testbluetooth\" object.";
+    # gcc -c ${test_source_directory}testbluetooth.c -o ${objects_directory}testbluetooth.o ${additional_arguments};
+    # if [ $? -ne 0 ];
+    # then
+    #     echo "Error creating \"testbluetooth\" object.";
+    #     return 1;
+    # fi;
     
-    echo "Creating \"testbluetooth\" program.";
-    gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth -lm ${additional_arguments};
-    
-    if [ $? -ne 0 ];
-    then
-        echo "Error creating \"testbluetooth\" program.";
-        return 1;
-    fi;
+    # echo "Creating \"testbluetooth\" program.";
+    # gcc -o ${binary_folder}testbluetooth ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}bluetooth.o ${objects_directory}testbluetooth.o -lbluetooth -lm ${additional_arguments};
+    # if [ $? -ne 0 ];
+    # then
+    #     echo "Error creating \"testbluetooth\" program.";
+    #     return 1;
+    # fi;
 
     echo "Creating \"muni\" object.";
     gcc -c ${release_source_directory}muni.c -o ${objects_directory}muni.o ${additional_arguments};

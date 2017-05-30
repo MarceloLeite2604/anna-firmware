@@ -1,8 +1,11 @@
 /*
- * This header file contains all componentes required to retrieve informations about system time.
+ * This header file contains the declaration of all componentes required to retrieve informations about system time.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef TIME_H
@@ -11,11 +14,13 @@
 /*
  * Includes.
  */
+
 #include <sys/time.h>
 #include <time.h>
 
+
 /*
- * Constants.
+ * Macros.
  */
 
 /* Length of time string formatted to read. */

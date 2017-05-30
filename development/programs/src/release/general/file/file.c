@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include "../../general/return_codes.h"
 #include "../../log/log.h"
 #include "file.h"
 
@@ -135,7 +136,7 @@ int read_file_chunk(char* file_path, uint8_t* buffer, long int start_position, s
     fgets_result = fgets(file_path, chunk_size, file);
     if ( fgets_result == NULL ) {
         errno_value = errno;
-        LOG_ERROR("Error while reading %zu bytes from file \"%s\".", chunk_size);
+        LOG_ERROR("Error while reading %zu bytes from file \"%s\".", chunk_size, file_path);
         LOG_ERROR("%s", strerror(errno_value));
         fclose(file);
         return GENERIC_ERROR;

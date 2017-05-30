@@ -1,19 +1,25 @@
 /*
- * This header file contains all components required to manipulate the bluetooth communication data packages.
+ * This header file contains the declaration of all components required to manipulate the bluetooth data packages.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef BLUETOOTH_PACKAGE_H
 #define BLUETOOTH_PACKAGE_H
+
 
 /*
  * Includes.
  */
 #include <stdint.h>
 #include <time.h>
+
 #include "../../general/byte_array/byte_array.h"
+
 
 /*
  * Structure definitions.
@@ -75,6 +81,7 @@ typedef struct {
     content_t content;
     uint32_t trailer;
 } package_t;
+
 
 /*
  * Function headers.

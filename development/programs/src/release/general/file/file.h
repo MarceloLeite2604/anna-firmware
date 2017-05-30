@@ -1,19 +1,24 @@
 /*
- * This header file contains all component declarations to manipulate failes.
+ * This header file contains the declaration of all component required to manipulate files.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author:
+ *  Marcelo Leite
  */
 
 #ifndef FILE_H
 #define FILE_H
 
 /*
- * Inclusions.
+ * Includes.
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <unistd.h>
+
 
 /*
  * Function declarations.

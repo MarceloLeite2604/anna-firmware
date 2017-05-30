@@ -1,14 +1,19 @@
 /*
- * This header file contains all components required to control retry attempts and wait time.
+ * This header file contains all components required to control waiting times and retry attempts.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
+
 #ifndef WAIT_TIME_H
 #define WAIT_TIME_H
 
+
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Code used to indicate that retry controller reached its maximum attempts. */
@@ -16,14 +21,15 @@
 
 
 /*
- * Structure declarations.
+ * Structures.
  */
 
-/* Stores informations about retries. */
+/* Stores informations about retry attempts. */
 typedef struct {
     int maximum;
     int attempts;
 } retry_informations_t;
+
 
 /*
  * Function headers.

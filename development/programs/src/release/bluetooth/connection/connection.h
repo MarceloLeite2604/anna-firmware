@@ -1,22 +1,28 @@
 /*
- * This header file contains all components required to manipulate the bluetooth connection.
+ * This header file contains the declaration of all components required to manipulate the bluetooth connection.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef BLUETOOTH_CONNECTION_H
 #define BLUETOOTH_CONNECTION_H
+
 
 /*
  * Includes.
  */
 #include <stdbool.h>
 #include <sys/time.h>
+
 #include "../../general/byte_array/byte_array.h"
 
+
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Code returned when there is not content to be read on socket. */
@@ -24,6 +30,7 @@
 
 /* Code returned when the socket has content to read. */
 #define CONTENT_TO_READ 51
+
 
 /*
  * Function headers.
@@ -39,7 +46,6 @@ int check_socket_content(int, struct timeval);
 int disconnect(int);
 
 /* Reads content from the socket. */
-/* byte_array_t read_socket_content(int); */
 int read_socket_content(int, byte_array_t*);
 
 /* Writes content on socket. */
