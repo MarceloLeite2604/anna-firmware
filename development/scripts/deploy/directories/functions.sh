@@ -15,10 +15,6 @@
 # Author: 
 #   Marcelo Leite
 #
-# Observations:
-#    Since this script is used by generic constants script, it cannot load it.
-# Therefore, it can't use constants like "SUCCESS" and "GENERIC_ERROR".
-#
 
 # ###
 # Include guard.
@@ -35,6 +31,9 @@ fi;
 # Script sources.
 # ###
 
+# Load generic constants script.
+source "$(dirname ${BASH_SOURCE})/../generic/constants.sh";
+
 # Load directory constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
 
@@ -49,8 +48,8 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 #   None.
 #
 # Returns:
-#   0 - If binaries directory was acquired and returned correctly.
-#   1 - Otherwise.
+#   SUCCESS - If binaries directory was acquired and returned correctly.
+#   GENERIC_ERROR - Otherwise.
 #   It also returns the binaries directory path through "echo".
 #
 get_binary_files_directory(){
@@ -60,7 +59,7 @@ get_binary_files_directory(){
     if [ ! -f "${_directories_binaries_directory_file}" ];
     then
         $(>&2 echo "Could not find binaries directory file \"${_directories_binaries_directory_file}\".");
-        return 1;
+        return ${generic_error};
     fi;
 
     # Reads binaries directory file content.
@@ -68,13 +67,13 @@ get_binary_files_directory(){
     if [ -z "${result}" ];
     then
         $(>&2 echo "Binaries directory file \"${_directories_binaries_directory_file}\" is empty.");
-        return 1;
+        return ${generic_error};
     fi;
 
     result="$(dirname ${BASH_SOURCE})/${result}";
 
     echo "${result}";
-    return 0;
+    return ${success};
 }
 
 # Returns the input files directory path.
@@ -83,8 +82,8 @@ get_binary_files_directory(){
 #   None.
 #
 # Returns:
-#   0 - If input directory was acquired and returned correctly.
-#   1 - Otherwise.
+#   SUCCESS - If input directory was acquired and returned correctly.
+#   GENERIC_ERROR - Otherwise.
 #   It also returns the input files directory path through "echo".
 #
 get_input_files_directory(){
@@ -95,7 +94,7 @@ get_input_files_directory(){
     if [ ! -f "${_directories_input_directory_file}" ];
     then
         $(>&2 echo "Could not find input directory file \"${_directories_input_directory_file}\".");
-        return 1;
+        return ${generic_error};
     fi;
 
     # Reads input directory file content.
@@ -103,13 +102,13 @@ get_input_files_directory(){
     if [ -z "${result}" ];
     then
         $(>&2 echo "Input directory file \"${_directories_input_directory_file}\" is empty.");
-        return 1;
+        return ${generic_error};
     fi;
 
     result="$(dirname ${BASH_SOURCE})/${result}";
 
     echo "${result}";
-    return 0;
+    return ${success};
 }
 
 # Returns the output files directory path.
@@ -118,8 +117,8 @@ get_input_files_directory(){
 #   None.
 #
 # Returns:
-#   0 - If output directory was acquired and returned correctly.
-#   1 - Otherwise.
+#   SUCCESS - If output directory was acquired and returned correctly.
+#   GENERIC_ERROR - Otherwise.
 #   It also returns the output files directory path through "echo".
 #
 get_output_files_directory(){
@@ -130,7 +129,7 @@ get_output_files_directory(){
     if [ ! -f "${_directories_output_directory_file}" ];
     then
         $(>&2 echo "Could not find output directory file \"${_directories_output_directory_file}\".");
-        return 1;
+        return ${generic_error};
     fi;
 
     # Reads output directory file content.
@@ -138,11 +137,11 @@ get_output_files_directory(){
     if [ -z "${result}" ];
     then
         $(>&2 echo "Output directory file \"${_directories_output_directory_file}\" is empty.");
-        return 1;
+        return ${generic_error};
     fi;
 
     result="$(dirname ${BASH_SOURCE})/${result}";
 
     echo "${result}";
-    return 0;
+    return ${success};
 }
