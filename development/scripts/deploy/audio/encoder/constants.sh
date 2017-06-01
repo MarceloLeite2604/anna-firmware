@@ -138,3 +138,9 @@ if [ -z "${audio_encoder_process_identifier}" ];
 then
     readonly audio_encoder_process_identifier="audio_encoder";
 fi;
+
+# Pattern to find audio files.
+if [ -z "${audio_file_pattern}" ];
+then
+    readonly audio_file_pattern="${audio_directory}${audio_file_preffix}*${audio_file_suffix}";
+fi;

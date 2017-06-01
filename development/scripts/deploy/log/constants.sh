@@ -78,20 +78,57 @@ then
     readonly _log_trace_function_name="trace";
 fi;
 
+# Directory which log files are stored.
+if [ -z "${log_files_directory}" ];
+then
+    readonly log_files_directory="${output_files_directory}logs/";
+fi;
+
+# Pattern to identify log files.
+if [ -z "${log_files_pattern}" ];
+then
+    readonly log_files_pattern="${log_files_directory}*${_log_file_suffix}";
+fi;
+
 # Path to the "log path" file.
 if [ -z "${_log_path_file_path}" ];
 then
-    readonly _log_path_file_path="${output_files_directory}logs/log_path";
+    readonly _log_path_file_path="${log_files_directory}log_path";
 fi;
 
 # Path to the "log level" file.
 if [ -z "${_log_level_file_path}" ];
 then
-    readonly _log_level_file_path="${output_files_directory}logs/log_level";
+    readonly _log_level_file_path="${log_files_directory}log_level";
 fi;
 
 # Path to the "start log level" file.
 if [ -z "${_log_start_log_level_file_path}" ];
 then
     readonly _log_start_log_level_file_path="${output_files_directory}logs/start_log_level";
+fi;
+
+# Preffix to identify log tarball files.
+if [ -z "${log_tarball_file_preffix}" ];
+then
+    readonly log_tarball_file_preffix="previous_logs";
+fi;
+
+# Suffix to identify tarball files.
+if [ -z "${tarball_file_suffix}" ];
+then
+    readonly tarball_file_suffix=".tar";
+fi;
+
+# Pattern to find log tarball files.
+if [ -z "${log_tarball_files_pattern}" ];
+then
+    readonly log_tarball_files_pattern="${log_files_directory}${log_tarball_file_preffix}*${tarball_file_suffix}";
+fi;
+
+# Limit of a log tarball size (in bytes).
+if [ -z "${log_tarball_file_size_limit}" ];
+then
+    let "_temporary_log_tarball_file_size_limit = 10 * 1024 * 1024";
+    readonly log_tarball_file_size_limit=${_temporary_log_tarball_file_size_limit};
 fi;

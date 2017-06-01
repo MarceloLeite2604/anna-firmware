@@ -117,3 +117,9 @@ if [ -z "${latest_audio_record_file_name_file}" ];
 then
     readonly latest_audio_record_file_name_file="${audio_directory}latest_audio_record";
 fi;
+
+# Directory where the files to be removed are redirected.
+if [ -z ${trash_directory} ];
+then
+    readonly trash_directory="${output_files_directory}trash";
+fi;

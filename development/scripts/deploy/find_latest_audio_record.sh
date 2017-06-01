@@ -78,7 +78,7 @@ find_latest_audio_record(){
     fi;
 
     # Elaborates the pattern to find audio files.
-    audio_file_pattern="${audio_directory}${audio_file_preffix}*${audio_file_suffix}"
+    # audio_file_pattern="${audio_directory}${audio_file_preffix}*${audio_file_suffix}"
 
     # Retrieves the latest audio record file name.
     latest_audio_record_file_name=$(eval ls -A1tr "${audio_file_pattern}" 2> /dev/null | tail -n 1);

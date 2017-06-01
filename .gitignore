@@ -10,8 +10,14 @@
 # Ignore mp3 files.
 *.mp3
 
-# Ignore pid filed.
+# Ignore pid files.
 *.pid
+
+# Ingore tarball files.
+*.tar
+
+# Ingore compressed tarball files.
+*.tar.gz
 
 # Ignore "temporary" directory.
 temporary/
