@@ -44,7 +44,16 @@ source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 #   GENERIC_ERROR - Otherwise.
 empty_trash_directory() {
 
-    echo "${trash_directory}/*";
+    local rm_result;
+
+    # Remove files from trash directory.
+    rm ${trash_directory}/*;
+    rm_result=${?};
+    if [ ${rm_result} -ne 0 ];
+    then
+        log ${log_message_type_error} "Error while removing files from trash directory.";
+        return ${generic_error};
+    fi;
 
     return ${success}
 }
