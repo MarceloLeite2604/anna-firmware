@@ -17,6 +17,17 @@
 #
 
 # ###
+# Include guard.
+# ###
+if [ -z "${AUDIO_ENCODER_FUNCTIONS_SH}" ];
+then
+    AUDIO_ENCODER_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
 # Script sources.
 # ###
 

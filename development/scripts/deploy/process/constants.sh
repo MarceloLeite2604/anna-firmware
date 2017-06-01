@@ -15,6 +15,16 @@
 #   Marcelo Leite
 #
 
+# ###
+# Include guard.
+# ###
+if [-z "${PROCESS_CONSTANTS_SH}" ];
+then
+    PROCESS_CONSTANTS_SH=1;
+else
+    return;
+fi;
+
 
 # ###
 # Script sources.

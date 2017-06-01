@@ -15,6 +15,16 @@
 #   Marcelo Leite
 #
 
+# ###
+# Include guard.
+# ###
+if [ -z ${LOG_CONSTANTS_SH} ];
+then
+    LOG_CONSTANTS_SH=1;
+else
+    return;
+fi;
+
 
 # ###
 # Constants.

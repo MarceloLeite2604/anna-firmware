@@ -14,6 +14,15 @@
 # Author: 
 #   Marcelo Leite
 
+# ###
+# Include guard.
+# ###
+if [ -z "${AUDIO_CAPTURE_CONSTANTS_SH}" ];
+then
+    AUDIO_CAPTURE_CONSTANTS_SH=1;
+else
+    return;
+fi;
 
 # ###
 # Script sources. 

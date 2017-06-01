@@ -14,6 +14,16 @@
 #   Marcelo Leite
 #
 
+# ###
+# Include guard.
+# ###
+if [ -z "${PROCESS_FUNCTIONS_SH}" ];
+then
+    PROCESS_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
 
 # ###
 # Script sources.

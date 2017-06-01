@@ -16,6 +16,16 @@
 #   Marcelo Leite
 #
 
+# ###
+# Include guard.
+# ###
+if [ -z "${DIRECTORIES_CONSTANTS_SH}" ];
+then
+    DIRECTORIES_CONSTANTS_SH=1;
+else
+    return;
+fi;
+
 
 # ###
 # Constants.

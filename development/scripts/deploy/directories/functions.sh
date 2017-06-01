@@ -20,6 +20,16 @@
 # Therefore, it can't use constants like "SUCCESS" and "GENERIC_ERROR".
 #
 
+# ###
+# Include guard.
+# ###
+if [ -z "${DIRECTORIES_FUNCTIONS_SH}" ];
+then
+    DIRECTORIES_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
 
 # ###
 # Script sources.

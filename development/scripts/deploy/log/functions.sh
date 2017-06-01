@@ -17,6 +17,17 @@
 #
 
 # ###
+# Include guard.
+# ###
+if [ -z "${LOG_FUNCTIONS_SH}" ];
+then
+    LOG_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
 # Script sources.
 # ###
 

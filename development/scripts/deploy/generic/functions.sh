@@ -16,6 +16,17 @@
 #
 
 # ###
+# Include guard.
+# ###
+if [ -z "${GENERIC_FUNCTIONS_SH}" ];
+then
+    GENERIC_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
 # Script sources.
 # ###
 

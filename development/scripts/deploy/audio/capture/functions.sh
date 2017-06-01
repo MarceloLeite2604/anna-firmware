@@ -17,6 +17,17 @@
 #
 
 # ###
+# Include guard.
+# ###
+if [ -z "${AUDIO_CAPTURE_FUNCTIONS_SH}" ];
+then
+    AUDIO_CAPTURE_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
 # Script sources.
 # ###
 
