@@ -1,0 +1,11 @@
+[Unit]
+Description=Clean up Anna directories
+After=?
+
+[Service]
+Type=simple
+ExecStart=clean_up_directories.sh
+Restart=?
+
+[Install]
+WantedBy=multi-user.target

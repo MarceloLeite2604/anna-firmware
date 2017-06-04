@@ -6,7 +6,7 @@
 #   None.
 #
 # Returns:
-#   1 - If this script could not find the input or ouput directories.
+#   GENERIC_ERROR - If this script could not find the input or ouput directories.
 #
 # Version:
 #   0.1
