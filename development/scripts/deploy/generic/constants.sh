@@ -48,6 +48,12 @@ then
 	readonly project="anna";
 fi;
 
+# The installation directory.
+if [ -z "${installation_directory}" ];
+then
+    readonly installation_directory="/opt/${company}/${project}/";
+fi;
+
 # Directory which contains the input files.
 if [ -z "${input_files_directory}" ];
 then

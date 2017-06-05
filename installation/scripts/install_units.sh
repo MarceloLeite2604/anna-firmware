@@ -119,10 +119,69 @@ install_unit() {
     return 0;
 }
 
+# Creates the unit file from unit model file.
+#
+# Parameters:
+#   1. The unit model file path.
+#
+# Returns:
+#   0 - If unit file was created successfully.
+#   1 - Otherwise.
+#   It also returns the unit file path through "echo".
+create_unit_file() {
+
+    local unit_model_file_path;
+    local unit_file_name;
+    local basename_result;
+    local cp_result;
+    local temporary_unit_file_path;
+    local sed_result;
+
+    # Check function parameters.
+    if [ ${#} -ne 1 ];
+    then
+        >&2 echo "Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
+        return 1;
+    else
+        unit_model_file_path="${1}";
+    fi;
+
+    unit_file_name="$(basename ${unit_model_file_path})";
+    basename_result=${?};
+    if [ ${basename_result} -ne 0 -o -z "${unit_file_name}" ];
+        >&2 echo "Error while retrieving the file name of unit model file \"${unit_model_file_path}\": ${basename_result}.";
+        return 1;
+    fi;
+
+    # Copies the unit model to a temporary directory.
+    cp "${unit_model_file_path}" "${temporary_directory}.";
+    cp_result=${?};
+    if [ ${cp_result} -ne 0 ];
+    then
+        >&2 echo "Error while copying unit model file to temporary directory \"${temporary_directory}\": ${cp_result}.";
+        return 1;
+    fi;
+
+    temporary_unit_file_path="${temporary_directory}${unit_file_name}";
+
+    # Replaces "installation directory" term by its value.
+    sed -i \'s/${installation_directory_term}/${installation_directory}/g\' ${temporary_unit_file_path};
+    sed_result=${?};
+    if [ ${sed_result} -ne 0 ];
+    then
+        >&2 echo "Error replacing terms on temporary unit file \"${temporary_unit_file_path}\": ${sed_result}.";
+        return 1;
+    fi;
+
+    echo "${temporary_unit_file_path}";
+
+    return 0;
+}
+
 # Requests a unit installation.
 #
 # Parameters:
-#   1. The unit file path.
+#   1. The unit model file path.
 #
 # Returns:
 #   0 - If unit was installed successfully.
@@ -130,9 +189,12 @@ install_unit() {
 #
 request_installation() {
 
-    local unit_file_path;
-    local unit_name;
+    local unit_model_file_path;
+    local unit_model_file_name;
+    local temporary_unit_file_path;
+    local create_unit_file_result;
     local install_unit_result;
+    local rm_result;
     
     # Check function parameters.
     if [ ${#} -ne 1 ];
@@ -140,21 +202,41 @@ request_installation() {
         >&2 echo "Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
         return 1;
     else
-        unit_file_path="${1}";
-        unit_name="$(basename ${unit_file_path})";
+        unit_model_file_path="${1}";
+        unit_model_file_name="$(basename ${unit_model_file_path})";
+    fi;
+
+    # Creates unit file.
+    temporary_unit_file_path="$(create_unit_file "${unit_model_file_path}")";
+    create_unit_file_result=${?};
+    if [ ${create_unit_file_result} -ne 0 ];
+    then
+        >&2 echo "Error while creating unit file from unit model \"${unit_model_file_path}\".";
+        return 1;
     fi;
 
     # Requests unit installation.
-    install_unit "${unit_file_path}";
+    install_unit "${temporary_unit_file_path}";
     install_unit_result=${?};
     if [ ${install_unit_result} -ne 0 ];
     then
-        >&2 echo "Error while installing \"${unit_name}\" unit.";
-        exit 1;
+        >&2 echo "Error while installing \"${unit_model_file_name}\" unit.";
+        return 1;
     else
-        echo "Unit \"${unit_name}\" installed successfuly.";
+        echo "Unit \"${unit_model_file_name}\" installed successfuly.";
         return 0;
     fi;
+
+    # Removes the temporary unit file.
+    rm -f "${temporary_unit_file_path}";
+    rm_result=${?};
+    if [ ${rm_result} -ne 0 ];
+    then
+        >&2 echo "Error while removing temporary unit file \"${temporary_unit_file_path}\".";
+        return 1;
+    fi;
+
+    return 0; 
 }
 
 # Installs all units required for project.
@@ -168,9 +250,9 @@ request_installation() {
 #
 install_units() {
 
-    request_installation "../units/bluetooth/var-run-sdp/unit_files/var-run-sdp.path";
-    request_installation "../units/bluetooth/var-run-sdp/unit_files/var-run-sdp.service";
-    request_installation "../units/bluetooth/pairing/unit_files/bluetooth-pairing.service";
+    request_installation "../units/bluetooth/var-run-sdp/unit_models/var-run-sdp.path";
+    request_installation "../units/bluetooth/var-run-sdp/unit_models/var-run-sdp.service";
+    request_installation "../units/bluetooth/pairing/unit_models/bluetooth-pairing.service";
 }
 
 install_units;

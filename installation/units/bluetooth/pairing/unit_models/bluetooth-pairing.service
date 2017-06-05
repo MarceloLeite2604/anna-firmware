@@ -4,7 +4,7 @@ After=bluetooth.service
 
 [Service]
 Type=simple
-ExecStart=/opt/marcelo/operating-system/services/bluetooth/pairing/scripts/bluetooth-pairing.sh
+ExecStart=<installation_directory>scripts/bluetooth-pairing.sh
 Restart=on-failure
 
 [Install]

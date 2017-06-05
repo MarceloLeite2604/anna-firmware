@@ -4,7 +4,7 @@ After=?
 
 [Service]
 Type=simple
-ExecStart=clean_up_directories.sh
+ExecStart=<installation_directory>scripts/clean_up_directories.sh
 Restart=?
 
 [Install]
