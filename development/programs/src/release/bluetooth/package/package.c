@@ -8,6 +8,7 @@
 /*
  * Includes.
  */
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -223,46 +224,57 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_check_connection_content(&temporary_content, byte_array);
             break;
+
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_confirmation_content(&temporary_content, byte_array);
             break;
+
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_command_result_content(&temporary_content, byte_array);
             break;
+
         case DISCONNECT_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_disconnect_content(&temporary_content, byte_array);
             break;
+
         case ERROR_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_error_content(&temporary_content, byte_array);
             break;
+
         case REQUEST_AUDIO_FILE_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_request_audio_file_content(&temporary_content, byte_array);
             break;
+
         case SEND_FILE_CHUNK_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_send_file_chunk_content(&temporary_content, byte_array);
             break;
+
         case SEND_FILE_HEADER_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_send_file_header_content(&temporary_content, byte_array);
             break;
+
         case SEND_FILE_TRAILER_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_send_file_trailer_content(&temporary_content, byte_array);
             break;
+
         case START_RECORD_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_start_record_content(&temporary_content, byte_array);
             break;
+
         case STOP_RECORD_CODE:
             LOG_TRACE_POINT;
             convertion_result = convert_byte_array_to_stop_record_content(&temporary_content, byte_array);
             break;
+
         default:
             LOG_ERROR("Unknown package type: 0x%x.", package_type_code);
             convertion_result = GENERIC_ERROR;
@@ -308,6 +320,7 @@ int convert_byte_array_to_disconnect_content(content_t* content, byte_array_t by
  */
 int convert_byte_array_to_error_content(content_t* content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
+
     size_t content_size;
     uint8_t* array_pointer;
 
@@ -547,7 +560,7 @@ int convert_byte_array_to_stop_record_content(content_t* content, byte_array_t b
  * Converts a byte array to a package.
  *
  * Parameters
- *
+ *  package - The variable which will receive the byte array converted as a package.
  *  byte_array - The byte array to be converted as package.
  *
  * Returns
@@ -712,7 +725,7 @@ content_t create_command_result_content(uint32_t result_code, struct timeval exe
 }
 
 /*
- * Creates a byte array containing the command a command result package content.
+ * Creates a byte array containing a command result package content.
  *
  * Parameters
  *  content - The command result package content with the informations to build the byte array.
@@ -1025,14 +1038,14 @@ uint32_t create_package_id() {
 }
 
 /*
- * Creates a send file chunk content for a package.
+ * Creates the content of a "send file chunk" package.
  *
  * Parameters
  *  chunk_size - Size of the file chunk to be stored on content.
- *  chunk_data - The data chunk to be stores on content.
+ *  chunk_data - The data chunk to be stored on content.
  *
  * Returns
- *  A send file chunk content with the chunk data and its size.
+ *  A "send file chunk" package content with the chunk data and its size.
  */
 content_t create_send_file_chunk_content(size_t chunk_size, uint8_t* chunk_data) {
     LOG_TRACE("Chunk size: %zu bytes.", chunk_size);
@@ -1050,13 +1063,13 @@ content_t create_send_file_chunk_content(size_t chunk_size, uint8_t* chunk_data)
 }
 
 /*
- * Creates a byte array containing the send file chunk package content.
+ * Creates a byte array containing the "send file chunk" package content.
  *
  * Parameters
- *  content - The send file chunk package content with the informations to build the byte array.
+ *  content - The "send file chunk" package content with the informations to build the byte array.
  *
  * Returns
- *  A byte array structure with the send file chunk package content informations.
+ *  A byte array structure with the "send file chunk" package content informations.
  */
 byte_array_t create_send_file_chunk_content_byte_array(content_t content) {
     LOG_TRACE_POINT;
@@ -1089,7 +1102,7 @@ byte_array_t create_send_file_chunk_content_byte_array(content_t content) {
  *  chunk_data - The chunk data to be informed on the package.
  *
  * Returns
- *  A package with the informations provided.
+ *  A "send file chunk" package with the informations provided.
  */
 package_t create_send_file_chunk_package(size_t chunk_size, uint8_t* chunk_data){
     LOG_TRACE("Chunk size: %zu bytes.", chunk_size);
@@ -1104,7 +1117,7 @@ package_t create_send_file_chunk_package(size_t chunk_size, uint8_t* chunk_data)
 }
 
 /*
- * Creates a send file header content for a package.
+ * Creates a "send file header" content for a package.
  *
  * Parameters
  *  file_size - Size of the file to be informed on the content.
@@ -1112,7 +1125,7 @@ package_t create_send_file_chunk_package(size_t chunk_size, uint8_t* chunk_data)
  *  file_name - Name of the file to be informed on the content.
  *
  * Returns
- *  A send file header content with the file informations.
+ *  A "send file header" content with the file informations.
  */
 content_t create_send_file_header_content(uint32_t file_size, uint32_t file_name_size, uint8_t* file_name) {
     LOG_TRACE("File size: 0x%x bytes, file name size: 0x%x.", file_size, file_name_size);
@@ -1133,7 +1146,7 @@ content_t create_send_file_header_content(uint32_t file_size, uint32_t file_name
 }
 
 /*
- * Creates a byte array containing the send file header package content.
+ * Creates a byte array containing the "send file header" package content.
  *
  * Parameters
  *  content - The send file header package content with the informations to build the byte array.
@@ -1168,7 +1181,7 @@ byte_array_t create_send_file_header_content_byte_array(content_t content) {
 }
 
 /*
- * Creates a send file header package.
+ * Creates a "send file header" package.
  *
  * Parameters
  *  file_size - The file size to be informed on the package.
@@ -1194,13 +1207,13 @@ package_t create_send_file_header_package(size_t file_size, const char* file_nam
 }
 
 /*
- * Creates a send file trailer content for a package.
+ * Creates a "send file trailer" package content.
  *
  * Parameters
  *  None
  *
  * Returns
- *  A send file trailer content with the file informations.
+ *  A "send file trailer" package content.
  */
 content_t create_send_file_trailer_content() {
     LOG_TRACE_POINT;
@@ -1214,13 +1227,13 @@ content_t create_send_file_trailer_content() {
 }
 
 /*
- * Creates a byte array containing the send file trailer package content.
+ * Creates a byte array containing the "send file trailer" package content.
  *
  * Parameters
- *  content - The send file trailer package content with the informations to build the byte array.
+ *  content - The "send file trailer" package content with the informations to build the byte array.
  *
  * Returns
- *  A byte array structure with the send file trailer package content informations.
+ *  A byte array structure with the "send file trailer" package content informations.
  */
 byte_array_t create_send_file_trailer_content_byte_array(content_t content) {
     LOG_TRACE_POINT;
@@ -1238,7 +1251,7 @@ byte_array_t create_send_file_trailer_content_byte_array(content_t content) {
 }
 
 /*
- * Creates a send file trailer package.
+ * Creates a "send file trailer" package.
  *
  * Parameters
  *  None
@@ -1256,13 +1269,13 @@ package_t create_send_file_trailer_package() {
 }
 
 /*
- * Deletes a byte array containing a command result package content.
+ * Deletes a byte array containing a "command result" package content.
  * 
  * Parameters
- *  content - The command result package content to be deleted.
+ *  content - The "command result" package content to be deleted.
  *
  * Returns
- *  SUCCESS - If the content was delete successfully.
+ *  SUCCESS - If the content was deleted successfully.
  *  GENERIC ERROR - Otherwise.
  */
 int delete_command_result_content(content_t content) {
@@ -1272,13 +1285,13 @@ int delete_command_result_content(content_t content) {
 }
 
 /*
- * Deletes a confirmation package content.
+ * Deletes a "confirmation" package content.
  *
  * Parameters
- *  content - The confirmation package content to be deleted.
+ *  content - The "confirmation" package content to be deleted.
  *
  * Returns
- *  SUCCESS - If the content was delted successfully.
+ *  SUCCESS - If the content was deleted successfully.
  *  GENERIC ERROR - Otherwise.
  */
 int delete_confirmation_content(content_t content) {
@@ -1288,13 +1301,13 @@ int delete_confirmation_content(content_t content) {
 }
 
 /*
- * Deletes a byte array of a package content.
+ * Deletes the content of a package.
  *
  * Parameters
  *  content - The package content to be deleted.
  *
  * Returns
- *  SUCCESS - If the package content was deleted correctly.
+ *  SUCCESS - If the content was deleted correctly.
  *  GENERIC ERROR - Otherwise.
  */
 int delete_content(uint32_t package_type, content_t content){
@@ -1357,10 +1370,10 @@ int delete_content(uint32_t package_type, content_t content){
 }
 
 /*
- * Deletes a containing the error package content.
+ * Deletes an "error" package content.
  * 
  * Parameters
- *  content - The error package content to be deleted.
+ *  content - The "error" package content to be deleted.
  *
  * Returns
  *  SUCCESS - If the content was deleted successfully.
@@ -1395,10 +1408,10 @@ int delete_package(package_t package) {
 }
 
 /*
- * Deletes a byte array containing a send file chunk package content.
+ * Deletes a "send file chunk" package content.
  * 
  * Parameters
- *  content - The send file chunk package content to be deleted.
+ *  content - The "send file chunk" package content to be deleted.
  *
  * Returns
  *  SUCCESS - If the content was delete successfully.
