@@ -31,6 +31,7 @@
 /* Size of the buffer to store file data chunks. */
 #define DATA_CHUNK_BUFFER_SIZE 1024*64
 
+
 /*
  * Function headers.
  */
@@ -52,6 +53,7 @@ int send_file_header(int, size_t, const char*);
 
 /* Sends a file trailer. */
 int send_file_trailer(int);
+
 
 /*
  * Function elaborations.
@@ -278,11 +280,13 @@ int receive_package(int socket_fd, package_t* package) {
                     case SUCCESS:
                         LOG_TRACE_POINT;
                         break;
+
                     case MAXIMUM_RETRY_ATTEMPTS_REACHED:
                         LOG_TRACE("Maximum receive attempts reached.");
                         receive_concluded = true;
                         result = NO_PACKAGE_RECEIVED;
                         break;
+
                     default:
                         LOG_ERROR("Error while waiting to receive a package.");
                         receive_concluded = true;
@@ -290,11 +294,13 @@ int receive_package(int socket_fd, package_t* package) {
                         break;
                 }
                 break;
+
             case GENERIC_ERROR:
                 LOG_ERROR("Error while reading socket content.");
                 receive_concluded = true;
                 result = GENERIC_ERROR;
                 break;
+
             default:
                 LOG_ERROR("Unknown result received from \"read_socket_content\" function: %d.", read_socket_content_result);
                 receive_concluded = true;
@@ -588,7 +594,6 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
 
     bool send_content_concluded;
     int errno_value;
-    /* uint8_t data_chunk_buffer[DATA_CHUNK_BUFFER_SIZE]; */
     uint8_t* data_chunk_buffer;
     size_t bytes_read;
     size_t total_bytes_read = 0; 
@@ -770,7 +775,6 @@ int send_file_trailer(int socket_fd){
  * Transmits a command result.
  *
  * Parameters
- *  
  *  socket_fd - The connection socket file descriptor to send the command result.
  *  command_result - The command result to be sent.
  *  execution_delay - The command execution delay to be sent.
@@ -807,7 +811,6 @@ int transmit_command_result(int socket_fd, int command_result, struct timeval ex
  * Transmits an error.
  *
  * Parameters
- *  
  *  socket_fd - The connection socket file descriptor to send the command result.
  *  error_code - The error code to be sent.
  *  error_message - The error message to be send.

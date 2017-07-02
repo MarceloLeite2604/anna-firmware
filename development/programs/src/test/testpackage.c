@@ -74,9 +74,9 @@ void test_packages(){
     test_package(command_result_package);
     delete_package(command_result_package);
 
-    package_t confirmation_package = create_confirmation_package(0xaabbccdd);
+    /* package_t confirmation_package = create_confirmation_package(0xaabbccdd);
     test_package(confirmation_package);
-    delete_package(confirmation_package);
+    delete_package(confirmation_package); */
 
     package_t disconnect_package = create_disconnect_package();
     test_package(disconnect_package);
@@ -206,6 +206,8 @@ void print_byte_array(byte_array_t byte_array) {
 }
 
 void print_uint8_t_array(uint8_t* array, size_t array_size) {
+    printf("Pointer location: %p.\n", array);
+    printf("Content size: %zu.\n", array_size);
     size_t counter;
     for (counter = 0; counter < array_size; counter++) {
         printf("%c", (unsigned char)array[counter]);

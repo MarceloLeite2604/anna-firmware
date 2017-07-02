@@ -46,6 +46,7 @@
 /* File name which the stop audio record instant is stored. */
 #define STOP_AUDIO_RECORD_INSTANT_FILE_NAME "temporary/stop_audio_instant"
 
+
 /*
  * Function elaborations.
  */
@@ -68,7 +69,7 @@ char* get_latest_audio_record(){
     int errno_value;
     int fclose_result;
 
-    /* larfn: Latest audio record file name */
+    /* Observation: larfn - Latest audio record file name */
     size_t larfn_file_path_length;
     FILE* larfn_file;
     size_t larfn_content_size;
@@ -137,7 +138,6 @@ char* get_latest_audio_record(){
 
         free(larfn_file_path);
         free(output_directory);
-        /* TODO: Check if "fclose" finished successfully. */
 
     }
 
@@ -147,10 +147,10 @@ char* get_latest_audio_record(){
 /*
  * Returns the path of the file which the start audio record instant is stored.
  * 
- * Parameters:
+ * Parameters
  *  None.
  *
- * Result:
+ * Result
  *  The path of the file which the start audio recorc instant is stored.
  */
 char* get_start_audio_record_instant_file_path() {
@@ -179,11 +179,11 @@ char* get_start_audio_record_instant_file_path() {
 /*
  * Returns the path of the file which the stop audio record instant is stored.
  * 
- * Parameters:
+ * Parameters
  *  None.
  *
- * Result:
- *  The path of the file which the stop audio recorc instant is stored.
+ * Result
+ *  The path of the file which the stop audio record instant is stored.
  */
 char* get_stop_audio_record_instant_file_path() {
 
@@ -215,6 +215,7 @@ char* get_stop_audio_record_instant_file_path() {
  *  None.
  *
  * Returns
+ * TODO: Should return "true" or "false".
  *  SUCCESS - If device is recording.
  *  GENERIC ERROR - Otherwise.
  */
@@ -235,10 +236,10 @@ int is_recording() {
 /*
  * Starts audio record.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If audio record was started successfully.
  *  GENERIC ERROR - Otherwise.
  */
@@ -256,10 +257,10 @@ int start_audio_record(){
 /*
  * Stops audio record.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If audio record was started successfully.
  *  GENERIC ERROR - Otherwise.
  */

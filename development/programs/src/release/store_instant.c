@@ -24,7 +24,7 @@
  * It retrieves the current instant and stores on file specified through program argument.
  *
  * Parameters:
- *  None applicable.
+ *  1. The file path to store the current instant.
  *
  * Returns:
  *  SUCCESS - If program was executed successfully.
@@ -53,21 +53,6 @@ int main(int argc, char** argv) {
         LOG_ERROR("Error while storing current instant on file.");
         return GENERIC_ERROR;
     }
-
-    /*
-    instant_t instant;
-    int retrieve_instant_from_file_result;
-    retrieve_instant_from_file_result = retrieve_instant_from_file(&instant, file_path);
-    if ( retrieve_instant_from_file_result != SUCCESS ) {
-        LOG_ERROR("Error while retrieving instant from file.");
-        return GENERIC_ERROR;
-    }
-
-    instant_read_formatted = format_instant_to_read(instant);
-    printf("Retrieved instant is %s.\n", instant_read_formatted);
-
-    free(instant_read_formatted);
-    */
 
     free(file_path);
     return SUCCESS;

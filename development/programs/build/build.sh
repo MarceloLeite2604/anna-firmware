@@ -112,14 +112,69 @@ build_programs() {
     #     return 1;
     # fi;
     
-    echo "Creating \"bluetooth package codes\" object.";
-    gcc -c ${release_source_directory}bluetooth/package/codes/codes.c -o ${objects_directory}bluetooth_package_codes.o ${additional_arguments};
+    # echo "Creating \"bluetooth package codes\" object.";
+    # gcc -c ${release_source_directory}bluetooth/package/codes/codes.c -o ${objects_directory}bluetooth_package_codes.o ${additional_arguments};
+    # if [ $? -ne 0 ];
+    # then
+    #     echo "Error creating \"bluetooth package codes\" object.";
+    #     return 1;
+    # fi;
+
+    echo "Creating \"command result content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/command_result/command_result.c -o ${objects_directory}command_result_content.o ${additional_arguments};
     if [ $? -ne 0 ];
     then
-        echo "Error creating \"bluetooth package codes\" object.";
+        echo "Error creating \"command result content\" object.";
         return 1;
-    fi;
+    fi; 
 
+    echo "Creating \"confirmation content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/confirmation/confirmation.c -o ${objects_directory}confirmation_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"confirmation content\" object.";
+        return 1;
+    fi; 
+
+    echo "Creating \"error content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/error/error.c -o ${objects_directory}error_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"error content\" object.";
+        return 1;
+    fi; 
+
+    echo "Creating \"send file chunk content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/send_file_chunk/send_file_chunk.c -o ${objects_directory}send_file_chunk_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"send file chunk content\" object.";
+        return 1;
+    fi; 
+
+    echo "Creating \"send file header content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/send_file_header/send_file_header.c -o ${objects_directory}send_file_header_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"send file header content\" object.";
+        return 1;
+    fi; 
+
+    echo "Creating \"send file trailer content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/send_file_trailer/send_file_trailer.c -o ${objects_directory}send_file_trailer_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"send file trailer content\" object.";
+        return 1;
+    fi; 
+
+    echo "Creating \"bluetooth package content\" object.";
+    gcc -c ${release_source_directory}bluetooth/package/content/content.c -o ${objects_directory}bluetooth_package_content.o ${additional_arguments};
+    if [ $? -ne 0 ];
+    then
+        echo "Error creating \"bluetooth package content\" object.";
+        return 1;
+    fi; 
     echo "Creating \"bluetooth package\" object.";
     gcc -c ${release_source_directory}bluetooth/package/package.c -o ${objects_directory}bluetooth_package.o ${additional_arguments};
     if [ $? -ne 0 ];
@@ -259,7 +314,7 @@ build_programs() {
     fi;
     
     echo "Creating \"testpackage\" program.";
-    gcc -o ${binary_folder}testpackage ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_codes.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}testpackage.o -lm ${additional_arguments};
+    gcc -o ${binary_folder}testpackage ${objects_directory}directory.o ${objects_directory}script.o ${objects_directory}error_messages.o ${objects_directory}random.o ${objects_directory}byte_array.o ${objects_directory}bluetooth_package_content.o ${objects_directory}command_result_content.o ${objects_directory}confirmation_content.o ${objects_directory}error_content.o ${objects_directory}send_file_chunk_content.o ${objects_directory}send_file_header_content.o ${objects_directory}send_file_trailer_content.o ${objects_directory}bluetooth_package.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}testpackage.o -lm ${additional_arguments};
     if [ $? -ne 0 ];
     then
         echo "Error creating \"testpackage\" program.";
@@ -291,7 +346,7 @@ build_programs() {
     fi;
     
     echo "Creating \"muni\" program.";
-    gcc -o ${binary_folder}muni ${objects_directory}muni.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}bluetooth_service.o ${objects_directory}script.o ${objects_directory}bluetooth_connection.o ${objects_directory}bluetooth_communication.o ${objects_directory}bluetooth_package.o ${objects_directory}byte_array.o ${objects_directory}wait_time.o ${objects_directory}random.o ${objects_directory}directory.o ${objects_directory}audio.o ${objects_directory}file.o -lbluetooth -lm ${additional_arguments};
+    gcc -o ${binary_folder}muni ${objects_directory}muni.o ${objects_directory}time.o ${objects_directory}log.o ${objects_directory}bluetooth_service.o ${objects_directory}script.o ${objects_directory}bluetooth_connection.o ${objects_directory}bluetooth_communication.o ${objects_directory}bluetooth_package.o ${objects_directory}bluetooth_package_content.o ${objects_directory}command_result_content.o ${objects_directory}confirmation_content.o ${objects_directory}error_content.o ${objects_directory}send_file_chunk_content.o ${objects_directory}send_file_header_content.o ${objects_directory}send_file_trailer_content.o ${objects_directory}byte_array.o ${objects_directory}wait_time.o ${objects_directory}random.o ${objects_directory}directory.o ${objects_directory}audio.o ${objects_directory}file.o -lbluetooth -lm ${additional_arguments};
     
     if [ $? -ne 0 ];
     then

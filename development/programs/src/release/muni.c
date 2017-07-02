@@ -9,6 +9,7 @@
  * Includes.
  */
 #include <stdlib.h>
+#include "general/parameters.h"
 #include "general/return_codes.h"
 #include "audio/audio.h"
 #include "bluetooth/service/service.h"
@@ -29,15 +30,6 @@
 /* Preffix to identofy shell scripts log file. */
 #define SCRIPT_LOG_FILE_PREFFIX "muni_script"
 
-/* Code used to request the program to restart. */
-#define RESTART_PROGRAM_CODE 90
-
-/* Code used to request the Raspberry to restart. */
-#define RESTART_RASPBERRY_CODE 91
-
-/* Code used to request the Raspberry to shut down. */
-#define SHUT_DOWN_RASPBERRY_CODE 92
-
 /* Code used to indicate the remote device was/has disconnected. */
 #define DEVICE_DISCONNECTED 93
 
@@ -51,8 +43,8 @@ int check_argument(char*, char*);
 /* Checks the program arguments. */
 int check_arguments(int, char**);
 
-/* Checks the program argument "debug". */
-int check_argument_debug(char*);
+/* Checks the program argument "log". */
+int check_argument_log(char*);
 
 /* Checks the bluetooth command received. */
 int check_command_received(int, package_t);
@@ -117,16 +109,17 @@ int wait_connection(int*);
  */
 int check_argument(char* argument, char* value) {
     LOG_TRACE("Argument: \"%s\", value pointer: %p.", argument, value);
+
     int result;
-    int check_argument_debug_result;
+    int check_argument_log_result;
 
-    if ( strcmp(argument, "-d") == 0 ) {
+    if ( strcmp(argument, PARAMETER_LOG) == 0 ) {
         LOG_TRACE_POINT;
 
-        check_argument_debug_result = check_argument_debug(value);
+        check_argument_log_result = check_argument_log(value);
         LOG_TRACE_POINT;
 
-        if ( check_argument_debug_result == SUCCESS ) {
+        if ( check_argument_log_result == SUCCESS ) {
             LOG_TRACE_POINT;
             result = SUCCESS;
         }
@@ -146,16 +139,16 @@ int check_argument(char* argument, char* value) {
 }
 
 /*
- * Checks the program argument "debug".
+ * Checks the program argument for log level.
  *
  * Parameters
- *  value - Value informed for "debug" argument.
+ *  value - Value informed for log level argument.
  *
  * Returns
- *  SUCCESS - If debug argument was checked successfully.
+ *  SUCCESS - If log argument was checked successfully.
  *  GENERIC_ERROR - Otherwise.
  */
-int check_argument_debug(char* value) {
+int check_argument_log(char* value) {
     LOG_TRACE("Value pointer: %p.", value);
 
     int result;
@@ -172,7 +165,7 @@ int check_argument_debug(char* value) {
         LOG_TRACE_POINT;
         value_integer = atoi(value);
 
-        if ( ( strcmp(value, "TRACE") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
+        if ( ( strcmp(value, PARAMETER_LOG_VALUE_TRACE) == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
             LOG_TRACE_POINT;
 
             log_level = LOG_MESSAGE_TYPE_TRACE;
@@ -181,7 +174,7 @@ int check_argument_debug(char* value) {
         else {
             LOG_TRACE_POINT;
 
-            if ( ( strcmp(value, "WARNING") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
+            if ( ( strcmp(value, PARAMETER_LOG_VALUE_WARNING) == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {
                 LOG_TRACE_POINT;
 
                 log_level = LOG_MESSAGE_TYPE_WARNING;
@@ -190,7 +183,7 @@ int check_argument_debug(char* value) {
             else {
                 LOG_TRACE_POINT;
 
-                if ( ( strcmp(value, "ERROR") == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_ERROR ) ) {
+                if ( ( strcmp(value, PARAMETER_LOG_VALUE_ERROR) == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_ERROR ) ) {
                     LOG_TRACE_POINT;
 
                     log_level = LOG_MESSAGE_TYPE_ERROR;
@@ -199,7 +192,7 @@ int check_argument_debug(char* value) {
                 else {
                     LOG_TRACE_POINT;
 
-                    LOG_ERROR("Unknown value for parameter \"debug\".");
+                    LOG_ERROR("Unknown value for parameter \"log\".");
                     result = GENERIC_ERROR;
                 }
             }
@@ -247,7 +240,6 @@ int check_arguments(int argc, char** argv) {
     char* argument;
     char* value;
 
-
     if ( argc == 1 ) {
         LOG_TRACE_POINT;
         result = SUCCESS;
@@ -260,6 +252,7 @@ int check_arguments(int argc, char** argv) {
 
             argument = argv[counter];
 
+            /* Checks if the argument informed has a value. */
             if ( (counter+1) < argc ) {
                 LOG_TRACE_POINT;
 
@@ -277,6 +270,7 @@ int check_arguments(int argc, char** argv) {
                 value = NULL;
             }
 
+            /* Checks the argument informed. */
             check_argument_result = check_argument(argv[counter], argv[counter+1]);
             LOG_TRACE_POINT;
 
@@ -311,11 +305,11 @@ int check_arguments(int argc, char** argv) {
  *  GENERIC_ERROR - If there was an error checking the command received.
  *  DEVICE_DISCONNECTED - If the remote device was disconnected.
  *  RESTART_PROGRAM_CODE - If the program requested to restart.
- *  RESTART_RASPBERRY_CODE - If the program requested the Raspberry to restart.
- *  SHUT_DOWN_RASPBERRY_CODE - If the program requested the Raspberry to shut down.
+ *  RESTART_AUDIO_RECORDER_CODE - If the program requested the audio recorder to restart.
+ *  SHUT_DOWN_AUDIO_RECORDER_CODE - If the program requested the audio recorder to shut down.
  *
  * Observation
- *  The return codes are defined on "exit_codes" header file.
+ *  The return codes are defined on "return_codes" header file.
  */
 int check_command_received(int btc_socket_fd, package_t package) {
     LOG_TRACE_POINT;
@@ -328,6 +322,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             LOG_TRACE("Connection checked by device.");
             result = SUCCESS;
             break;
+
         case CONFIRMATION_CODE:
         case COMMAND_RESULT_CODE:
         case ERROR_CODE:
@@ -337,6 +332,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             LOG_ERROR("Pacakage type recognized, but no action defined to be done. Package type: 0x%08x.", package.type_code);
             result = GENERIC_ERROR;
             break;
+
         case DISCONNECT_CODE:
             LOG_TRACE_POINT;
 
@@ -349,6 +345,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             }
 
             break;
+
         case REQUEST_AUDIO_FILE_CODE:
             LOG_TRACE_POINT;
 
@@ -365,6 +362,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             }
 
             break;
+
         case START_RECORD_CODE:
             LOG_TRACE_POINT;
 
@@ -381,6 +379,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             }
 
             break;
+
         case STOP_RECORD_CODE:
             LOG_TRACE_POINT;
 
@@ -397,6 +396,7 @@ int check_command_received(int btc_socket_fd, package_t package) {
             }
 
             break;
+
         default:
             LOG_ERROR("Unrecognized package type: 0x%08x.", package.type_code);
             result = GENERIC_ERROR;
@@ -463,7 +463,6 @@ int command_start_audio_record(int socket_fd){
     instant_t current_instant;
     instant_t difference;
     int get_instant_difference_result;
-
     package_t command_result_package;
 
     start_audio_record_result = start_audio_record();
@@ -854,8 +853,8 @@ int program_execution_loop(){
                     LOG_TRACE_POINT;
                     break;
                 case RESTART_PROGRAM_CODE:
-                case RESTART_RASPBERRY_CODE:
-                case SHUT_DOWN_RASPBERRY_CODE:
+                case RESTART_AUDIO_RECORDER_CODE:
+                case SHUT_DOWN_AUDIO_RECORDER_CODE:
                     LOG_TRACE_POINT;
                     program_finished = true;
                     result = remote_device_communication_loop_result;
@@ -921,10 +920,10 @@ int remote_device_communication_loop(int btc_socket_fd) {
                         LOG_TRACE("Device disconnected.");
                     case RESTART_PROGRAM_CODE:
                         LOG_TRACE("Device requested the program to be restarted.");
-                    case RESTART_RASPBERRY_CODE:
-                        LOG_TRACE("Device requested to restart the Rasberry.");
-                    case SHUT_DOWN_RASPBERRY_CODE:
-                        LOG_TRACE("Device requested the Raspberry to shut down.");
+                    case RESTART_AUDIO_RECORDER_CODE:
+                        LOG_TRACE("Device requested to restart the audio recorder.");
+                    case SHUT_DOWN_AUDIO_RECORDER_CODE:
+                        LOG_TRACE("Device requested the audio recorder to shut down.");
 
                         close_socket_result = close_socket(btc_socket_fd);
                         LOG_TRACE_POINT;

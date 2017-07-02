@@ -8,6 +8,7 @@
 /*
  * Includes.
  */
+
 #include <errno.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -17,12 +18,14 @@
 #include "../package/codes/codes.h"
 #include "connection.h"
 
+
 /*
  * Definitions.
  */
 
 /* Size of the buffer to read content from the socket. */
 #define READ_CONTENT_BUFFER_SIZE 1024
+
 
 /*
  * Variables.
@@ -71,8 +74,8 @@ int close_socket(int socket_fd){
  * Checks if there is content to be read on a socket.
  *
  * Parameters
- *  socket_fd    - The socket communication file descriptor to be checked.
- *  check_time   - Time to wait for a content to be avilable on socket.
+ *  socket_fd - The socket communication file descriptor to be checked.
+ *  check_time - Time to wait for a content to be avilable on socket.
  *
  * Returns
  *  NO_CONTENT_TO_READ - If there is no content to be read.
@@ -123,7 +126,6 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
  *  NO_CONTENT_TO_READ - If there was no content to read from socket.
  *  GENERIC_ERROR - If there was an error reading the socket.
  */
-/* byte_array_t read_socket_content(int socket_fd) { */
 int read_socket_content(int socket_fd, byte_array_t* byte_array) {
     LOG_TRACE("Socket file descriptor: %d", socket_fd);
 
@@ -154,12 +156,14 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                 done_reading = true;
                 result = NO_CONTENT_TO_READ;
                 break;
+
             case GENERIC_ERROR:
                 LOG_ERROR("Error while waiting for a content to read on socket.");
                 done_reading = true;
                 error = true;
                 result = GENERIC_ERROR;
                 break;
+
             case CONTENT_TO_READ:
                 LOG_TRACE("There is content to read on socket.");
 
@@ -171,6 +175,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                         done_reading = true;
                         result = GENERIC_ERROR;
                         break;
+
                     case -1:
                         errno_value = errno;
                         LOG_ERROR("Error while reading socket content.");
@@ -179,6 +184,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                         done_reading = true;
                         result = GENERIC_ERROR;
                         break;
+
                     default:
                         LOG_TRACE_POINT;
                         content_size += total_read;
@@ -192,6 +198,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                     }
                 LOG_TRACE("Content size: %zu byte(s).", content_size);
                 break;
+
             default:
                 LOG_ERROR("Unkown return code from \"check_socket_content\" function.");
                 error = true;
@@ -218,7 +225,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
  * Writes content on socket.
  *
  * Parameters
- *  socket_fd    - The socket communication file descritptor to write content.
+ *  socket_fd - The socket communication file descritptor to write content.
  *  byte_array_t - The byte array content to be written on socket.
  *
  * Returns
