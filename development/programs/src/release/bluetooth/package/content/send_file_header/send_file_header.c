@@ -1,8 +1,11 @@
 /*
- * This source file contains all the components required to create and manipulate bluetooth communication data.
+ * This source file contains the elaboration of all components required to create and manipulate "send file header" package contents.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
@@ -24,8 +27,8 @@
  * Converts a byte array to a "send file header" package content.
  *
  * Parameters
- *  send_file_header_content - The content where the byte array informations will be stored.
- *  byte_array - The byte array with the content informations.
+ *  send_file_header_content - The variable where the "send file header" package content create will be stored.
+ *  byte_array - The byte array with the informations to create the "send file header" package content.
  *
  * Returns
  *  SUCCESS - If the byte array was converted successfully.
@@ -51,6 +54,7 @@ int convert_byte_array_to_send_file_header_content(send_file_header_content_t* s
 
     temporary_send_file_header_content = (send_file_header_content_t*)malloc(sizeof(send_file_header_content_t));
     memcpy(&temporary_send_file_header_content->file_header, array_pointer, sizeof(uint32_t));
+    LOG_TRACE_POINT;
 
     if ( temporary_send_file_header_content->file_header != SEND_FILE_HEADER_CONTENT_CODE ) {
         LOG_ERROR("The content header does not match a send file header content.");
@@ -61,8 +65,10 @@ int convert_byte_array_to_send_file_header_content(send_file_header_content_t* s
 
     memcpy(&temporary_send_file_header_content->file_size, array_pointer, sizeof(uint32_t));
     array_pointer += sizeof(uint32_t);
+    LOG_TRACE_POINT;
 
     memcpy(&temporary_send_file_header_content->file_name_size, array_pointer, sizeof(uint32_t));
+    LOG_TRACE_POINT;
 
     content_size += temporary_send_file_header_content->file_name_size;
 
@@ -78,6 +84,7 @@ int convert_byte_array_to_send_file_header_content(send_file_header_content_t* s
     memcpy(temporary_send_file_header_content->file_name, array_pointer, temporary_send_file_header_content->file_name_size*sizeof(uint8_t));
     memcpy(send_file_header_content, temporary_send_file_header_content, sizeof(send_file_header_content_t));
 
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 
@@ -94,16 +101,17 @@ int convert_byte_array_to_send_file_header_content(send_file_header_content_t* s
  */
 send_file_header_content_t* create_send_file_header_content(uint32_t file_size, uint32_t file_name_size, uint8_t* file_name) {
     LOG_TRACE("File size: 0x%x bytes, file name size: 0x%x.", file_size, file_name_size);
+
     send_file_header_content_t* send_file_header_content;
 
     send_file_header_content = (send_file_header_content_t*)malloc(sizeof(send_file_header_content_t));
+    LOG_TRACE_POINT;
 
     send_file_header_content->file_header = SEND_FILE_HEADER_CONTENT_CODE;
     send_file_header_content->file_size = file_size;
     send_file_header_content->file_name_size = file_name_size;
 
     send_file_header_content->file_name = (uint8_t*)malloc(file_name_size*sizeof(uint8_t));
-
     memcpy(send_file_header_content->file_name, file_name, file_name_size);
 
     LOG_TRACE_POINT;
@@ -111,13 +119,13 @@ send_file_header_content_t* create_send_file_header_content(uint32_t file_size, 
 }
 
 /*
- * Creates a byte array containing the "send file header" package content.
+ * Creates a byte array containing a "send file header" package content.
  *
  * Parameters
- *  send_file_header_content - The send file header package content with the informations to build the byte array.
+ *  send_file_header_content - The "send file header" package content with the informations to build the byte array.
  *
  * Returns
- *  A byte array structure with the send file header package content informations.
+ *  A byte array structure with the "send file header" package content informations.
  */
 byte_array_t create_send_file_header_content_byte_array(send_file_header_content_t send_file_header_content) {
     LOG_TRACE_POINT;
@@ -132,13 +140,20 @@ byte_array_t create_send_file_header_content_byte_array(send_file_header_content
 
     byte_array.data = (uint8_t*)malloc(byte_array.size*sizeof(uint8_t));
     uint8_t* array_pointer = byte_array.data;
+    LOG_TRACE_POINT;
 
     memcpy(array_pointer, &send_file_header_content.file_header, sizeof(uint32_t));
     array_pointer += sizeof(uint32_t);
+    LOG_TRACE_POINT;
+
     memcpy(array_pointer, &send_file_header_content.file_size, sizeof(uint32_t));
     array_pointer += sizeof(uint32_t);
+    LOG_TRACE_POINT;
+
     memcpy(array_pointer, &send_file_header_content.file_name_size, sizeof(uint32_t));
     array_pointer += sizeof(uint32_t);
+    LOG_TRACE_POINT;
+
     memcpy(array_pointer, send_file_header_content.file_name, send_file_header_content.file_name_size);
 
     LOG_TRACE_POINT;
@@ -146,10 +161,10 @@ byte_array_t create_send_file_header_content_byte_array(send_file_header_content
 }
 
 /*
- * Deletes the information of a send file header package content.
+ * Deletes the information of a "send file header" package content.
  * 
  * Parameters
- *  send_file_header_content - The send file header package content to be deleted.
+ *  send_file_header_content - The "send file header" package content to be deleted.
  *
  * Returns
  *  SUCCESS - If the content was delete successfully.
@@ -157,8 +172,10 @@ byte_array_t create_send_file_header_content_byte_array(send_file_header_content
  */
 int delete_send_file_header_content(send_file_header_content_t* send_file_header_content) {
     LOG_TRACE_POINT;
+
     free(send_file_header_content->file_name);
     free(send_file_header_content);
+
     LOG_TRACE_POINT;
     return SUCCESS;
 }

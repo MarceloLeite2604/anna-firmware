@@ -1,5 +1,5 @@
 /*
- * This header file contains the declaration of all components required to create and manipulate content for "send file header" bluetooth packages.
+ * This header file contains the declaration of all components required to create and manipulate the "send file header" package content.
  *
  * Version: 
  *  0.1
@@ -15,6 +15,7 @@
 /*
  * Includes.
  */
+
 #include <stdint.h>
 
 #include "../../../../general/byte_array/byte_array.h"
@@ -23,7 +24,7 @@
  * Structure definitions.
  */
 
-/* Send file header package content. */
+/* The content of a "send file header" package. */
 typedef struct {
     uint32_t file_header;
     uint32_t file_size;

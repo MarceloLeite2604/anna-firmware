@@ -55,16 +55,6 @@
 /* Code used to specify the end position of a package. */
 #define PACKAGE_TRAILER 0x9228c204
 
-/* Code used on package contents to indicates it has a chunk o file. */
-#define SEND_FILE_CHUNK_CONTENT_CODE 0x90e3ec43
-
-/* Code used on package contents to indicates it has a file header. */
-#define SEND_FILE_HEADER_CONTENT_CODE 0x674eb247
-
-/* Code used on package contents to indicates it has a file trailer. */
-#define SEND_FILE_TRAILER_CONTENT_CODE 0xfa618007
-
-
 /*
  * Structures.
  */
@@ -74,22 +64,5 @@ typedef union {
     int value;
     unsigned char data[4];
 } package_code_t;
-
-
-/*
- * Constants.
- */
-
-/* extern const package_code_t confirmation_code; */
-/* extern const package_code_t error_code; */
-/* extern const package_code_t command_result_code; */
-/* extern const package_code_t start_record_code; */
-/* extern const package_code_t stop_record_code; */
-/* extern const package_code_t check_connection_code; */
-/* extern const package_code_t request_audio_file_code; */
-/* extern const package_code_t disconnect_code; */
-/* extern const package_code_t send_file_header_code; */
-/* extern const package_code_t send_file_chunk_code; */
-/* extern const package_code_t send_file_trailer_code; */
 
 #endif

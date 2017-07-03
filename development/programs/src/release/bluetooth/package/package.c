@@ -1,26 +1,30 @@
 /*
- * This source file contains all the components required to create and manipulate bluetooth communication data.
+ * This source file contains the elaboration of all components required to create and manipulate bluetooth packages.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+#include "../../general/random/random.h"
+#include "../../general/return_codes.h"
+#include "../../log/log.h"
 #include "package.h"
 #include "codes/codes.h"
-#include "../../general/return_codes.h"
-#include "../../general/random/random.h"
-#include "../../log/log.h"
 
 
 /*
- * Private function declarations.
+ * Function declarations.
  */
 
 /* Creates a new package. */
@@ -42,7 +46,8 @@ uint32_t create_package_id();
  *  byte_array - The byte array to be converted as package.
  *
  * Returns
- *  A package_t type with the informations obtained from the byte_array.
+ *  SUCCESS - If the byte array convertion was done successfully.
+ *  GENERIC_ERROR - Otherwise.
  */
 int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     LOG_TRACE_POINT;
@@ -65,6 +70,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
 
     array_pointer = byte_array.data;
     memcpy(&temporary_package.header, array_pointer, sizeof(uint32_t));
+    LOG_TRACE_POINT;
 
     if (temporary_package.header != PACKAGE_HEADER) {
         LOG_ERROR("Byte array is not a package.");
@@ -99,7 +105,10 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     memcpy(&temporary_package.trailer, array_pointer, sizeof(uint32_t));
 
     if ( content_byte_array.size > 0 ) {
+        LOG_TRACE_POINT;
+
         delete_byte_array(&content_byte_array);
+        LOG_TRACE_POINT;
     }
 
     package->header = temporary_package.header;
@@ -108,6 +117,7 @@ int convert_byte_array_to_package(package_t* package, byte_array_t byte_array) {
     package->content = temporary_package.content;
     package->trailer = temporary_package.trailer;
 
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 
@@ -134,9 +144,9 @@ int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
     temporary_byte_array.size += sizeof(uint32_t);
 
     byte_array_t content_byte_array = create_content_byte_array(package.content, package.type_code);
+    LOG_TRACE_POINT;
 
     temporary_byte_array.size += content_byte_array.size;
-
     temporary_byte_array.data = (uint8_t*)malloc(temporary_byte_array.size*sizeof(uint8_t));
 
     uint8_t* array_pointer = temporary_byte_array.data;
@@ -149,12 +159,15 @@ int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
     memcpy(array_pointer, content_byte_array.data, content_byte_array.size);
     array_pointer += content_byte_array.size;
     memcpy(array_pointer, &package.trailer, sizeof(uint32_t));
+    LOG_TRACE_POINT;
 
     delete_byte_array(&content_byte_array);
+    LOG_TRACE_POINT;
 
     byte_array->size = temporary_byte_array.size;
     byte_array->data = (uint8_t*)malloc(temporary_byte_array.size*sizeof(uint8_t));
     memcpy(byte_array->data, temporary_byte_array.data, temporary_byte_array.size*sizeof(uint8_t));
+    LOG_TRACE_POINT;
 
     delete_byte_array(&temporary_byte_array);
 
@@ -163,13 +176,13 @@ int convert_package_to_byte_array(byte_array_t* byte_array, package_t package) {
 }
 
 /*
- * Creates a check connection package.
+ * Creates a "check connection" package.
  * 
  * Parameters
- *  None
+ *  None.
  *
  * Returns
- *  A check connection package.
+ *  A "check connection" package.
  */
 package_t create_check_connection_package() {
     LOG_TRACE_POINT;
@@ -181,14 +194,14 @@ package_t create_check_connection_package() {
 }
 
 /*
- * Creates a command result package.
+ * Creates a "command result" package.
  * 
  * Parameters
  *  command_result - The command result to be informed on the package.
  *  execution_delay - The command execution delay to be informed on the package.
  *
  * Returns
- *  A command result package with the information provided.
+ *  A "command result" package with the information provided.
  */
 package_t create_command_result_package(uint32_t command_result, struct timeval execution_delay) {
     LOG_TRACE("Command result: 0x%x, Execution delay: %ld.%06ld.", command_result, execution_delay.tv_sec, execution_delay.tv_usec);
@@ -201,13 +214,13 @@ package_t create_command_result_package(uint32_t command_result, struct timeval 
 }
 
 /*
- * Creates a confirmation package.
+ * Creates a "confirmation" package.
  *
  * Parameters
  *  package_id - ID of the package to be confirmed.
  *
  * Returns
- *  A confirmation package with the ID informed.
+ *  A "confirmation" package with the ID informed.
  */
 package_t create_confirmation_package(uint32_t package_id) {
     LOG_TRACE("Package id: 0x%x.", package_id);
@@ -220,7 +233,7 @@ package_t create_confirmation_package(uint32_t package_id) {
 }
 
 /*
- * Creates a disconnect package.
+ * Creates a "disconnect" package.
  *
  * Parameters
  *  None
@@ -238,25 +251,30 @@ package_t create_disconnect_package() {
 }
 
 /*
- *  Creates an error package.
+ *  Creates an "error" package.
  *
  * Parameters
  *  error_code - The error code to be inserted on the package.
  *  error_message - The error message to be inserted on the package.
  *
  * Return
- *  An error package with the informations provided.
+ *  An "error" package with the informations provided.
  */
 package_t create_error_package(uint32_t error_code, const char* error_message) {
     LOG_TRACE("Error code: 0x%x, error message: \"%s\".", error_code, error_message);
 
     size_t error_message_size = strlen(error_message);
     LOG_TRACE("Error message size: %zu.", error_message_size);
+
     uint8_t* error_message_content = (uint8_t*)malloc(error_message_size*sizeof(uint8_t));
     memcpy(error_message_content, error_message, error_message_size);
+    LOG_TRACE_POINT;
 
     package_t package = create_package(ERROR_CODE);
+    LOG_TRACE_POINT;
+
     package.content.error_content = create_error_content(error_code, error_message_size, error_message_content);
+    LOG_TRACE_POINT;
 
     free(error_message_content);
 
@@ -275,6 +293,7 @@ package_t create_error_package(uint32_t error_code, const char* error_message) {
  */
 package_t create_package(uint32_t package_type_code) {
     LOG_TRACE("Package type code: 0x%x.", package_type_code);
+
     package_t package;
 
     package.header = PACKAGE_HEADER;
@@ -299,7 +318,9 @@ uint32_t create_package_id() {
     LOG_TRACE_POINT;
 
     uint32_t new_id;
-    uint8_t* random_bytes = generate_random_bytes(sizeof(uint32_t));
+    uint8_t* random_bytes;
+   
+    random_bytes = generate_random_bytes(sizeof(uint32_t));
     memcpy(&new_id, random_bytes, sizeof(uint32_t));
     free(random_bytes);
 
@@ -308,11 +329,11 @@ uint32_t create_package_id() {
 }
 
 /*
- * Creates a send file chunk package.
+ * Creates a "send file chunk" package.
  *
  * Parameters
- *  chunk_size - Size of the chunk to be informed on the package.
- *  chunk_data - The chunk data to be informed on the package.
+ *  chunk_size - Size of the data chunk to be informed on the package.
+ *  chunk_data - The chunk of data to be informed on the package.
  *
  * Returns
  *  A "send file chunk" package with the informations provided.
@@ -333,11 +354,11 @@ package_t create_send_file_chunk_package(size_t chunk_size, uint8_t* chunk_data)
  * Creates a "send file header" package.
  *
  * Parameters
- *  file_size - The file size to be informed on the package.
- *  file_name - The file name to be informed on the package.
+ *  file_size - The size of the file to be informed on the package.
+ *  file_name - The name of the file to be informed on the package.
  *
  * Returns
- *  A send file header package with the information provided.
+ *  A "send file header" package with the information provided.
  */
 package_t create_send_file_header_package(size_t file_size, const char* file_name){
     LOG_TRACE("File size: %zu bytes, file name: \"%s\".", file_size, file_name);
@@ -362,10 +383,11 @@ package_t create_send_file_header_package(size_t file_size, const char* file_nam
  *  None
  *
  * Returns
- *  A send file trailer package.
+ *  A "send file trailer" package.
  */
 package_t create_send_file_trailer_package() {
     LOG_TRACE_POINT;
+
     package_t package = create_package(SEND_FILE_TRAILER_CODE);
     package.content.send_file_trailer_content = create_send_file_trailer_content();
 
@@ -389,6 +411,7 @@ int delete_package(package_t package) {
     int result;
 
     result = delete_content(package.type_code, package.content);
+
     LOG_TRACE_POINT;
     return result;
 }

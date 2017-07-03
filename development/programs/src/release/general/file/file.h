@@ -34,6 +34,6 @@ bool file_is_readable(char*);
 size_t get_file_size(char*);
 
 /* Reads a chunk of the specified file. */
-int read_file_chunk(char*, uint8_t*, long int, size_t);
+/* int read_file_chunk(char*, uint8_t*, long int, size_t); */
 
 #endif

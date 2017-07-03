@@ -1,5 +1,25 @@
+/*
+ * This source file contains the elaboration of all componentes to store the error messages used thoughout the programs.
+ *
+ * Version:
+ *  0.1
+ *
+ * Author:
+ *  Marcelo Leite
+ */
+
+/*
+ * Includes.
+ */
+
 #include "error_messages.h"
 
+
+/*
+ * Constants.
+ */
+
+/* An array with all the mapped errors used throughout the programs. */
 const char* error_messages[] = {
     ERROR_MESSAGE_000,
     ERROR_MESSAGE_001,

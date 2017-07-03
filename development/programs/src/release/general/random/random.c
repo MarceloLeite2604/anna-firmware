@@ -1,32 +1,42 @@
 /*
- * This source file contains all components used to generate random values.
+ * This source file contains the elaboration of all components required to generate random values.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
-#include <stdint.h>
+
+#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>
+
 #include "random.h"
+#include "../../log/log.h"
+
 
 /*
- * Private variables.
+ * Variables.
  */
 
+/* Indicates if random byte generator was initialized. */
 bool initialized = false;
 
-/*
- * Private functions.
- */
-void initialize_random_byte_generator();
 
 /*
- * Function elborations.
+ * Function headers.
+ */
+
+void initialize_random_byte_generator();
+
+
+/*
+ * Function elaborations.
  */
 
 /*
@@ -39,17 +49,25 @@ void initialize_random_byte_generator();
  *  An array with random byte values.
  */
 uint8_t* generate_random_bytes(size_t array_size) {
-    uint8_t* byte_array = (uint8_t*)malloc(array_size*sizeof(uint8_t));
+    LOG_TRACE_POINT;
+
+    uint8_t* byte_array;
     size_t count;
 
+    byte_array = (uint8_t*)malloc(array_size*sizeof(uint8_t));
+
     if ( initialized == false ) {
+        LOG_TRACE_POINT;
+
         initialize_random_byte_generator();
+        LOG_TRACE_POINT;
     }
 
     for ( count = 0; count < array_size; count++ ) {
         byte_array[count] = rand();
     }
 
+    LOG_TRACE_POINT;
     return byte_array;
 }
 
@@ -57,12 +75,16 @@ uint8_t* generate_random_bytes(size_t array_size) {
  * Initialized the random byte generator.
  *
  * Parameters
- *  None
+ *  None.
  *
  * Returns
- *  Nothing
+ *  Nothing.
  */
 void initialize_random_byte_generator() {
+    LOG_TRACE_POINT;
+
     srand((unsigned int)time(NULL));
     initialized = true;
+
+    LOG_TRACE_POINT;
 }

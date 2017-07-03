@@ -15,6 +15,7 @@
 /*
  * Includes.
  */
+
 #include "confirmation/confirmation.h"
 #include "command_result/command_result.h"
 #include "error/error.h"
@@ -22,11 +23,12 @@
 #include "send_file_header/send_file_header.h"
 #include "send_file_trailer/send_file_trailer.h"
 
+
 /*
  * Structure definitions.
  */
 
-/* Union of package content pointers. */
+/* Stores the bluetooth package content. */
 typedef union {
     confirmation_content_t* confirmation_content; 
     error_content_t* error_content;
@@ -41,15 +43,13 @@ typedef union {
  * Function declarations.
  */
 
-
 /* Converts a byte array to a package content. */
 int convert_byte_array_to_content(content_t*, byte_array_t, uint32_t);
 
-/* Creates a byte array of a package content. */
+/* Creates a byte array storing the informations of the package content. */
 byte_array_t create_content_byte_array(content_t, uint32_t);
 
-/* Deletes the information of a package content. */
+/* Deletes the content of a package. */
 int delete_content(uint32_t, content_t);
-
 
 #endif

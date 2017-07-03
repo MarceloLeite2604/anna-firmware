@@ -1,5 +1,5 @@
 /*
- * This source file contains all the components required to create and manipulate content for "send file chunk" bluetooth packages.
+ * This source file contains the elaboration of all components required to create and manipulate "send file chunk" package contents.
  *
  * Version:
  *  0.1
@@ -25,11 +25,11 @@
  */
 
 /*
- * Converts a byte array to an send file chunk content.
+ * Converts a byte array to a "send file chunk" package content.
  *
  * Parameters
- *  send_file_chunk_content - The content where the byte array informations will be stored.
- *  byte_array - The byte array with the content informations.
+ *  send_file_chunk_content - The variable where the "send file chunk" package content created will be stored.
+ *  byte_array - The byte array with the information to create the "send file chunk" package content.
  *
  * Returns
  *  SUCCESS - If the byte array was converted successfully.
@@ -37,6 +37,7 @@
  */
 int convert_byte_array_to_send_file_chunk_content(send_file_chunk_content_t* send_file_chunk_content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
+
     size_t content_size;
     uint8_t* array_pointer;
 
@@ -83,14 +84,14 @@ int convert_byte_array_to_send_file_chunk_content(send_file_chunk_content_t* sen
 }
 
 /*
- * Creates the content of a "send file chunk" package.
+ * Creates a "send file chunk" package content.
  *
  * Parameters
  *  chunk_size - Size of the file chunk to be stored on content.
  *  chunk_data - The data chunk to be stored on content.
  *
  * Returns
- *  A "send file chunk" package content with the chunk data and its size.
+ *  A "send file chunk" package content with the informations provided.
  */
 send_file_chunk_content_t* create_send_file_chunk_content(size_t chunk_size, uint8_t* chunk_data) {
     LOG_TRACE("Chunk size: %zu bytes.", chunk_size);
@@ -108,7 +109,7 @@ send_file_chunk_content_t* create_send_file_chunk_content(size_t chunk_size, uin
 }
 
 /*
- * Creates a byte array containing the "send file chunk" package content.
+ * Creates a byte array containing a "send file chunk" package content.
  *
  * Parameters
  *  send_file_chunk_content - The "send file chunk" package content with the informations to build the byte array.

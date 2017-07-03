@@ -1,8 +1,11 @@
 /*
- * This source file contains all the components required to create and manipulate bluetooth communication data.
+ * This source file contains the elaboration of all components required to create and manipulate "error" package contents.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
@@ -20,11 +23,11 @@
  */
 
 /*
- * Converts a byte array to an error package content.
+ * Converts a byte array to an "error" package content.
  *
  * Parameters
- *  error_content - The content where the byte array informations will be stored.
- *  byte_array - The byte array with the content informations.
+ *  error_content - The variable which will store the "error" content created with the byte array informations.
+ *  byte_array - The byte array with the "error" package content informations.
  *
  * Returns
  *  SUCCESS - If the byte array was converted successfully.
@@ -67,22 +70,24 @@ int convert_byte_array_to_error_content(error_content_t* error_content, byte_arr
     memcpy(error_content, temporary_error_content, sizeof(error_content_t));
     free(temporary_error_content);
 
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 
 /*
- * Creates an error content for a package.
+ * Creates an "error" package content.
  *
  * Parameters
- *  error_code         - The error code to be stored in the content.
+ *  error_code - The error code to be stored in the content.
  *  error_message_size - Size of the error message to be stored in the content.
- *  error_message      - The error message to be stored in the content.
+ *  error_message - The error message to be stored in the content.
  *
  * Returns
  *  An error package content with the error code and message informed.
  */
 error_content_t* create_error_content(uint32_t error_code, uint32_t error_message_size, uint8_t* error_message) {
     LOG_TRACE("Error code: 0x%x, error message size: 0x%x.", error_code, error_message_size);
+
     error_content_t* error_content;
 
     error_content = (error_content_t*)malloc(sizeof(error_content_t));
@@ -97,7 +102,7 @@ error_content_t* create_error_content(uint32_t error_code, uint32_t error_messag
 }
 
 /*
- * Creates a byte array containing the error package content.
+ * Creates a byte array containing an "error" package content.
  *
  * Parameters
  *  error_content - The error package content with the informations to build the byte array.
@@ -143,6 +148,7 @@ int delete_error_content(error_content_t* error_content) {
 
     free(error_content->error_message);
     free(error_content);
+
     LOG_TRACE_POINT;
     return SUCCESS;
 }

@@ -12,6 +12,12 @@
 #define RANDOM_H
 
 /*
+ * Includes.
+ */
+
+#include <stdint.h>
+
+/*
  * Function specifications.
  */
 

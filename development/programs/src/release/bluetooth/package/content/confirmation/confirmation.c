@@ -1,5 +1,5 @@
 /*
- * This source file contains all the components required to create and manipulate content for "confirmation" bluetooth packages.
+ * This source file contains the elaboration of all components required to create and manipulate "confirmation" package contents.
  *
  * Version:
  *  0.1
@@ -23,11 +23,11 @@
  */
 
 /*
- * Converts a byte array to a confirmation package content.
+ * Converts a byte array to a "confirmation" package content.
  *
  * Parameters
- *  confirmation_content - The content where the byte array informations will be stored.
- *  byte_array - The byte array with the content informations.
+ *  confirmation_content - The variable where the "confirmation" package content will be stored.
+ *  byte_array - The byte array with information of the "confirmation" package content.
  *
  * Returns
  *  SUCCESS - If the byte array was converted successfully.
@@ -35,27 +35,29 @@
  */
 int convert_byte_array_to_confirmation_content(confirmation_content_t* confirmation_content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
+
     size_t content_size;
 
     content_size = sizeof(uint32_t);
-
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array size does not match a confirmation content.");
         return GENERIC_ERROR;
     }
 
     memcpy(&confirmation_content->package_id, byte_array.data, sizeof(uint32_t));
+
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 
 /*
- * Creates a confirmation package content.
+ * Creates a "confirmation" package content.
  *
  * Parameters
  *  package_id - The package id to confirm its delivery.
  *
  * Returns
- *  A confirmation package content with the id of the delivered package.
+ *  A "confirmation" package content with the id of the delivered package.
  */
 confirmation_content_t* create_confirmation_content(uint32_t package_id){
     LOG_TRACE("Package id: 0x%x.", package_id);
@@ -70,10 +72,10 @@ confirmation_content_t* create_confirmation_content(uint32_t package_id){
 }
 
 /*
- * Creates a byte array containing the confirmation package content.
+ * Creates a byte array containing the "confirmation" package content.
  *
  * Parameters
- *  confirmation_content - The confirmation package content with the informations to build the byte array.
+ *  confirmation_content - The "confirmation" package content with the informations to build the byte array.
  *
  * Returns
  *  A byte array structure with the confirmation package content informations.
@@ -103,6 +105,7 @@ byte_array_t create_confirmation_content_byte_array(confirmation_content_t confi
  */
 int delete_confirmation_content(confirmation_content_t* confirmation_content) {
     free(confirmation_content);
+
     LOG_TRACE_POINT;
     return SUCCESS;
 }

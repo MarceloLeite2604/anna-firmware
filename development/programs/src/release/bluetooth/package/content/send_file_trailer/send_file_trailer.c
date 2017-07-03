@@ -1,5 +1,5 @@
 /*
- * This source file contains all the components required to create and manipulate content for "send file trailer" bluetooth packages.
+ * This source file contains the elaboration of all components required to create and manipulate "send file trailer" package contents.
  *
  * Version:
  *  0.1
@@ -19,16 +19,17 @@
 #include "../codes/codes.h"
 #include "send_file_trailer.h"
 
+
 /*
  * Function elaborations.
  */
 
 /*
- * Converts a byte array to a send file trailer package content.
+ * Converts a byte array to a "send file trailer" package content.
  *
  * Parameters
- *  send_file_trailer_content - The content where the byte array informations will be stored.
- *  byte_array - The byte array with the content informations.
+ *  send_file_trailer_content - The variable where the "send file trailer" package content create will be stored.
+ *  byte_array - The byte array with the informations to create the "send file trailer" package content.
  *
  * Returns
  *  SUCCESS - If the byte array was converted successfully.
@@ -36,6 +37,7 @@
  */
 int convert_byte_array_to_send_file_trailer_content(send_file_trailer_content_t* send_file_trailer_content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
+
     size_t content_size;
 
     content_size = sizeof(uint32_t);
@@ -46,6 +48,8 @@ int convert_byte_array_to_send_file_trailer_content(send_file_trailer_content_t*
     }
 
     memcpy(&send_file_trailer_content->file_trailer, byte_array.data, sizeof(uint32_t));
+
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 
@@ -62,6 +66,7 @@ send_file_trailer_content_t* create_send_file_trailer_content() {
     LOG_TRACE_POINT;
 
     send_file_trailer_content_t* send_file_trailer_content;
+
     send_file_trailer_content = (send_file_trailer_content_t*)malloc(sizeof(send_file_trailer_content_t));
     send_file_trailer_content->file_trailer = SEND_FILE_TRAILER_CONTENT_CODE;
 
@@ -94,7 +99,7 @@ byte_array_t create_send_file_trailer_content_byte_array(send_file_trailer_conte
 }
 
 /*
- * Deletes the information of a send file trailer package content.
+ * Deletes the information of a "send file trailer" package content.
  * 
  * Parameters
  *  send_file_trailer_content - The send file trailer package content to be deleted.
@@ -107,6 +112,8 @@ int delete_send_file_trailer_content(send_file_trailer_content_t* send_file_trai
     LOG_TRACE_POINT;
 
     free(send_file_trailer_content);
+
+    LOG_TRACE_POINT;
     return SUCCESS;
 }
 

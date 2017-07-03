@@ -1,9 +1,9 @@
 /*
- * This source file contains all the components required to create and manipulate bluetooth package contents.
+ * This source file contains the elaboration of all components required to create and manipulate bluetooth package contents.
  *
  * Version:
  *  0.1
-
+ *
  * Author: 
  *  Marcelo Leite
  */
@@ -15,8 +15,9 @@
 #include <stdlib.h>
 
 #include "../../../general/return_codes.h"
-#include "content.h"
 #include "../codes/codes.h"
+#include "content.h"
+
 
 /*
  * Function elaborations.
@@ -26,9 +27,9 @@
  * Converts a byte array to a package content.
  *
  * Parameters
- *  content - The content package to store the informations obtained from the byte array.
- *  byte_array - The byte array with the content informations.
- *  package_type_code - The package type of the content byte array.
+ *  content - The package content variable to store the informations obtained from the byte array.
+ *  byte_array - The byte array with the package content informations.
+ *  package_type_code - The type of the package content stored by the byte array.
  *
  * Returns
  *  SUCCESS - If the content was converted successfully.
@@ -36,6 +37,7 @@
  */
 int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, uint32_t package_type_code){
     LOG_TRACE("Byte array size: %zu, package type: 0x%x.", byte_array.size, package_type_code);
+
     int result;
     int convertion_result;
     content_t temporary_content;
@@ -45,44 +47,56 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
         case DISCONNECT_CODE:
         case REQUEST_AUDIO_FILE_CODE:
             LOG_TRACE_POINT;
-            /* These package types does not have content. */
+            /* These types of package does not have content. */
             convertion_result = SUCCESS;
             break;
 
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t)); 
             convertion_result = convert_byte_array_to_confirmation_content(temporary_content.confirmation_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
             convertion_result = convert_byte_array_to_command_result_content(temporary_content.command_result_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         case ERROR_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.error_content = (error_content_t*)malloc(sizeof(error_content_t));
             convertion_result = convert_byte_array_to_error_content(temporary_content.error_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         case SEND_FILE_CHUNK_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.send_file_chunk_content = (send_file_chunk_content_t*)malloc(sizeof(send_file_chunk_content_t));
             convertion_result = convert_byte_array_to_send_file_chunk_content(temporary_content.send_file_chunk_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         case SEND_FILE_HEADER_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.send_file_header_content = (send_file_header_content_t*)malloc(sizeof(send_file_header_content_t));
             convertion_result = convert_byte_array_to_send_file_header_content(temporary_content.send_file_header_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         case SEND_FILE_TRAILER_CODE:
             LOG_TRACE_POINT;
+
             temporary_content.send_file_trailer_content = (send_file_trailer_content_t*)malloc(sizeof(send_file_trailer_content_t));
             convertion_result = convert_byte_array_to_send_file_trailer_content(temporary_content.send_file_trailer_content, byte_array);
+            LOG_TRACE_POINT;
             break;
 
         default:
@@ -101,7 +115,7 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
 }
 
 /*
- * Creates a byte array of a package content.
+ * Creates a byte array storing the informations of the package content.
  *
  * Parameters
  *  content - The package content with the informations to create the byte array.
@@ -124,30 +138,47 @@ byte_array_t create_content_byte_array(content_t content, uint32_t package_type)
             break;
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_confirmation_content_byte_array(*content.confirmation_content);
+            LOG_TRACE_POINT;
             break;
+
         case ERROR_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_error_content_byte_array(*content.error_content);
+            LOG_TRACE_POINT;
             break;
+
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_command_result_content_byte_array(*content.command_result_content);
+            LOG_TRACE_POINT;
+
             break;
         case SEND_FILE_CHUNK_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_send_file_chunk_content_byte_array(*content.send_file_chunk_content);
+            LOG_TRACE_POINT;
+
             break;
         case SEND_FILE_HEADER_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_send_file_header_content_byte_array(*content.send_file_header_content);
+            LOG_TRACE_POINT;
             break;
+
         case SEND_FILE_TRAILER_CODE:
             LOG_TRACE_POINT;
+
             byte_array = create_send_file_trailer_content_byte_array(*content.send_file_trailer_content);
-            break;
-        default:
             LOG_TRACE_POINT;
+            break;
+
+        default:
             LOG_ERROR("Unkown package type.");
             byte_array.size = 0;
             byte_array.data = NULL;
@@ -181,36 +212,49 @@ int delete_content(uint32_t package_type, content_t content){
         case STOP_RECORD_CODE:
             LOG_TRACE_POINT("This package type doesn't have a content.");
             break;
+
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
+
             result = delete_confirmation_content(content.confirmation_content);
             LOG_TRACE_POINT;
             break;
+
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
+
             result = delete_command_result_content(content.command_result_content);
             LOG_TRACE_POINT;
             break;
+
         case ERROR_CODE:
             LOG_TRACE_POINT;
+
             result = delete_error_content(content.error_content);
             LOG_TRACE_POINT;
             break;
+
         case SEND_FILE_CHUNK_CODE:
             LOG_TRACE_POINT;
+
             result = delete_send_file_chunk_content(content.send_file_chunk_content);
             LOG_TRACE_POINT;
             break;
+
         case SEND_FILE_HEADER_CODE:
             LOG_TRACE_POINT;
+
             result = delete_send_file_header_content(content.send_file_header_content);
             LOG_TRACE_POINT;
             break;
+
         case SEND_FILE_TRAILER_CODE:
             LOG_TRACE_POINT;
+
             result = delete_send_file_trailer_content(content.send_file_trailer_content);
             LOG_TRACE_POINT;
             break;
+
         default:
             LOG_ERROR("Unknown package type.");
             result = GENERIC_ERROR;
