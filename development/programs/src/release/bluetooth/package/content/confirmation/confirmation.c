@@ -44,7 +44,6 @@ int convert_byte_array_to_confirmation_content(confirmation_content_t* confirmat
         return GENERIC_ERROR;
     }
 
-    confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t));
     memcpy(&confirmation_content->package_id, byte_array.data, sizeof(uint32_t));
     return SUCCESS;
 }

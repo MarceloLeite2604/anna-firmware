@@ -76,8 +76,7 @@ int convert_byte_array_to_send_file_header_content(send_file_header_content_t* s
 
     temporary_send_file_header_content->file_name = (uint8_t*)malloc(temporary_send_file_header_content->file_name_size*sizeof(uint8_t));
     memcpy(temporary_send_file_header_content->file_name, array_pointer, temporary_send_file_header_content->file_name_size*sizeof(uint8_t));
-
-    send_file_header_content = temporary_send_file_header_content;
+    memcpy(send_file_header_content, temporary_send_file_header_content, sizeof(send_file_header_content_t));
 
     return SUCCESS;
 }

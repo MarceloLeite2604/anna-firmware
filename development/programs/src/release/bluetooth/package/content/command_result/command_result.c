@@ -33,16 +33,21 @@
 int convert_byte_array_to_command_result_content(command_result_content_t* command_result_content, byte_array_t byte_array) {
     LOG_TRACE_POINT;
     size_t content_size;
+    uint8_t* array_pointer;
 
-    content_size = sizeof(uint32_t);
+    content_size = 0;
+    content_size += sizeof(uint32_t);
+    content_size += sizeof(struct timeval);
 
     if ( byte_array.size != content_size ) {
         LOG_ERROR("The byte array size does not match a command result content.");
         return GENERIC_ERROR;
     }
 
-    command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
-    memcpy(&command_result_content->result_code, byte_array.data, sizeof(uint32_t));
+    array_pointer = byte_array.data;
+    memcpy(&command_result_content->result_code, array_pointer, sizeof(uint32_t));
+    array_pointer += sizeof(uint32_t);
+    memcpy(&command_result_content->execution_delay, array_pointer, sizeof(struct timeval));
     return SUCCESS;
 }
 

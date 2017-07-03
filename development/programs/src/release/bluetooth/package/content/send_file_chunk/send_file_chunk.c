@@ -76,7 +76,8 @@ int convert_byte_array_to_send_file_chunk_content(send_file_chunk_content_t* sen
     temporary_send_file_chunk_content->chunk_data = (uint8_t*)malloc(temporary_send_file_chunk_content->chunk_size*sizeof(uint8_t));
     memcpy(temporary_send_file_chunk_content->chunk_data, array_pointer, temporary_send_file_chunk_content->chunk_size*sizeof(uint8_t));
 
-    send_file_chunk_content = temporary_send_file_chunk_content;
+    memcpy(send_file_chunk_content, temporary_send_file_chunk_content, sizeof(send_file_chunk_content_t));
+    free(temporary_send_file_chunk_content);
 
     return SUCCESS;
 }

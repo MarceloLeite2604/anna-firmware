@@ -257,9 +257,6 @@ package_t create_error_package(uint32_t error_code, const char* error_message) {
 
     package_t package = create_package(ERROR_CODE);
     package.content.error_content = create_error_content(error_code, error_message_size, error_message_content);
-    printf("Error content pointer: %p.\n", package.content.error_content);
-    printf("Error message pointer: %p.\n", package.content.error_content->error_message);
-    
 
     free(error_message_content);
 

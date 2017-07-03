@@ -45,7 +45,6 @@ int convert_byte_array_to_send_file_trailer_content(send_file_trailer_content_t*
         return GENERIC_ERROR;
     }
 
-    send_file_trailer_content = (send_file_trailer_content_t*)malloc(sizeof(send_file_trailer_content_t));
     memcpy(&send_file_trailer_content->file_trailer, byte_array.data, sizeof(uint32_t));
     return SUCCESS;
 }

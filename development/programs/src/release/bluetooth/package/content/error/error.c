@@ -35,10 +35,10 @@ int convert_byte_array_to_error_content(error_content_t* error_content, byte_arr
 
     size_t content_size;
     uint8_t* array_pointer;
+    error_content_t* temporary_error_content;
 
     content_size = sizeof(uint32_t);
     content_size += sizeof(uint32_t);
-    error_content_t* temporary_error_content;
 
     if ( byte_array.size < content_size ) {
         LOG_ERROR("The byte array size does not match an error content.");
@@ -46,14 +46,11 @@ int convert_byte_array_to_error_content(error_content_t* error_content, byte_arr
     }
 
     array_pointer = byte_array.data;
-
     temporary_error_content = (error_content_t*)malloc(sizeof(error_content_t));
 
     memcpy(&temporary_error_content->error_code, array_pointer, sizeof(uint32_t));
-    LOG_TRACE("Error code: 0x%02x.", temporary_error_content->error_code);
     array_pointer += sizeof(uint32_t);
     memcpy(&temporary_error_content->error_message_size, array_pointer, sizeof(uint32_t));
-    LOG_TRACE("Error message size: 0x%02x.", temporary_error_content->error_message_size);
     array_pointer += sizeof(uint32_t);
 
     content_size += temporary_error_content->error_message_size;

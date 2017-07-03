@@ -46,23 +46,19 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
         case REQUEST_AUDIO_FILE_CODE:
             LOG_TRACE_POINT;
             /* These package types does not have content. */
-            /* convertion_result = convert_byte_array_to_check_connection_content(&temporary_content, byte_array); */
-            /* convertion_result = convert_byte_array_to_command_result_content(temporary_content.command_result_content, byte_array); */
-            /* convertion_result = convert_byte_array_to_request_audio_file_content(&temporary_content, byte_array); */
-            /* convertion_result = convert_byte_array_to_start_record_content(&temporary_content, byte_array); */
-            /* convertion_result = convert_byte_array_to_stop_record_content(&temporary_content, byte_array); */
             convertion_result = SUCCESS;
             break;
 
         case CONFIRMATION_CODE:
             LOG_TRACE_POINT;
-            temporary_content.confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t));
+            temporary_content.confirmation_content = (confirmation_content_t*)malloc(sizeof(confirmation_content_t)); 
             convertion_result = convert_byte_array_to_confirmation_content(temporary_content.confirmation_content, byte_array);
             break;
 
         case COMMAND_RESULT_CODE:
             LOG_TRACE_POINT;
             temporary_content.command_result_content = (command_result_content_t*)malloc(sizeof(command_result_content_t));
+            convertion_result = convert_byte_array_to_command_result_content(temporary_content.command_result_content, byte_array);
             break;
 
         case ERROR_CODE:
