@@ -42,9 +42,6 @@ int close_socket(int);
 /* Checks if there is content to be read on a socket. */
 int check_socket_content(int, struct timeval);
 
-/* Disconnects from device. */
-int disconnect(int);
-
 /* Reads content from the socket. */
 int read_socket_content(int, byte_array_t*);
 

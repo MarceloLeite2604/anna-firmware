@@ -40,7 +40,7 @@ int check_connection(int);
 int receive_package(int, package_t*);
 
 /* Sends a disconnect signal through a connection. */
-int send_disconnect(int);
+int send_disconnect_signal(int);
 
 /* Sends a file through a connection. */
 int send_file(int, char*);

@@ -1,8 +1,11 @@
 /*
- * This source file contains all component elaborations to manipulate bluetooth connection.
+ * This source file contains the elaboration of all components required to manipulate a bluetooth connection.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
@@ -10,17 +13,18 @@
  */
 
 #include <errno.h>
-#include <sys/time.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
+#include <unistd.h>
+
 #include "../../general/return_codes.h"
 #include "../package/codes/codes.h"
 #include "connection.h"
 
 
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Size of the buffer to read content from the socket. */
@@ -43,7 +47,7 @@ const struct timeval _read_wait_time = { .tv_sec = 0, .tv_usec = 0 };
  * Closes a socket communication.
  *
  * Parameters
- *  socket_fd - The socket communication file descriptor to be closed.
+ *  socket_fd - The file descriptor of the socket communication to be closed.
  *
  * Returns
  *  SUCCESS - If the communication was closed successfully.
@@ -54,15 +58,17 @@ int close_socket(int socket_fd){
 
     int result;
     int close_result;
-    close_result = close(socket_fd);
 
+    close_result = close(socket_fd);
     if (close_result < 0 ) {
         LOG_ERROR("Error while closing socket.");
         LOG_ERROR("%s", strerror(errno));
+
         result = GENERIC_ERROR;
     }
     else {
         LOG_TRACE_POINT;
+
         result = SUCCESS;
     }
 
@@ -71,7 +77,7 @@ int close_socket(int socket_fd){
 }
 
 /*
- * Checks if there is content to be read on a socket.
+ * Checks if there is content to read on a socket.
  *
  * Parameters
  *  socket_fd - The socket communication file descriptor to be checked.
@@ -94,16 +100,19 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
     FD_SET(socket_fd, &socket_fd_set);
     select_result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &check_time);
     FD_CLR(socket_fd, &socket_fd_set);
+    LOG_TRACE_POINT;
 
     switch (select_result) {
         case 0:
             LOG_TRACE("No content on socket.");
             result = NO_CONTENT_TO_READ;
             break;
+
         case -1:
             LOG_ERROR("Error while checking socket.");
             result = GENERIC_ERROR;
             break;
+
         default:
             LOG_TRACE("Found content on socket.");
             result = CONTENT_TO_READ;
@@ -115,7 +124,7 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
 }
 
 /*
- * Reads content from the socket.
+ * Reads content from a socket.
  *
  * Parameters
  *  socket_fd - The socket communication file descriptor to read content.
@@ -143,6 +152,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
     int copy_content_result;
 
     delete_byte_array(byte_array);
+    LOG_TRACE_POINT;
 
     while (done_reading == false ) {
         LOG_TRACE_POINT;
@@ -195,7 +205,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                         }
                         array_pointer = (uint32_t*)(buffer+content_size);
                         break;
-                    }
+                }
                 LOG_TRACE("Content size: %zu byte(s).", content_size);
                 break;
 
@@ -208,11 +218,17 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
 
     if ( error == true ) {
         LOG_TRACE_POINT;
+
         delete_byte_array(byte_array);
+        LOG_TRACE_POINT;
     } else {
         copy_content_result = copy_content_to_byte_array(byte_array, buffer, content_size);
+        LOG_TRACE_POINT;
+
         if ( copy_content_result != SUCCESS ) {
             delete_byte_array(byte_array);
+            LOG_TRACE_POINT;
+
             result = GENERIC_ERROR;
         }
     }
@@ -225,7 +241,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
  * Writes content on socket.
  *
  * Parameters
- *  socket_fd - The socket communication file descritptor to write content.
+ *  socket_fd - The socket communication file descriptor to write content.
  *  byte_array_t - The byte array content to be written on socket.
  *
  * Returns
@@ -250,17 +266,21 @@ int write_content_on_socket(int socket_fd, byte_array_t byte_array) {
                 errno_value = errno;
                 LOG_ERROR("Error while writing content on socket.");
                 LOG_ERROR("%s", strerror(errno_value));
+
                 result = GENERIC_ERROR;
                 concluded = true;
                 break;
+
             case 0:
                 LOG_TRACE_POINT;
+
                 if ( byte_array.size != 0 ) {
                     LOG_ERROR("The content was not written on socket.");
                     result = GENERIC_ERROR;
                     concluded = true;
                 }
                 break;
+
             default:
                 LOG_TRACE("%zu byte(s) written on socket.", write_result);
                 break;

@@ -1,32 +1,50 @@
 /*
  * This program registers the current instant in a specified file.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Arguments:
+ *  1. The file location to store the current instant.
+ *
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
+
 #include <errno.h>
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
+
 #include "general/return_codes.h"
 #include "general/time/time.h"
 #include "log/log.h"
 
+/*
+ * Function headers.
+ */
+
+/* Program's main function. */
+int main(int argc, char** argv);
+
+
+/*
+ * Function elaborations.
+ */
 
 /*
  * Program's main function.
- * It retrieves the current instant and stores on file specified through program argument.
  *
- * Parameters:
- *  1. The file path to store the current instant.
+ * Parameters
+ *  Check the program arguments informed on this file source header. 
  *
- * Returns:
+ * Returns
  *  SUCCESS - If program was executed successfully.
  *  GENERIC_ERROR - Otherwise.
  */
