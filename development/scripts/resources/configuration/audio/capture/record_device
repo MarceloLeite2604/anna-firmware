@@ -1,1 +1,1 @@
-plughw:CARD=PCH,DEV=0
+hw:CARD=MID,DEV=0

@@ -177,7 +177,7 @@ create_directory() {
 #     echo_result=${?};
 #     if [ ${echo_result} -ne 0 ];
 #     then
-#         echo -n "Error while defining the input directory.";
+#         echo -e "Error while defining the input directory.";
 #         return 1;
 #     fi;
 # 
@@ -185,7 +185,7 @@ create_directory() {
 #     echo_result=${?};
 #     if [ ${echo_result} -ne 0 ];
 #     then
-#         echo -n "Error while defining the output directory.";
+#         echo -e "Error while defining the output directory.";
 #         return 1;
 #     fi;
 # 
@@ -207,7 +207,7 @@ create_current_release_version_directory(){
 
     if [ ! -d "${current_release_version_directory}" ];
     then
-        echo "Creating release version directory.";
+        echo -n "Creating release version directory.";
         mkdir -p "${current_release_version_directory}";
     fi;
 
@@ -238,7 +238,7 @@ copy_directory(){
     local cp_result;
 
     if [ ${#} -ne 2 ];
-    then;
+    then
         print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return 1;
     else
@@ -248,19 +248,19 @@ copy_directory(){
 
     if [[ ${directory_to_copy} != */ ]];
     then
-        echo "[WARNING]: Parameter 1 informed for \"${FUNCNAME[0]}\" method does not have the leading forward slash.";
+        echo -e "[WARNING]: Parameter 1 informed for \"${FUNCNAME[0]}\" method does not have the leading forward slash.";
         directory_to_copy="${directory_to_copy}/";
     fi;
 
     if [[ ${destination_directory} != */ ]];
     then
-        echo "[WARNING]: Parameter 2 informed for \"${FUNCNAME[0]}\" method does not have the leading forward slash.";
+        echo -e "[WARNING]: Parameter 2 informed for \"${FUNCNAME[0]}\" method does not have the leading forward slash.";
         destination_directory="${destination_directory}/";
     fi;
 
     if [ -d "${destination_directory}" ];
     then
-        echo -n "Directory \"${destination_directory}\" already exists.";
+        # echo -e "Directory \"${destination_directory}\" already exists.";
 
         rm -rf "${destination_directory}";
         rm_result=${?}
@@ -298,8 +298,8 @@ deploy_configuration(){
 
     create_current_release_version_directory;
 
-    echo -n "Deploying configuration files to release version directory.";
-    copy_directory "${subdivision_configuration_directory_path}" "${current_release_version_directory}configuration";
+    echo -e "Deploying to release version directory.";
+    copy_directory "${subdivision_configuration_directory_path}" "${current_release_version_directory}configuration/";
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -307,8 +307,8 @@ deploy_configuration(){
         return 1;
     fi;
 
-    echo -n "Deploying configuration files to \"programs\" project subdivision.";
-    copy_directory "${subdivision_configuration_directory_path}" "${subdivision_programs_directory_path}resources/configuration";
+    echo -e "Deploying to \"programs\" project subdivision.";
+    copy_directory "${subdivision_configuration_directory_path}" "${subdivision_programs_directory_path}resources/configuration/";
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -316,8 +316,8 @@ deploy_configuration(){
         return 1;
     fi;
 
-    echo -n "Deploying configuration files to \"scripts\" project subdivision.";
-    copy_directory "${subdivision_configuration_directory_path}" "${subdivision_scripts_directory_path}resources/configuration";
+    echo -e "Deploying to \"scripts\" project subdivision.";
+    copy_directory "${subdivision_configuration_directory_path}" "${subdivision_scripts_directory_path}resources/configuration/";
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -344,8 +344,8 @@ deploy_scripts(){
 
     create_current_release_version_directory;
 
-    echo "Deploying scripts to release version directory.";
-    copy_directory "${subdivision_scripts_directory_path}deploy" "${current_release_version_directory}scripts";
+    echo -e "Deploying to release version directory.";
+    copy_directory "${subdivision_scripts_directory_path}deploy/" "${current_release_version_directory}scripts/";
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -353,7 +353,7 @@ deploy_scripts(){
         return 1;
     fi;
 
-    echo "Deploying scripts to \"programs\" project subdivision.";
+    echo -e "Deploying to \"programs\" project subdivision.";
     copy_directory "${subdivision_scripts_directory_path}deploy/" "${subdivision_programs_directory_path}resources/scripts/";
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
@@ -390,8 +390,8 @@ deploy_programs() {
 
     create_current_release_version_directory;
 
-    echo "Deploying source files to release version directory."
-    copy_directory "${subdivision_programs_directory_path}/src/release" "${current_release_version_directory}source/"
+    echo -e "Deploying source files to release version directory."
+    copy_directory "${subdivision_programs_directory_path}/src/release/" "${current_release_version_directory}source/"
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -399,8 +399,8 @@ deploy_programs() {
         return 1;
     fi;
 
-    echo "Deploying built programs to \"scripts\" project subdivision.";
-    copy_directory "${subdivision_programs_directory_path}/build/release" "${subdivision_scripts_directory_path}resources/programs"
+    echo -e "Deploying built programs to \"scripts\" project subdivision.";
+    copy_directory "${subdivision_programs_directory_path}/build/release/" "${subdivision_scripts_directory_path}resources/programs/"
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -427,8 +427,8 @@ deploy_installation() {
 
     create_current_release_version_directory;
 
-    echo "Deploying installation files to release version directory.";
-    copy_directory "${subdivision_programs_directory_path}" "${current_release_version_directory}installation/"
+    echo -e "Deploying to release version directory.";
+    copy_directory "${subdivision_installation_directory_path}" "${current_release_version_directory}installation/"
     copy_directory_result=${?};
     if [ ${copy_directory_result} -ne 0 ];
     then
@@ -451,7 +451,7 @@ print_usage(){
     echo -e "Use this script to deploy the project subdivisions.\n"
     echo -e "Usage:"
     echo -e "\t$(basename ${0}) {configuration, scripts, programs, installation}"
-    echo -e "\tDepending on parameter informed the script will deploy a project division.\n"
+    echo -e "\tDepending on parameter informed the script will deploy a project subdivision.\n"
 
     return 0;
 }
