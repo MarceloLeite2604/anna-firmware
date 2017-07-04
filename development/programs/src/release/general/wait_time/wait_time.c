@@ -1,23 +1,28 @@
 /*
- * This source file contains all component elaborations to control retry attempts and wait time.
+ * This source file contains the elaboration of all components required to store retry attempts and wait before another attempt is realized.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
-#include <math.h>
+
 #include <errno.h>
-#include <unistd.h>
+#include <math.h>
 #include <stdlib.h>
-#include "../return_codes.h"
+#include <unistd.h>
+
 #include "../../log/log.h"
+#include "../return_codes.h"
 #include "wait_time.h"
 
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Minimum time to wait on a retry (in microseconds). */
@@ -25,6 +30,7 @@
 
 /* Wait time added for every retry realized (in microseconds). */
 #define WAIT_TIME_STEP 10000
+
 
 /*
  * Function elaborations.
@@ -40,6 +46,8 @@
  *  A retry informations structure with the maximum attempt retries informed and zero attempts realized.
  */
 retry_informations_t create_retry_informations(int maximum_attempts) {
+    LOG_TRACE_POINT;
+
     retry_informations_t retry_informations = { .maximum = maximum_attempts, .attempts = 0 };
     return retry_informations;
 }
@@ -57,6 +65,7 @@ retry_informations_t create_retry_informations(int maximum_attempts) {
  */
 int wait_time(retry_informations_t* retry_informations) {
     LOG_TRACE("Attempts: %d, maximum attempts: %d", retry_informations->attempts, retry_informations->maximum);
+
     if ( retry_informations->attempts >= retry_informations->maximum ) {
         LOG_TRACE("Maximum retries attempt reached.");
         return MAXIMUM_RETRY_ATTEMPTS_REACHED;
@@ -64,10 +73,9 @@ int wait_time(retry_informations_t* retry_informations) {
 
     int error_code;
     int usleep_result;
-
     unsigned long microseconds;
     unsigned long seconds;
-   
+
     microseconds = MINIMUM_WAIT_TIME;
     microseconds += retry_informations->attempts * WAIT_TIME_STEP;
 
@@ -92,5 +100,7 @@ int wait_time(retry_informations_t* retry_informations) {
     }
 
     retry_informations->attempts++;
+
+    LOG_TRACE_POINT;
     return SUCCESS;
 }

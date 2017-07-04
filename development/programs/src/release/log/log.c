@@ -1,30 +1,34 @@
 /*
- * This source contains the elaboration of all functions required to 
+ * This source contains the elaboration of all components required to 
  * elaborate log files.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
- *  Inclusions.
+ *  Includes.
  */
+
+#include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
-#include <errno.h>
-#include "../general/time/time.h"
+
 #include "../directory/directory.h"
 #include "../general/return_codes.h"
+#include "../general/time/time.h"
 #include "../script/script.h"
 #include "log.h"
 
 
 /*
- * Definitions.
+ * Macros.
  */
-
 
 /* Default directory to log files. */
 #define DEFAULT_LOG_DIRECTORY "./logs/"
@@ -61,15 +65,22 @@
 /* Size of variable that stored the log directory. */
 #define LOG_DIRECTORY_SIZE 512
 
-/* Macro to print an error message. */
+/* Prints an error message. */
 #define _LOG_PRINT_ERROR(x) fprintf(stderr, "[%s] %s: (%s, %d): %s\n", get_instant_read_formatted(), LOG_ERROR_PREFFIX, __func__, __LINE__, (x))
 
+
 /*
- * Global variables.
+ * Variables.
  */
 
 /* Log message buffer. */
 char _log_message_buffer[LOG_MESSAGE_BUFFER_SIZE];
+
+/* Indicates that a message is being written. */
+bool _log_writing_message = false;
+
+/* Error message. */
+char error_message[ERROR_MESSAGE_BUFFER_LENGTH];
 
 /* Current directory to store log files. */
 char log_directory[LOG_DIRECTORY_SIZE];
@@ -77,17 +88,14 @@ char log_directory[LOG_DIRECTORY_SIZE];
 /* Indicates that log directory was initialized. */
 bool log_directory_initialized = false;
 
+/* Current log file. */
+FILE* log_file = NULL;
+
 /* Current log file name. */
 char* log_file_name = NULL;
 
 /* Current log file path. */
 char* log_file_path = NULL;
-
-/* Current log file. */
-FILE* log_file = NULL;
-
-/* Error message. */
-char error_message[ERROR_MESSAGE_BUFFER_LENGTH];
 
 /* Current log level. */
 int log_level = LOG_MESSAGE_TYPE_TRACE;
@@ -95,12 +103,9 @@ int log_level = LOG_MESSAGE_TYPE_TRACE;
 /* Indicates if start log level is defined. */
 bool start_log_level_defined = false;
 
-/* Indicates that a message is being written. */
-bool _log_writing_message = false;
-
 
 /*
- * Private function headers.
+ * Function headers.
  */
 
 /* Format a message to be logged. */
@@ -123,10 +128,10 @@ int undefine_shell_start_log_level();
 /*
  * Closes a log file.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Return:
+ * Return
  *  SUCCESS - If log file was closed successfully.
  *  GENERIC_ERROR - Otherwise.
  */
@@ -152,11 +157,48 @@ int close_log_file() {
 
     free(log_file_name);
     log_file_name=NULL;
+
     free(log_file_path);
     log_file_path=NULL;
 
     LOG_TRACE_POINT;
     return SUCCESS;
+}
+
+/*
+ * Creates a log file name.
+ *
+ * Parameters
+ *  log_file_preffix - The preffix to identify the log file.
+ *
+ * Returns
+ *  The log file name based on the preffix informed and current time or NULL if there was an error.
+ */
+char* create_log_file_name(char* log_file_preffix){
+    LOG_TRACE_POINT;
+
+    char* result;
+    int log_file_preffix_length;
+    char* current_time_file_formatted;
+
+    if ( log_file_preffix == NULL ) {
+        LOG_ERROR("Log file preffix is null.\n");
+        return NULL;
+    }
+
+    log_file_preffix_length = strlen(log_file_preffix);
+
+    result = malloc((log_file_preffix_length+TIME_STRING_FILE_LENGTH+strlen(LOG_FILE_SUFFIX)+2)*sizeof(char));
+
+    strcpy(result, log_file_preffix);
+    strcat(result, "_");
+    current_time_file_formatted = get_instant_file_formatted();
+    strcat(result, current_time_file_formatted);
+    free(current_time_file_formatted);
+    strcat(result, LOG_FILE_SUFFIX);
+
+    LOG_TRACE_POINT;
+    return result;
 }
 
 /*
@@ -255,46 +297,9 @@ int finish_shell_script_log(){
 }
 
 /*
- * Creates a log file name.
- *
- * Parameters:
- *  log_file_preffix - The preffix to identify the log file.
- *
- * Returns:
- *  The log file name based on the preffix informed and current time or NULL if there was any error.
- */
-char* create_log_file_name(char* log_file_preffix){
-    LOG_TRACE_POINT;
-
-    char* result;
-
-    int log_file_preffix_length;
-
-    if ( log_file_preffix == NULL ) {
-        LOG_ERROR("Log file preffix is null.\n");
-        return NULL;
-    }
-
-    log_file_preffix_length = strlen(log_file_preffix);
-
-    result = malloc((log_file_preffix_length+TIME_STRING_FILE_LENGTH+strlen(LOG_FILE_SUFFIX)+2)*sizeof(char));
-
-    strcpy(result, log_file_preffix);
-    strcat(result, "_");
-    char* current_time_file_formatted = get_instant_file_formatted();
-    strcat(result, current_time_file_formatted);
-    free(current_time_file_formatted);
-    strcat(result, LOG_FILE_SUFFIX);
-
-    LOG_TRACE_POINT;
-    return result;
-}
-
-
-/*
  * Format a message to be logged.
  *
- * Parameters:
+ * Parameters
  *  buffer - Buffer where the message will be returned.
  *  buffer_size - Size of "buffer" parameter.
  *  message_type - Type of message to be formatted.
@@ -302,9 +307,11 @@ char* create_log_file_name(char* log_file_preffix){
  *  index - Index to identify the message location.
  *  message - The message to be written (optional).
  *
- * Returns:
+ * Returns
  *  SUCCESS - If the message was formatted successfully.
  *  GENERIC ERROR - Otherwise.
+ *
+ * Observations
  *  The formatted message is returned through "buffer" parameter.
  */
 int format_log_message(char* buffer, int buffer_size, const int message_type, const char* tag, const int index, const char* message) {
@@ -312,46 +319,45 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
 
     char* preffix;
     int preffix_length;
-
     int tag_length;
-
     char string_index[20];
     int string_index_length;
-
     char* temporary_buffer;
     int temporary_buffer_length;
-
     int message_length;
     int additional_characters;
-
     int characters_to_copy;
+    char* instant_read_formatted;
 
-    // Check "buffer" parameter.
+    /* Check "buffer" parameter. */
     if ( buffer == NULL ) {
         LOG_ERROR("Buffer pointer is null.\n");
         return GENERIC_ERROR;
     }
 
-    // Check "buffer_size" parameter.
+    /* Check "buffer_size" parameter. */
     if ( buffer_size <= 0 ) {
         LOG_ERROR("Buffer size must be greater than zero.\n");
         return GENERIC_ERROR;
     }
 
-    // Check "message_type" parameter.
+    /* Check "message_type" parameter. */
     switch (message_type){
         case LOG_MESSAGE_TYPE_TRACE:
             LOG_TRACE_POINT;
             preffix = LOG_TRACE_PREFFIX;
             break;
+
         case LOG_MESSAGE_TYPE_WARNING:
             LOG_TRACE_POINT;
             preffix = LOG_WARNING_PREFFIX;
             break;
+
         case LOG_MESSAGE_TYPE_ERROR:
             LOG_TRACE_POINT;
             preffix = LOG_ERROR_PREFFIX;
             break;
+
         default:
             LOG_TRACE_POINT;
             _LOG_PRINT_ERROR("Unknown log message type.\n");
@@ -361,7 +367,7 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
 
     preffix_length=strlen(preffix);
 
-    // Check "tag" parameter.
+    /* Check "tag" parameter. */
     if ( tag == NULL ) {
         LOG_ERROR("Message tag is null.\n");
         return GENERIC_ERROR;
@@ -369,7 +375,7 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
 
     tag_length=strlen(tag);
 
-    // Check "index" parameter.
+    /* Check "index" parameter. */
     sprintf(string_index, "%d", index);
     string_index_length = strlen(string_index);
 
@@ -384,10 +390,12 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
         additional_characters=8;
     }
 
-    temporary_buffer_length=TIME_STRING_READ_LENGTH+preffix_length+tag_length+string_index_length+message_length+additional_characters+1;
+    temporary_buffer_length = TIME_STRING_READ_LENGTH + preffix_length+tag_length + string_index_length + message_length + additional_characters + 1;
     temporary_buffer = malloc(temporary_buffer_length*sizeof(char));
 
-    char* instant_read_formatted = get_instant_read_formatted();
+    instant_read_formatted = get_instant_read_formatted();
+    LOG_TRACE_POINT;
+
     if ( message != NULL && strlen(message) > 0 ) {
         LOG_TRACE_POINT;
         sprintf(temporary_buffer, "[%s] %s: %s (%s): %s", instant_read_formatted, preffix, tag, string_index, message);
@@ -408,11 +416,9 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
     }
 
     strcpy(buffer, temporary_buffer);
-    //strncpy(buffer, temporary_buffer, characters_to_copy);
-    //buffer[characters_to_copy] = '\0';
 
     free(temporary_buffer);
-    temporary_buffer=NULL;
+    temporary_buffer = NULL;
 
     LOG_TRACE_POINT;
     return SUCCESS;
@@ -421,10 +427,10 @@ int format_log_message(char* buffer, int buffer_size, const int message_type, co
 /*
  * Returns the current directory where log files are stored.
  *
- * Parameters:
+ * Parameters
  *  None.
  * 
- * Returns:
+ * Returns
  *  The current directory where log files are stored.
  */
 char* get_log_directory() {
@@ -444,10 +450,10 @@ char* get_log_directory() {
 /*
  * Returns the current log file name.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  The current log file name. If log file is not opened then it will return NULL.
  */
 char* get_log_file_name() {
@@ -465,21 +471,17 @@ char* get_log_file_name() {
 /*
  * Returns the current log file path.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  The current log file path.
  *
- * Observations:
- *  If there is not a log file opened, then it will return NULL.
+ * Observations
+ *  If there is not a log file opened the method will return NULL.
  */
 char* get_log_file_path() {
     LOG_TRACE_POINT;
-
-    /*char* result;
-    int log_directory_length;
-    int log_file_name_length;*/
 
     if ( is_log_open() == false ) {
         LOG_TRACE_POINT;
@@ -488,16 +490,6 @@ char* get_log_file_path() {
 
     LOG_TRACE_POINT;
     return log_file_path;
-
-    /*log_directory_length=strlen(log_directory);
-    log_file_name_length=strlen(log_file_name);
-
-    char* result=malloc((log_directory+log_file_name+1)*sizeof(char));
-
-    strcpy(result, log_directory);
-    strcat(result, log_file_name);
-
-    return result;*/
 }
 
 /*
@@ -526,7 +518,7 @@ int get_log_level() {
  */
 int initialize_log_directory() {
     LOG_TRACE_POINT;
-    
+
     char* output_directory;
 
     output_directory = get_output_directory();
@@ -555,19 +547,13 @@ int initialize_log_directory() {
  *  None.
  *
  * Returns
- *  True if there is a log file specified. False otherwise.
+ *  True - If log file is open
+ *  False - If there is no log file open.
  */
 bool is_log_open() {
     LOG_TRACE_POINT;
 
-    if ( log_file == NULL ) {
-        LOG_TRACE_POINT;
-        return false;
-    }
-    else {
-        LOG_TRACE_POINT;
-        return true;
-    }
+    return ( log_file == NULL );
 }
 
 /*
@@ -603,10 +589,10 @@ bool is_shell_log_activated(){
 /*
  * Opens a log file.
  *
- * Parameters:
+ * Parameters
  *  log_file_preffix - Preffix to identify log file.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If log file was created successfully.
  *  GENERIC ERROR - Otherwise.
  */
@@ -615,6 +601,7 @@ int open_log_file(char* log_file_preffix){
 
     int log_file_name_length;
     int log_directory_length;
+    char* instant_read_formatted;
 
     if ( log_file_preffix == NULL ) {
         LOG_ERROR("Log file preffix is null.");
@@ -627,16 +614,18 @@ int open_log_file(char* log_file_preffix){
     }
 
     log_file_name = create_log_file_name(log_file_preffix);
+    LOG_TRACE_POINT;
+
     if ( log_file_name == NULL ) {
         LOG_ERROR("Could not create log file name.");
         return GENERIC_ERROR;
     }
 
-    log_file_name_length=strlen(log_file_name);
-    log_directory_length=strlen(get_log_directory());
+    log_file_name_length = strlen(log_file_name);
+    log_directory_length = strlen(get_log_directory());
     LOG_TRACE_POINT;
 
-    log_file_path=(char*)malloc((log_directory_length+log_file_name_length+1)*sizeof(char));
+    log_file_path = (char*)malloc((log_directory_length + log_file_name_length + 1)*sizeof(char));
 
     strcpy(log_file_path, get_log_directory());
     LOG_TRACE_POINT;
@@ -650,7 +639,7 @@ int open_log_file(char* log_file_preffix){
         return GENERIC_ERROR;
     }
 
-    char* instant_read_formatted = get_instant_read_formatted();
+    instant_read_formatted = get_instant_read_formatted();
     fprintf(log_file, "[%s] Log started.\n", instant_read_formatted);
     free(instant_read_formatted);
 
@@ -661,10 +650,10 @@ int open_log_file(char* log_file_preffix){
 /*
  * Defines the directory to store log files.
  *
- * Parameters:
+ * Parameters
  *  new_log_directory - The directory that should be defined to store the log files.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If the directory to store log files was defined correctly.
  *  GENERIC ERROR - Otherwise.
  */
@@ -672,8 +661,9 @@ int set_log_directory(const char* new_log_directory){
     LOG_TRACE_POINT;
 
     int new_log_directory_length;
+    DIR* directory;
 
-    // Check "new_log_directory" parameter.
+    /* Check "new_log_directory" parameter. */
     if ( new_log_directory == NULL ) {
         LOG_ERROR("Log directory cannot be null.");
         return GENERIC_ERROR;
@@ -684,22 +674,13 @@ int set_log_directory(const char* new_log_directory){
         return GENERIC_ERROR;
     }
 
-    DIR* dir = opendir(new_log_directory);
-    if ( dir == 0 ) {
+    dirrectory = opendir(new_log_directory);
+    if ( dir == NULL ) {
         LOG_ERROR("Directory \"%s\" does not exist.\n", new_log_directory);
         return GENERIC_ERROR;
     }
 
     closedir(dir);
-
-    /*
-    new_log_directory_length=strlen(new_log_directory);
-
-    if ( log_directory != NULL ) {
-        free(log_directory);
-    }
-    log_directory=malloc((new_log_directory_length+1)*sizeof(char));
-    */
 
     strcpy(log_directory, new_log_directory);
 
@@ -712,14 +693,14 @@ int set_log_directory(const char* new_log_directory){
 /*
  * Defines the current level of log file.
  *
- * Parameters:
+ * Parameters
  *  new_log_level - The new log level.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If the log level was defined correctly.
  *  GENERIC ERROR - Otherwise.
  *
- * Observation:
+ * Observations
  *  The log level indicates wich messages will be stored on log file. Messages with a level lower than current log level will be ignored.
  *  Use the message level constants defined on header file to indicate the log level.
  */ 
@@ -760,7 +741,7 @@ int set_log_level(int new_log_level) {
  *
  * Parameters
  *  log_preffix - The preffix to use on log file name.
- *  log_level   - The log level to define.
+ *  log_level - The log level to define.
  *
  * Returns
  *  SUCCESS - If shell script log was activated successfully.
@@ -795,7 +776,7 @@ int start_shell_script_log(char* log_preffix, int log_level){
  * Undefines the start log level for shell scripts.
  *
  * Parameters
- *  None
+ *  None.
  *
  * Returns
  *  SUCCESS - If start log level was undefined successfully.
@@ -826,17 +807,17 @@ int undefine_shell_start_log_level() {
 /* 
  * Writes a log message.
  *
- * Parameters:
+ * Parameters
  *  message_type - Type of log message.
- *  tag          - Tag to identify log message origin.
- *  index        - Index to identify log message origin.
- *  message      - Message to be written.
+ *  tag - Tag to identify log message origin.
+ *  index - Index to identify log message origin.
+ *  message - Message to be written.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If message was written successfully.
  *  GENERIC ERROR - Otherwise.
  *
- * Observations:
+ * Observations
  *  Use constants defined on header file to fill "message_type" parameter.
  *  Parameter "message" is optional if message is a trace information.
  */
@@ -847,7 +828,7 @@ int write_log_message(const int message_type, const char* tag, const int index, 
     char* formatted_message;
     FILE* output_file;
 
-    // Check "message_type" parameter.
+    /* Check "message_type" parameter. */
     if ( message_type != LOG_MESSAGE_TYPE_TRACE && message_type != LOG_MESSAGE_TYPE_WARNING && message_type != LOG_MESSAGE_TYPE_ERROR ) {
         LOG_ERROR("Unknown message type: %d.", message_type);
         return GENERIC_ERROR;
@@ -855,13 +836,13 @@ int write_log_message(const int message_type, const char* tag, const int index, 
 
     if ( message_type >= log_level ) {
 
-        // Check "tag" parameter.
+        /* Check "tag" parameter. */
         if ( tag == NULL ) {
             LOG_ERROR("Message tag is null.");
             return GENERIC_ERROR;
         }
 
-        // Check "message" parameter.
+        /* Check "message" parameter. */
         if ( message == NULL && message_type != LOG_MESSAGE_TYPE_TRACE ) {
             LOG_ERROR("Message content is mandatory if its type is not \"trace\".");
             return GENERIC_ERROR;
