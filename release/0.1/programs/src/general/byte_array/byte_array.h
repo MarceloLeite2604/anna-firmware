@@ -1,22 +1,28 @@
 /*
- * This header file contains all components required to manipulate data arrays.
+ * This header file contains the declaration of all components required to manipulate data arrays.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef BYTE_ARRAY_H
 #define BYTE_ARRAY_H
 
+
 /*
  * Includes.
  */
+
 #include <stdint.h>
+
 #include "../../log/log.h"
 
 
 /* 
- * Structure definitions.
+ * Structures.
  */
 
 /* Structure to store a byte array. */

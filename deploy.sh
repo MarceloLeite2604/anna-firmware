@@ -160,7 +160,7 @@ deploy_programs() {
 print_usage(){
     echo -e "Use this script to deploy the project divisions.\n"
     echo -e "Usage:"
-    echo -e "\t$(basename ${0}) {configuration, scripts, program}"
+    echo -e "\t$(basename ${0}) {configuration, scripts, programs}"
     echo -e "\tDepending on parameter informed the script will deploy a project division.\n"
 }
 

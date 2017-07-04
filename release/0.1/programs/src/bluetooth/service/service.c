@@ -1,40 +1,33 @@
 /*
- * This source file contains the elaboration of all components requires to create and manage a bluetooth service.
+ * This source file contains the elaboration of all components required to create and manage a bluetooth service.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
 
-#include <stdint.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
-#include "service.h"
+#include <stdint.h>
+
 #include "../../general/return_codes.h"
-#include "../connection/connection.h"
 #include "../../log/log.h"
+#include "../connection/connection.h"
+#include "service.h"
+
 
 /*
- * Structures.
- */
-
-/* Stores informations about the bluetooth service provided. */
-typedef struct {
-    uint32_t uuid[4];
-    char* name;
-    char* description;
-    char* provider;
-} bluetooth_service_infos_t;
-
-/*
- * Definitions.
+ * Macros.
  */
 
 /* The RFCOMM channel used to provide the service. */
@@ -50,11 +43,25 @@ typedef struct {
 #define SERVICE_PROVIDER "Marcelo Leite"
 
 /* The bluetooth service description. */
-#define SERVICE_DESCRIPTION "A service to create a communication between the project's hardware and a smard device."
+#define SERVICE_DESCRIPTION "A service to create a communication between the audio recorder and a remote device."
 
 /* Wait time to check a connection attempt. */
 #define CHECK_CONNECTION_WAIT_TIME_SECONDS 5
 #define CHECK_CONNECTION_WAIT_TIME_MICROSECONDS 0
+
+
+/*
+ * Structures.
+ */
+
+/* Stores informations about the bluetooth service provided. */
+typedef struct {
+    uint32_t uuid[4];
+    char* name;
+    char* description;
+    char* provider;
+} bluetooth_service_infos_t;
+
 
 /*
  * Constants.
@@ -71,6 +78,7 @@ const struct timeval _check_connection_wait_time = { .tv_sec = CHECK_CONNECTION_
 
 /* Local address to check connection attempt. */
 const struct sockaddr_rc local_address = { .rc_family = AF_BLUETOOTH, .rc_bdaddr = *BDADDR_ANY, .rc_channel = RFCOMM_CHANNEL };
+
 
 /*
  * Variables.
@@ -98,24 +106,24 @@ sdp_session_t* sdp_connect_session = NULL;
 int check_connection_attempt(int* socket_fd) {
     LOG_TRACE_POINT;
 
+    int listening_socket_file_descriptor;
+    int client_socket_file_descriptor;
+    int close_socket_result;
+    int result;
+    struct sockaddr_rc remote_device_address = { 0 };
+    char remote_device_address_string[19] = { 0 };
+    char remote_device_name[256] = { 0 };
+    socklen_t address_length;
+    struct timeval check_connection_wait_time;
+    int check_socket_content_result;
+
     if ( is_bluetooth_service_registered() == false ) {
         LOG_ERROR("Bluetooth service is not registered.");
         return GENERIC_ERROR;
     }
 
-    int listening_socket_file_descriptor;
-    int client_socket_file_descriptor;
-    int close_socket_result;
-    int result;
-
-    struct sockaddr_rc remote_device_address = { 0 };
-    socklen_t address_length = sizeof(struct sockaddr_rc);
-
-    char remote_device_address_string[19] = { 0 };
-    char remote_device_name[256] = { 0 };
-
-    struct timeval check_connection_wait_time = _check_connection_wait_time;
-    int check_socket_content_result;
+    address_length = sizeof(struct sockaddr_rc);
+    check_connection_wait_time = _check_connection_wait_time;
 
     /* Allocates a socket to listen to connections. */
     listening_socket_file_descriptor = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
@@ -127,24 +135,26 @@ int check_connection_attempt(int* socket_fd) {
     bind(listening_socket_file_descriptor, (struct sockaddr *)&local_address, sizeof(local_address));
     LOG_TRACE_POINT;
 
-    /*
-     * Listens for connections on socket, defining the listening queue to a maximum of one.
-     */
+    /* Listens for connections on socket, defining the listening queue to a maximum of one. */
     listen(listening_socket_file_descriptor, 1);
-
     LOG_TRACE("Checking connection.");
+
     check_socket_content_result = check_socket_content(listening_socket_file_descriptor, check_connection_wait_time); 
     LOG_TRACE_POINT;
 
     switch (check_socket_content_result) {
         case NO_CONTENT_TO_READ:
             LOG_TRACE("No connections.");
+
             result = NO_CONNECTION;
             break;
+
         case GENERIC_ERROR:
             LOG_TRACE("Error while checking bluetooth service socket.");
+
             result = GENERIC_ERROR;
             break;
+
         case CONTENT_TO_READ:
             LOG_TRACE("Connection attempt initialized.");
 
@@ -164,6 +174,7 @@ int check_connection_attempt(int* socket_fd) {
             *socket_fd = client_socket_file_descriptor;
             result = CONNECTION_STABLISHED;
             break;
+
         default:
             LOG_ERROR("Unknown result received from \"check_socket_content\" function.");
             result = GENERIC_ERROR;
@@ -186,38 +197,32 @@ int check_connection_attempt(int* socket_fd) {
  * Checks is bluetooth service is registered.
  * 
  * Parameters
- *  None
+ *  None.
  *
- * Return
- *  True if bluetooth service is available.
- *  False otherwise.
+ * Returns
+ *  True - If bluetooth service is available.
+ *  False - Otherwise.
  */
 bool is_bluetooth_service_registered(){
-    if ( sdp_connect_session == NULL ) {
-        return false;
-    }
-    return true; 
+    LOG_TRACE_POINT;
+
+    return ( sdp_connect_session == NULL );
 }
 
 /*
  * Registers the bluetooth service.
  *
  * Parameters
- *  None
+ *  None.
  *
- * Return
+ * Returns
  *  SUCCESS - If bluetooth service started successfully.
  *  GENERIC_ERROR - If there was an error while starting bluetooth service.
  */
 int register_bluetooth_service(){
     LOG_TRACE_POINT;
 
-    if ( is_bluetooth_service_registered() == true ) {
-        LOG_ERROR("The bluetooth service is already registered.");
-        return GENERIC_ERROR;
-    }
-
-    uint8_t rfcomm_channel = _rfcomm_channel;
+    uint8_t rfcomm_channel;
 
     uuid_t public_browse_group_uuid;
     uuid_t l2cap_uuid;
@@ -235,59 +240,71 @@ int register_bluetooth_service(){
     sdp_record_t record = { 0 };
     sdp_session_t *session = 0;
 
-    // Creates the service ID.
-    sdp_uuid128_create(&service_uuid, &bluetooth_service_infos.uuid );
+    if ( is_bluetooth_service_registered() == true ) {
+        LOG_ERROR("The bluetooth service is already registered.");
+        return GENERIC_ERROR;
+    }
 
-    // Sets the services classes ID.
+    rfcomm_channel = _rfcomm_channel;
+
+    /* Creates the service ID. */
+    sdp_uuid128_create(&service_uuid, &bluetooth_service_infos.uuid );
+    LOG_TRACE_POINT;
+
+    /* Sets the services classes ID. */
     service_class_id_list = sdp_list_append(0, &service_uuid);
     sdp_set_service_classes(&record, service_class_id_list);
+    LOG_TRACE_POINT;
 
-    // Makes the service record publicly browsable.
+    /* Makes the service record publicly browsable. */
     sdp_uuid16_create(&public_browse_group_uuid, PUBLIC_BROWSE_GROUP);
     public_browse_group_list = sdp_list_append(0, &public_browse_group_uuid);
     sdp_set_browse_groups( &record, public_browse_group_list );
+    LOG_TRACE_POINT;
 
-    // Elaborates L2CAP protocol informations.
+    /* Elaborates L2CAP protocol informations. */
     sdp_uuid16_create(&l2cap_uuid, L2CAP_UUID);
     l2cap_list = sdp_list_append( 0, &l2cap_uuid );
     protocol_list = sdp_list_append( 0, l2cap_list );
+    LOG_TRACE_POINT;
 
-    // Elaborates RFCOMM protocol informations.
+    /* Elaborates RFCOMM protocol informations. */
     sdp_uuid16_create(&rfcomm_uuid, RFCOMM_UUID);
     rfcomm_list = sdp_list_append( 0, &rfcomm_uuid );
     channel_data = sdp_data_alloc(SDP_UINT8, &rfcomm_channel);
+    LOG_TRACE_POINT;
 
-    // Defines the procol accepted by the service.
+    /* Defines the procol accepted by the service. */
     sdp_list_append( rfcomm_list, channel_data );
     sdp_list_append( protocol_list, rfcomm_list );
     access_protocol_list = sdp_list_append( 0, protocol_list );
     sdp_set_access_protos( &record, access_protocol_list );
+    LOG_TRACE_POINT;
 
-    // Set the service name, description and provider.
-    // sdp_set_info_attr(&record, service_name, service_dsc, service_prov);
+    /* Set the service name, description and provider. */
     sdp_set_info_attr(&record, bluetooth_service_infos.name, bluetooth_service_infos.description, bluetooth_service_infos.provider);
-
-    /*
-     * Connects the service to the local SDP server.
-     * Observation: There is a bug on Ubuntu related to BlueZ version used. To correct it, follow the instructions listed on "https://bbs.archlinux.org/viewtopic.php?id=201672".
-     */
+    LOG_TRACE_POINT;
+    
+    /* Connects the service to the local SDP server.
+     Observation: There is a bug on Ubuntu related to BlueZ version used. To correct it, follow the instructions listed on "https://bbs.archlinux.org/viewtopic.php?id=201672". */
     session = sdp_connect(BDADDR_ANY, BDADDR_LOCAL, SDP_RETRY_IF_BUSY);
     if ( session <= 0 ) {
         LOG_ERROR("Could not register the bluetooth service.");
         return GENERIC_ERROR;
     }
 
-    // Register the service on SDP server.
+    /* Register the service on SDP server. */
     sdp_record_register(session, &record, 0);
+    LOG_TRACE_POINT;
 
-    // Clean variables previously alocated. 
+    /* Clean variables previously alocated. */
     sdp_data_free( channel_data );
     sdp_list_free( l2cap_list, 0 );
     sdp_list_free( rfcomm_list, 0 );
     sdp_list_free( public_browse_group_list, 0 );
     sdp_list_free( access_protocol_list, 0 );
+    LOG_TRACE_POINT;
 
-    // set_registered_bluetooth_service_infos(bluetooth_service_infos);
     sdp_connect_session = session;
 
     LOG_TRACE("Service registered.");
@@ -298,17 +315,20 @@ int register_bluetooth_service(){
  * Unregisters the bluetooth service.
  *
  * Parameters
- *  None
+ *  None.
  *
  * Returns
  *  SUCCESS - If bluetooth service was unregistered successfully.
  *  GENERIC_ERROR - If there was an error while unregistering bluetooth service.
  */
 int unregister_bluetooth_service() {
+    LOG_TRACE_POINT;
+
     if ( is_bluetooth_service_registered() == true ) {
         sdp_close(sdp_connect_session);
         sdp_connect_session = NULL;
     }
 
+    LOG_TRACE_POINT;
     return SUCCESS;
 }

@@ -674,13 +674,13 @@ int set_log_directory(const char* new_log_directory){
         return GENERIC_ERROR;
     }
 
-    dirrectory = opendir(new_log_directory);
-    if ( dir == NULL ) {
+    directory = opendir(new_log_directory);
+    if ( directory == NULL ) {
         LOG_ERROR("Directory \"%s\" does not exist.\n", new_log_directory);
         return GENERIC_ERROR;
     }
 
-    closedir(dir);
+    closedir(directory);
 
     strcpy(log_directory, new_log_directory);
 

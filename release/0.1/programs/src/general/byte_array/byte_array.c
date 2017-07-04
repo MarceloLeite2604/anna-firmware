@@ -1,24 +1,33 @@
 /*
- * This source file contains all component elaborations to manipulate data arrays.
+ * This source file contains the definition of all components required to manipulate byte arrays.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
-#include "../return_codes.h"
+
 #include <stdlib.h>
+
+#include "../return_codes.h"
 #include "byte_array.h"
+
+
+/*
+ * Function elaborations.
+ */
 
 /*
  * Copies an array content to the byte array.
  *
  * Parameters
- *
  * byte_array - The byte array to copy the array content to.
- * array      - The array of data to be copied.
+ * array - The array of data to be copied.
  * array_size - Size of the array to be copied.
  *
  * Returns
@@ -27,6 +36,7 @@
  */
 int copy_content_to_byte_array(byte_array_t* byte_array, void* array, size_t array_size) {
     LOG_TRACE_POINT;
+
     int result;
 
     byte_array->data = (uint8_t*)malloc(array_size);
@@ -49,7 +59,7 @@ int copy_content_to_byte_array(byte_array_t* byte_array, void* array, size_t arr
  * Deletes a byte array.
  * 
  * Parameters
- *  The byte array to be deleted.
+ *  byte_array - The byte array to be deleted.
  *
  * Returns
  *  SUCCESS - If the byte array was deleted correctly.

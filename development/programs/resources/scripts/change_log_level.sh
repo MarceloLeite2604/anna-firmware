@@ -2,62 +2,89 @@
 
 # This script changes the log level for script executions.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   1. The new log level. 
 #
-# Observations
-#   This script accepts a log level as a parameter.
+# Return:
+#   SUCCESS - If log level was defined successfully.
+#   GENERIC_ERROR - Otherwise.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+# Observations:
+#   The valid log level values are defined on log constants file.
+
+
+# ###
+# Source scripts.
+# ###
 
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
 
+# ###
+# Functions elaboration.
+# ###
+
 # Changes the log level.
 #
-# Parameters
-#  2. The new log level value.
+# Parameters:
+#   1. The new log level value.
 #
-# Returns
-#   0. If log level was changed successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If log level was changed successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 change_log_level(){
-    local result;
+
     local new_log_level;
     local is_log_defined_result;
     local continue_log_file_result;
     local set_log_level_result;
 
+    # Check function parameters.
     if [ ${#} -ne 1 ];
     then
         log ${log_message_type_error} "No log level informed.";
-        result=${generic_error};
+        return ${generic_error};
     else
         new_log_level=${1};
+    fi;
 
-        is_log_defined;
-        is_log_defined_result=${?};
-        if [ ${is_log_defined_result} -eq ${success} ];
+    # Checks if log is defined.
+    is_log_defined;
+    is_log_defined_result=${?};
+    if [ ${is_log_defined_result} -eq ${success} ];
+    then
+
+        # Continues the log file.
+        continue_log_file;
+        continue_log_file_result=${?};
+        if [ ${continue_log_file_result} -eq ${success} ];
         then
-            continue_log_file;
-            continue_log_file_result=${?};
-            if [ ${continue_log_file_result} -eq ${success} ];
+
+            # Defines the log level.
+            set_log_level ${new_log_level};
+            set_log_level_result=${?};
+            if [ ${set_log_level_result} -ne ${success} ];
             then
-                set_log_level ${new_log_level};
-                set_log_level_result=${?};
-                if [ ${set_log_level_result} -ne ${success} ];
-                then
-                    log ${log_message_type_error} "Error changing current log level.";
-                    result=${generic_error};
-                fi;
-            else
-                log ${log_message_type_error} "Error continuing log file.";
-                result=${generic_error};
+                log ${log_message_type_error} "Error changing current log level.";
+                return ${generic_error};
             fi;
+        else
+            log ${log_message_type_error} "Error continuing log file.";
+            return ${generic_error};
         fi;
     fi;
 
-    return ${result};
+    return ${success};
 }
 
+# Requests to change the log level.
 change_log_level ${@};
 exit ${?};

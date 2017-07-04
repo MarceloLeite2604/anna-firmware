@@ -1,11 +1,37 @@
 #!/bin/bash
 
-# This script constains the constants required to acquire de input and output file directories for script executions.
+# This script contains the constants required to acquire de input, output and 
+# binaries directories for script executions.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
 
-# File which contains the directory path for binaries files.
+# ###
+# Include guard.
+# ###
+if [ -z "${DIRECTORIES_CONSTANTS_SH}" ];
+then
+    DIRECTORIES_CONSTANTS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
+# Constants.
+# ###
+
+# File which contains the directory path for binaries.
 if [ -z "${_directories_binaries_directory_file}" ];
 then
     readonly _directories_binaries_directory_file="$(dirname ${BASH_SOURCE})/binaries_directory";

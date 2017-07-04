@@ -1,9 +1,33 @@
 #!/bin/bash
 
-# This script contains all generic functions required for audio functions.
+# This script contains all generic functions required for audio capture and encoding.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Return:
+#   None.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+
+# ###
+# Include guard.
+# ###
+if [ -z "${AUDIO_FUNCTIONS_SH}" ];
+then
+    AUDIO_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
+# Script sources.
+# ###
 
 # Load generic audio constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
@@ -17,36 +41,49 @@ source "$(dirname ${BASH_SOURCE})/../file/functions.sh";
 # Load log functions script.
 source "$(dirname ${BASH_SOURCE})/../log/functions.sh";
 
+
+# ###
+# Functions.
+# ###
+
 # Reads an audio configuration file.
 #
 # Parameters
-#    1. Configuration file to be read.
+#   1. Path to configuration file to read.
 #
 # Returns
-#    0. If confguration file was read and there was content on it.
-#    1. Otherwise.
+#   SUCCESS - If configuration file was read and there was content on it.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns the configuration file's content through "echo".
+#
 read_audio_configuration_file(){
-    if [ $# -ne 1 ]
+    local file;
+    local file_content;
+
+    # Check function parameters.
+    if [ ${#} -ne 1 ]
     then
         log ${type_error} "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${general_error};
+    else
+        file="${1}";
     fi;
 
-    local readonly file="$1";
-
-    local file_content;
+    # Get configuration file content.
     file_content=$(read_file "${file}");
     if [ ${?} -ne ${success} ];
     then
         return ${generic_error};
     fi;
 
+    # Check if configuration file has a content.
     if [ -z "${file_content}" ];
     then
         log ${log_message_type_error} "File \"${audio_capture_channels_configuration_file}\" is empty.";
         return ${generic_error};
     fi;
 
+    # Returns configuration file's content through "echo".
     echo "${file_content}";
 
     return ${success};

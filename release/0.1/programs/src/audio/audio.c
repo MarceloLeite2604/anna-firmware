@@ -1,25 +1,30 @@
 /*
- * This source file contains all functions required to start and stop audio record.
+ * This source file contains the elaboration of all components required to start and stop audio record.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../directory/directory.h"
+#include "../general/file/file.h"
 #include "../general/return_codes.h"
 #include "../log/log.h"
 #include "../script/script.h"
-#include "../directory/directory.h"
-#include "../general/file/file.h"
 
 
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Script name to start audio record. */
@@ -40,6 +45,13 @@
 /* Name of the file where is stored the latest audio record file name. */
 #define LATEST_AUDIO_RECORD_FILE_NAME_FILE "latest_audio_record"
 
+/* File name which the start audio record instant is stored. */
+#define START_AUDIO_RECORD_INSTANT_FILE_NAME "temporary/start_audio_instant"
+
+/* File name which the stop audio record instant is stored. */
+#define STOP_AUDIO_RECORD_INSTANT_FILE_NAME "temporary/stop_audio_instant"
+
+
 /*
  * Function elaborations.
  */
@@ -48,12 +60,14 @@
  * Returns the latest audio record file path.
  *
  * Parameters
- *  None
+ *  None.
  *
  * Returns
  *  The path to the latest audio record file or NULL if there was an error.
  */
 char* get_latest_audio_record(){
+    LOG_TRACE_POINT;
+
     char* output_directory;
     char* result = NULL;
     size_t result_size;
@@ -61,8 +75,7 @@ char* get_latest_audio_record(){
     char* larfn_file_path;
     int errno_value;
     int fclose_result;
-
-    /* larfn: Latest audio record file name */
+    /* Observation: larfn - Latest audio record file name */
     size_t larfn_file_path_length;
     FILE* larfn_file;
     size_t larfn_content_size;
@@ -70,9 +83,14 @@ char* get_latest_audio_record(){
     size_t bytes_read;
 
     script_result = execute_script(FIND_LATEST_AUDIO_RECORD_SCRIPT_NAME);
+    LOG_TRACE_POINT;
 
     if ( script_result == SUCCESS ) {
+        LOG_TRACE_POINT;
+
         output_directory = get_output_directory();
+        LOG_TRACE_POINT;
+
         larfn_file_path_length = strlen(output_directory);
         larfn_file_path_length += strlen(AUDIO_DIRECTORY);
         larfn_file_path_length += strlen(LATEST_AUDIO_RECORD_FILE_NAME_FILE);
@@ -93,9 +111,10 @@ char* get_latest_audio_record(){
             result = NULL;
         }
         else {
+            LOG_TRACE_POINT;
+
             larfn_content_size = get_file_size(larfn_file_path);
             larfn_content = (char*)malloc((larfn_content_size+1)*sizeof(char));
-
 
             bytes_read = fread(larfn_content, sizeof(char), larfn_content_size, larfn_file);
 
@@ -106,6 +125,8 @@ char* get_latest_audio_record(){
                 result = NULL;
             }
             else {
+                LOG_TRACE_POINT;
+
                 larfn_content[bytes_read] = 0;
                 result_size = strlen(output_directory);
                 result_size += strlen(AUDIO_DIRECTORY);
@@ -131,10 +152,80 @@ char* get_latest_audio_record(){
 
         free(larfn_file_path);
         free(output_directory);
-        /* TODO: Check if "fclose" finished successfully. */
 
     }
 
+    LOG_TRACE_POINT;
+    return result;
+}
+
+/*
+ * Returns the path of the file which the start audio record instant is stored.
+ * 
+ * Parameters
+ *  None.
+ *
+ * Result
+ *  The path of the file which the start audio record instant is stored.
+ */
+char* get_start_audio_record_instant_file_path() {
+    LOG_TRACE_POINT;
+
+    char* result;
+    size_t result_size;
+    char* output_directory;
+
+    output_directory = get_output_directory();
+    LOG_TRACE_POINT;
+
+    result_size = strlen(START_AUDIO_RECORD_INSTANT_FILE_NAME);
+    result_size += strlen(output_directory);
+    result_size += 1;
+
+    result = malloc(result_size*sizeof(char));
+
+    memset(result, 0, result_size*sizeof(char));
+    strcpy(result, output_directory);
+    strcat(result, START_AUDIO_RECORD_INSTANT_FILE_NAME);
+
+    free(output_directory);
+
+    LOG_TRACE_POINT;
+    return result;
+}
+
+/*
+ * Returns the path of the file which the stop audio record instant is stored.
+ * 
+ * Parameters
+ *  None.
+ *
+ * Result
+ *  The path of the file which the stop audio record instant is stored.
+ */
+char* get_stop_audio_record_instant_file_path() {
+    LOG_TRACE_POINT;
+
+    char* result;
+    size_t result_size;
+    char* output_directory;
+
+    output_directory = get_output_directory();
+    LOG_TRACE_POINT;
+
+    result_size = strlen(STOP_AUDIO_RECORD_INSTANT_FILE_NAME);
+    result_size += strlen(output_directory);
+    result_size += 1;
+
+    result = malloc(result_size*sizeof(char));
+
+    memset(result, 0, result_size*sizeof(char));
+    strcpy(result, output_directory);
+    strcat(result, STOP_AUDIO_RECORD_INSTANT_FILE_NAME);
+
+    free(output_directory);
+
+    LOG_TRACE_POINT;
     return result;
 }
 
@@ -145,61 +236,69 @@ char* get_latest_audio_record(){
  *  None.
  *
  * Returns
- *  SUCCESS - If device is recording.
- *  GENERIC ERROR - Otherwise.
+ *  True - If device is recording.
+ *  False - If device is not recording.
  */
-int is_recording() {
+bool is_recording() {
     LOG_TRACE_POINT;
+
     int result;
     int script_result = execute_script(CHECK_DEVICE_IS_RECORDING_SCRIPT_NAME);
 
-    if (script_result == SUCCESS ) {
-        result = SUCCESS;
-    } else {
-        result = GENERIC_ERROR;
-    }
-
-    return result;
+    LOG_TRACE_POINT;   
+    return ( script_result == SUCCESS );
 }
 
 /*
  * Starts audio record.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If audio record was started successfully.
  *  GENERIC ERROR - Otherwise.
  */
 int start_audio_record(){
-    int script_result = execute_script(START_AUDIO_RECORD_SCRIPT_NAME);
+    LOG_TRACE_POINT;
+
+    int script_result;
+
+    script_result = execute_script(START_AUDIO_RECORD_SCRIPT_NAME);
+    LOG_TRACE_POINT;
 
     if ( script_result != SUCCESS ){
         LOG_ERROR("Error executing start record script. Execution returned: %d.", script_result);
         return GENERIC_ERROR;
     }
 
+    LOG_TRACE_POINT;
     return script_result;
 }
 
 /*
  * Stops audio record.
  *
- * Parameters:
+ * Parameters
  *  None.
  *
- * Returns:
+ * Returns
  *  SUCCESS - If audio record was started successfully.
- *  GENERIC ERROR - Otherwise.
+ *  GENERIC_ERROR - Otherwise.
  */
 int stop_audio_record(){
-    int script_result = execute_script(STOP_AUDIO_RECORD_SCRIPT_NAME);
+    LOG_TRACE_POINT;
+
+    int script_result;
+
+    script_result = execute_script(STOP_AUDIO_RECORD_SCRIPT_NAME);
+    LOG_TRACE_POINT;
 
     if ( script_result != SUCCESS ){
         LOG_ERROR("Error executing stop record script. Execution returned: %d.", script_result);
         return GENERIC_ERROR;
     }
 
+    LOG_TRACE_POINT;
     return script_result;
 }

@@ -1,12 +1,21 @@
 /*
- * This header file contains all functions to create random values.
+ * This header file contains all components required to create random values.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef RANDOM_H
 #define RANDOM_H
+
+/*
+ * Includes.
+ */
+
+#include <stdint.h>
 
 /*
  * Function specifications.

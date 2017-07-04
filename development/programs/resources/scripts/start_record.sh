@@ -1,9 +1,25 @@
 #!/bin/bash
 
-# This script start the audio record processes.
+# This script starts the audio record processes.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   SUCCESS - If audio record was started successfully.
+#   GENERIC_ERROR - Otherwise.
+#
+# Version:
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+
+# ###
+# Script sources.
+# ###
 
 # Load audio capture functions.
 source "$(dirname ${BASH_SOURCE})/audio/capture/functions.sh";
@@ -14,15 +30,22 @@ source "$(dirname ${BASH_SOURCE})/audio/encoder/functions.sh";
 # Load log functions.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
+
+# ###
+# Functions elaboration.
+# ###
+
 # Starts the audio record processes.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If audio record processes was started successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If audio record processes was started successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 start_record(){
+
     local result;
     local continue_log_file_result;
     local log_file_created;
@@ -53,55 +76,44 @@ start_record(){
         # Creates a new log file.
         create_log_file "start_record";
         log_file_created=${?};
-
-        # Set log level.
-        # set_log_level ${log_message_type_trace};
     fi;
 
     log ${log_message_type_trace} "Starting record processes.";
 
+    # Checks is device is already recording.
     $(dirname ${BASH_SOURCE})/is_recording.sh
     is_recording_result=${?};
-
-    if [ ${is_recording_result} -eq 2 ];
+    if [ ${is_recording_result} -eq 0 ];
     then
-        log ${log_message_type_error} "Only one of the audio processes is running.";
-        result=${generic_error};
+        log ${log_message_type_trace} "Audio capture processes are already running.";
+        result=${success};
+
     else
-        if [ ${is_recording_result} -eq 0 ];
+
+        # Starts audio capture process.
+        start_audio_capture_process;
+        start_audio_capture_process_result=${?};
+        if [ ${start_audio_capture_process_result} -ne ${success} ];
         then
-            log ${log_message_type_trace} "Audio capture processes are already running.";
-            result=${success};
+            log ${log_message_type_error} "Could not start audio capture process."
+            result=${generic_error};
         else
-            start_audio_capture_process;
-            start_audio_capture_process_result=${?};
-            if [ ${start_audio_capture_process_result} -ne ${success} ];
+
+            # Starts audio encoder process.
+            start_audio_encoder_process;
+            start_audio_encoder_process_result=${?};
+            if [ ${start_audio_encoder_process_result} -ne ${success} ];
             then
-                log ${log_message_type_error} "Could not start audio capture process."
+                log ${log_message_type_error} "Could not start audio encoder process."
                 result=${generic_error};
             else
-                start_audio_encoder_process;
-                start_audio_encoder_process_result=${?};
-                if [ ${start_audio_encoder_process_result} -ne ${success} ];
-                then
-                    log ${log_message_type_error} "Could not start audio encoder process."
-                    result=${generic_error};
-                else
-                    log ${log_message_type_trace} "Audio record started.";
-                    register_instant_result=${?};
-
-                    if [ ${register_instant_result} -ne ${success} ];
-                    then
-                        log ${log_message_type_error} "Could not store start audio capture instant."
-                        result=${generic_error};
-                    else
-                        result=${success};
-                    fi;
-                fi;
+                log ${log_message_type_trace} "Audio record started.";
+                result=${success};
             fi;
         fi;
     fi;
 
+    # If log file was created by this script.
     if [ ${log_file_created} -eq ${success} ];
     then
 

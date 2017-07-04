@@ -1,9 +1,35 @@
 #!/bin/bash
 
-# This script contains all functions and variables required to log and trace functions.
+# This script contains all functions and variables required to elaborate and 
+# store log messages.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Parameters:
+#   None.
+#
+# Returns:
+#   None.
+#
+# Version:
+#   0.1
+#
+# Author:
+#   Marcelo Leite
+#
+
+# ###
+# Include guard.
+# ###
+if [ -z "${LOG_FUNCTIONS_SH}" ];
+then
+    LOG_FUNCTIONS_SH=1;
+else
+    return;
+fi;
+
+
+# ###
+# Script sources.
+# ###
 
 # Load generic constants script.
 source "$(dirname ${BASH_SOURCE})/../generic/constants.sh";
@@ -11,25 +37,38 @@ source "$(dirname ${BASH_SOURCE})/../generic/constants.sh";
 # Load log constants script.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
 
-# Log directory.
+
+# ###
+# Variables.
+# ###
+
+# Current log directory.
 _log_directory="${output_files_directory}logs/";
 
-# Log file location.
+# Current log file location.
 _log_file_location="";
 
-# Indicates if the log file creation was successful.
+# Indicates if the log file creation was done successfully.
 _log_file_creation_result=${not_executed};
 
 # Indicates the log level.
 _log_level=${log_message_type_warning};
 
-# Returns the current time formatted.
+
+# ###
+# Functions elaboration.
+# ###
+
+# Returns the current time formatted as a readable format.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#    The current time formatted through "echo".
+# Returns:
+#   SUCCESS - If time was retrieved successfully.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns the current time in a readable format through "echo".
+#
 _log_get_current_time(){
     echo "$(date +"%Y/%m/%d %H:%M:%S.%N" | awk '{print $1" "substr($2, 1, 12)}')";
     return ${success};
@@ -37,127 +76,163 @@ _log_get_current_time(){
 
 # Writes a message on "stderr".
 #
-# Parameters
-#  1. Message to be written.
+# Parameters:
+#   1. Message to be written.
 #
-# Returns
-#  Code returned from "echo" writing on "stderr".
+# Returns:
+#   SUCCESS - If message was successfully written on stderr.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_write_stderr(){
 
-    for parameter in "$@"
-    do
-        local stderr_message=${stderr_message}${parameter}" ";
-    done;
+    local message;
+    local echo_result;
 
-    local result=${success};
-    if [ -n "${stderr_message}" ]; then
-        $(>&2 echo ${stderr_message});
-        local result=${?};
+    # Checks function parameters.
+    #for parameter in "$@"
+    #do
+    #    local stderr_message=${stderr_message}${parameter}" ";
+    #done;
+    if [ ${#} -ne 1 ];
+    then
+        return ${generic_error};
+    else
+        message="${1}";
     fi;
 
-    return ${result};
+    # Writes message on stderr.
+    $(>&2 echo ${stderr_message});
+    echo_result=${?};
+    if [ ${echo_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
+
+    return ${success};
 }
 
 # Writes a message on a file.
 #
-# Parameters
-#  1. File path to write the message.
-#  2. Message to be written.
+# Parameters:
+#   1. Path to file which the message will be written.
+#   2. Message to be written.
 #
-# Returns
-#   0. If message was successfully written.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If message was successfully written.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_write_on_file(){
 
+    local file_path;
+    local message;
+    local echo_result;
+
+    # Checks function parameters.
     if [ ${#} -ne 2 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Not enough parameters to execute \"${FUNCNAME[O]}\".";
         return ${generic_error};
+    else
+        file_path="${1}";
+        message="${2}";
     fi;
 
-    local readonly file_path="$1";
-    local readonly message="$2";
-
-    # If the file does not exists.
-    if [ ! -f ${file_path} ];
+    # Checks if file exists.
+    if [ ! -f "${file_path}" ];
     then
         _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Could not find file \"${file_path}\".";
         return ${generic_error};
     fi;
 
-    # Check if user was write permission on file.
-    if [ ! -w ${file_path} ];
+    # Checks if user has write permission on file.
+    if [ ! -w "${file_path}" ];
     then
         _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on  \"${file_path}\".";
         return ${generic_error};
     fi;
 
-    # Write message on file.
-    echo "${message}" >> ${file_path};
-    local echo_result=${?};
+    # Writes the message on file.
+    echo "${message}" >> "${file_path}";
+    echo_result=${?};
     if [ ${echo_result} -ne 0 ];
     then
         _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Error writing message on \"${file_path}\" (${echo_result}).";
         return ${generic_error};
     fi; 
+
+    return ${success};
 }
 
 
 # Creates a log filename based on preffix informed and current time.
 #
-# Parameters
+# Parameters:
 #	1. Log file preffix.
 #
-# Returns
-#   0. If log filename was created sucessfully.
-#   1. Otherwise
-#
+# Returns:
+#   SUCCESS - If log filename was created sucessfully.
+#   GENERIC_ERROR - Otherwise
 #	It also returns the log file name created trough "echo".
+#
 _log_create_log_file_name() {
+    local log_file_preffix;
+    local log_file_name;
 
+    # Checks function parameters.
     if [ ${#} -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        log_file_preffix="${1}";
     fi;
 
-    local readonly log_file_preffix="$1";
-
-    local readonly log_file_name="${log_file_preffix}_$(date +"%Y%m%d_%H%M%S").${_log_file_suffix}";
+    # Creates the log file name.
+    log_file_name="${log_file_preffix}_$(date +"%Y%m%d_%H%M%S").${_log_file_suffix}";
 
     echo "${log_file_name}";
-
     return ${success};
 }
 
 # Creates the log file based on a preffix informed.
 #
 # Parameters
-#   1. Preffix to identify log file.	
+#   1. Preffix to identify log file.
 #
 # Returns
-#	0. If log file was created.
-#   1. Otherwise.
+#	SUCCESS - If log file was created.
+#   GENERIC_ERROR - Otherwise.
+#
 create_log_file() {
 
+    local log_file_preffix;
+    local log_file_name;
+    local temporary_log_file_path;
+    local touch_result;
+    local initialize_log_level_result;
+
+    # Checks function parameters.
     if [ ${#} -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         _log_file_location="";
         _log_file_creation_result=${generic_error};
         return ${generic_error};
+    else
+        log_file_preffix="${1}";
     fi;
 
-    local readonly log_file_preffix="$1";
-    local readonly log_file_name=$(_log_create_log_file_name ${log_file_preffix});
+    # Elaborates log file name.
+    log_file_name="$(_log_create_log_file_name ${log_file_preffix})";
 
-    local readonly temporary_log_file_location=$(get_log_directory)${log_file_name};
+    # Elaborates log file path.
+    temporary_log_file_path="$(get_log_directory)${log_file_name}";
 
-    # If log file does not exist.
-    if [ ! -f "${temporary_log_file_location}" ];
+    # Checks if log file does not exists.
+    if [ ! -f "${temporary_log_file_path}" ];
     then
 
-        # If log directory does not exist.
+        # Checks if log directory exists.
         if [ ! -d "$(get_log_directory)" ];
         then
             _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Invalid log directory \"$(get_log_directory)\".";
@@ -166,7 +241,7 @@ create_log_file() {
             return ${generic_error};
         fi;
 
-        # If user does not have write permission on log directory.
+        # Checks if user has permission to write on log directory.
         if [ ! -w "$(get_log_directory)" ];
         then
             _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on directory. \"${_log_directory}\".";
@@ -176,12 +251,11 @@ create_log_file() {
         fi;
 
         # Creates the log file.
-        touch ${temporary_log_file_location};
-
-        # If, after creation, the file is still missing.
-        if [ ! -f "${temporary_log_file_location}" ];
+        touch "${temporary_log_file_path}";
+        touch_result=${?};
+        if [ ${touch_result} -ne 0 ];
         then
-            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Could not create file \"${temporary_log_file_location}\".";
+            _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Could not create file \"${temporary_log_file_path}\".";
             _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Log messages will be redirected to \"stderr\".";
             _log_file_location="";
             _log_file_creation_result=${generic_error};
@@ -189,10 +263,10 @@ create_log_file() {
         fi;
     fi;
 
-    # If user does not have write permission on log file.
-    if [ ! -w "${temporary_log_file_location}" ];
+    # Checks if user has permission to write on log file.
+    if [ ! -w "${temporary_log_file_path}" ];
     then
-        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write access on \"${temporary_log_file_location}.";
+        _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write access on \"${temporary_log_file_path}.";
         _log_write_stderr "[${FUNCNAME[0]}, ${LINENO[0]}] ${_log_error_message_preffix}: Log messages will be redirected to \"stderr\".";
         _log_file_location="";
         _log_file_creation_result=${generic_error};
@@ -206,7 +280,7 @@ create_log_file() {
         return ${generic_error};
     fi;
 
-    _log_file_location=${temporary_log_file_location};
+    _log_file_location="${temporary_log_file_path}";
     _log_file_creation_result=${success};
 
     # Stores the log file path.
@@ -215,61 +289,69 @@ create_log_file() {
     # Stores the log level.
     _log_store_log_level;
 
-    _log_write_on_file ${_log_file_location} "[$(_log_get_current_time)] Log started.";
+    # Writes a message on log file to inform that log has started.
+    _log_write_on_file "${_log_file_location}" "[$(_log_get_current_time)] Log started.";
 
     return ${success};
 
 }
 
-# Finishes log file.
+# Finishes the log file.
 #
-# Parameters
+# Parameters:
 #  None.
 #
-# Returns
-#   0. If log was finished successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If log was finished successfully.
+#   GENERIC_ERROR - Otherwise.
 finish_log_file(){
 
-    local delete_log_file_path_result;
-    local delete_log_level_result;
-    local write_on_file_result;
+    local finish_message;
+    local _log_write_on_file_result;
+    local _log_delete_log_file_path_result;
+    local _log_delete_log_level_result;
 
+    # Checks function parameters.
     if [ ${#} -ne 0 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
     fi;
+
+    # Checks if log was previously started.
     if [ -z "${_log_file_location}" -o ${_log_file_creation_result} -ne ${success} ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: No log file to finish.";
         return ${generic_error};
     fi;
-    local readonly finish_message="[$(_log_get_current_time)] Log finished.";
 
+    # Elaborates the message to inform that log file is closed.
+    finish_message="[$(_log_get_current_time)] Log finished.";
+
+    # Writes the message on log file.
     _log_write_on_file ${_log_file_location} "${finish_message}";
-    write_on_file_result=${?}
-
-    if [ ${write_on_file_result} -ne ${success} ];
+    _log_write_on_file_result=${?}
+    if [ ${_log_write_on_file_result} -ne ${success} ];
     then
         return ${generic_error};
     fi;
 
-    unset _log_file_location;
+    #unset _log_file_location;
+    _log_file_location="";
     _log_file_creation_result=${not_executed};
 
     # Deletes the log path file.
     _log_delete_log_path_file;
-    delete_log_file_path_result=${?};
-    if [ ${delete_log_file_path_result} -ne ${success} ];
+    _log_delete_log_file_path_result=${?};
+    if [ ${_log_delete_log_file_path_result} -ne ${success} ];
     then
         return ${generic_error};
     fi;
 
     # Deletes the log level file.
     _log_delete_log_level_file;
-    delete_log_level_file_result=${?}
-    if [ ${delete_log_level_file_result} -ne ${success} ];
+    _log_delete_log_level_file_result=${?}
+    if [ ${_log_delete_log_level_file_result} -ne ${success} ];
     then
         return ${generic_error};
     fi;
@@ -283,64 +365,81 @@ finish_log_file(){
 #   1. Message to be written.
 #
 # Returns
-#   0. If message was correctly written.
-#   1. Otherwise.
+#   SUCCESS - If message was correctly written.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_write_log_message() {
+
+    local message;
+    local message_content;
+    local write_on_stderr;
+
+    # Checks function parameters.
     if [ ${#} -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        message="${1}";
     fi;
 
-    local readonly message_content="[$(_log_get_current_time)] $1";
-    local write_on_stderr="false";
+    message_content="[$(_log_get_current_time)] ${message}";
 
-    # If log file location is not specified.
-    if [ -z ${_log_file_location} ];
+    # Checks if log file has been specified.
+    if [ -z "${_log_file_location}" ];
     then
-        write_on_stderr="true";
-    fi;
-
-    if [ "${write_on_stderr}" == "true" ];
-    then
+        # Writes message on stderr.
         _log_write_stderr ${message_content};
     else
-        # Print message on log file.    
+        # Writes messsage on log file.
         echo "${message_content}" >> ${_log_file_location};
     fi;
+
+    return ${success};
 }
 
 # Log a message.
 #
-# Parameters
+# Parameters:
 #   1. Message type (trace, info, warning, error).
 #   2. Message content. (optional for trace messages, mandatory for other message types).
 #
 # Returns
 #   0. If message was successfully logged.
 #   1. Otherwise.
+#
+# Observations:
+#   Values accepted on first parameter are defined on "constants.sh" file.
+#
 log() {
-    local result;
+    local message_type;
+    local message_content;
+    local preffix;
+    local message_tag;
+    local message_index;
+    local log_message;
+    local _log_write_log_message_result;
 
     # Check function parameters.
     if [ ${#} -lt 1 -o ${#} -gt 2 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        message_type=${1};
+        message_content="${2}";
     fi;
 
-    local readonly message_type=$1;
-    local readonly message_content="$2";
-
+    # Selects the log message preffix.
     case ${message_type} in
         ${log_message_type_trace})
-            local readonly preffix=${_log_trace_message_preffix};
+            preffix=${_log_trace_message_preffix};
             ;;
         ${log_message_type_warning})
-            local readonly preffix=${_log_warning_message_preffix};
+            preffix=${_log_warning_message_preffix};
             ;;
         ${log_message_type_error})
-            local readonly preffix=${_log_error_message_preffix};
+            preffix=${_log_error_message_preffix};
             ;;
         *)
             _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log message type (${message_type}).";
@@ -348,15 +447,17 @@ log() {
             ;;
     esac;
 
+    # Checks if function execution was requested from "trace" function.
     if [ "${FUNCNAME[1]}" == "${_log_trace_function_name}" ];
     then
-        local readonly message_tag=${FUNCNAME[2]};
-        local readonly message_index=${BASH_LINENO[1]};
+        message_tag=${FUNCNAME[2]};
+        message_index=${BASH_LINENO[1]};
     else
-        local readonly message_tag="${FUNCNAME[1]}";
-        local readonly message_index=${BASH_LINENO[0]};
+        message_tag="${FUNCNAME[1]}";
+        message_index=${BASH_LINENO[0]};
     fi;
 
+    # Checks if message type informed is different from "trace" and a message content was informed.
     if [ ${message_type} -ne ${log_message_type_trace} -a -z "${message_content}" ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Only trace log messages are allowed to be written without content.";
@@ -370,200 +471,277 @@ log() {
         return ${success};
     fi;
 
-    local log_message="${preffix}: ${message_tag} (${message_index})";
+    # Elaborates the log message.
+    log_message="${preffix}: ${message_tag} (${message_index})";
 
+    # If a message content was informed.
     if [ -n "${message_content}" ];
     then
-        local log_message=${log_message}": ${message_content}";
+        log_message+=": ${message_content}";
     fi;
 
+    # Writes the message on log file.
     _log_write_log_message "${log_message}";
+    _log_write_log_message_result=${?};
+    if [ ${_log_write_log_message_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
 
-    result=${?};
-    return ${result};
+    return ${success};
 }
 
-# This function register a trace point on log file.
+# Registers a trace point on current log.
 #
-# Parameters
+# Parameters:
 #   1. Message (optional). 
 #
-# Returns
-#   0. If trace was logged correctly.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If trace was logged correctly.
+#   GENERIC_ERROR - Otherwise.
+#
 trace(){
 
+    local message;
+    local log_result;
+
+    # Checks function parameters.
     if [ ${#} -gt 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
     fi;
 
+    # Checks if a message was informed.
     if [ ${#} -eq 1 ];
     then
-        local readonly trace_message="$1";
+        message="${1}";
     fi;
 
+    # Writes trace point on log.
     log ${log_message_type_trace} "${trace_message}";
+    log_result=${?};
+    if [ ${log_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
 
-    return ${?};
+    return ${success};
 }
 
-# Set the log level.
+# Sets the log level.
 #
-# Parameters
+# Parameters:
 #   1. The log level to be defined.
 #
-# Returns
-#   0. If log level was defined correctly.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If log level was defined correctly.
+#   GENERIC_ERROR - Otherwise.
 #
-# Observation
+# Observations:
 #   To define correctly the log level, use the constants defines on
-# "log_constants.sh".
+# "constants.sh".
+#
 set_log_level(){
 
     local readonly numeric_regex="^[0-9]+$";
+    local temporary_log_level;
+    local _log_store_log_level_result;
 
+    # Checks function parameters:
     if [ ${#} -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        temporary_log_level=${1};
     fi;
 
-    local readonly temporary_log_level=${1};
-
+    # Checks if log level informed is a number.
     if ! [[ ${temporary_log_level} =~ ${numeric_regex} ]];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log level value (${temporary_log_level}).";
         return ${generic_error};
     fi;
 
+    # Checks if log level informed is a valid value.
     if [ ${temporary_log_level} -ne ${log_message_type_trace} -a ${temporary_log_level} -ne ${log_message_type_warning} -a ${temporary_log_level} -ne ${log_message_type_error} ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid log level value (${temporary_log_level}).";
         return ${generic_error};
     fi;
 
+    # Defines the log level.
     _log_level=${temporary_log_level};
 
-    # Stores the log level.
+    # Stores the log level on log level file.
     _log_store_log_level;
+    _log_store_log_level_result=${?};
+    if [ ${_log_store_log_level_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
 
     return ${success};
 }
 
 # Returns the log level.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#    The current log level through echo.
+# Returns:
+#   SUCCESS - If log level was returned though "echo" successfully.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns the current log level through echo.
+#
 get_log_level(){
+    local echo_result;
+
     echo "${_log_level}";
+    echo_result=${?};
+    if [ ${echo_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
+
     return ${success};
 }
 
-# Set the directory to write log files.
+# Sets the directory to write log files.
 #
-# Parameters
-#   1. Relative or complete path to directory to store log files.
+# Parameters:
+#   1. Path to directory to store log files.
 #
-# Returns
-#   0. If log directory was updated correctly.
-#  -1. Otherwise.
+# Returns:
+#   SUCCESS - If log directory was updated correctly.
+#   GENERIC_ERROR - Otherwise.
 #
-# Observations
-#   If the directory does not exists, this function willi not create it. 
+# Observations:
+#   If the directory does not exists, this function will not create it. 
 # It will return and error and log directory will not be updated.
+#
 set_log_directory(){
 
+    local temporary_log_directory;
+
+    # Checks function parameters.
     if [ ${#} -ne 1 ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return ${generic_error};
+    else
+        temporary_log_directory="${1}";
     fi;
 
-    local readonly temporary_log_directory="$1";
-
+    # Checks if directory exists.
     if [ ! -d "${temporary_log_directory}" ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: Unknown or invalid directory \"${temporary_log_directory}\".";
         return ${generic_error};
     fi;
 
+    # Checks if uses has permission to write on directory.
     if [ ! -w "${temporary_log_directory}" ];
     then
         _log_write_stderr "[${FUNCNAME[1]}, ${BASH_LINENO[0]}] ${_log_error_message_preffix}: User \"$(whoami)\" does not have write permission on directory \"${temporary_log_directory}\".";
         return ${generic_error};
     fi;
 
-    _log_directory=${temporary_log_directory};
+    # Defines the log directory.
+    _log_directory="${temporary_log_directory}";
+
     return ${success};
 }
 
-# Returns the log directory.
+# Returns the current log directory.
 #
-# Parametes
+# Parametes:
 #    None.
 #
-# Returns
-#    The current log directory through echo.
+# Returns:
+#   SUCCESS - If current log directory was returned through "echo" successfully.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns the current log directory through echo.
+#
 get_log_directory(){
-    echo ${_log_directory};
+    local echo_result;
+
+    # Returns the current log directory through "echo".
+    echo "${_log_directory}";
+    echo_result=${?};
+    if [ ${echo_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
+
     return ${success};
 }
 
-# Return the path to the log file.
+# Returns the path to current log file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#    The path to the current log file through echo.
+# Returns:
+#   SUCCESS - If current log file path was returned through "echo" successfully.
+#   GENERIC_ERROR - Otherwise.
+#   It also returns the path to the current log file through "echo".
+#
 get_log_path(){
+    local echo_result;
+
+    # Returns the current log file path through "echo".
     echo "${_log_file_location}";
+    echo_result=${?};
+    if [ ${echo_result} -ne ${success} ];
+    then
+        return ${generic_error};
+    fi;
+
     return ${success};
 }
 
 # Stores the log file path on "log path" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#  0. If log file path was stored successfully.
-#  1. Otherwise.
+# Returns:
+#  SUCCESS - If log file path was stored successfully.
+#  GENERIC_ERROR - Otherwise.
+#
 _log_store_log_file_path() {
-    local result;
+
     local echo_result;
 
+    # Writes current log file path on "log path" file.
     echo -e "${_log_file_location}" > ${_log_path_file_path};
     echo_result=${?};
-
-    if [ ${echo_result} -eq ${success} ];
+    if [ ${echo_result} -ne ${success} ];
     then
-        result=${success};
-    else
-        result=${generic_error};
+        return ${success};
     fi;
 
     return ${result};
 }
 
-# Retrieves the log file path from "log path" file.
+# Retrieves the current log file path from "log path" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#  0. If log file path was retrieved successfully.
-#  1. Otherwise.
+# Returns:
+#  SUCCESS - If current log file path and was retrieved successfully, or if there is no "log path" file defined.
+#  GENERIC_ERROR - Otherwise.
 #  
-# Obvervations
-#  When retrieved, the log file path will be stored on "_log_file_location" variable.
+# Obvervations:
+#   When retrieved, the log file path will be stored on "_log_file_location" variable.
+#   If "log path" file does not exists, the function considers that there is not log 
+# defined, thus accepting current log path stored and returning "SUCCESS".
+#
 _log_retrieve_log_file_path() {
+
     local result;
     local is_log_path_file_defined_result;
     local temporary_log_file_path;
@@ -575,11 +753,11 @@ _log_retrieve_log_file_path() {
     then
 
         # Retrieves log path from "log path" file.
-        temporary_log_file_path=$(cat "${_log_path_file_path}");
+        temporary_log_file_path="$(cat "${_log_path_file_path}")";
         cat_result=${?};
         if [ ${cat_result} -eq ${success} ];
         then
-            # Define the log file path.
+            # Defines the log file path.
             _log_file_location="${temporary_log_file_path}";
             result=${success};
         else
@@ -594,12 +772,13 @@ _log_retrieve_log_file_path() {
 
 # Deletes the "log path" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "log path" file was deleted successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If "log path" file was deleted successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_delete_log_path_file() {
     local result;
     local rm_result;
@@ -624,20 +803,21 @@ _log_delete_log_path_file() {
 
 # Checks if "log path" file is defined.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "log path" is defined.
-#   1. If "log path" is not defined.
-#   2. If there was an error.
+# Returns:
+#   SUCCESS - If "log path" is defined.
+#   GENERIC_ERROR - If "log path" is not defined or there was an error checking "log path" file.
 _log_is_log_path_file_defined() {
+
     local result;
     local log_path_file_defined;
 
     # Checks if "log path" file exists.
     if [ -f "${_log_path_file_path}" ];
     then
+
         # Check if "log path" file has content.
         log_path_file_defined=$(cat ${_log_path_file_path} | wc -l);
         if [ ${log_path_file_defined} -eq 1 ];
@@ -653,26 +833,26 @@ _log_is_log_path_file_defined() {
     return ${result};
 }
 
-# Stores the log level on "log level" file.
+# Stores the current log level on "log level" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#  0. If log level was stored successfully.
-#  1. Otherwise.
+# Returns:
+#   SUCCESS - If current log level was stored successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_store_log_level() {
+
     local result;
     local echo_result;
 
+    # Stores current log level on "log level" file.
     echo -e "${_log_level}" > ${_log_level_file_path};
     echo_result=${?};
-
     if [ ${echo_result} -eq ${success} ];
     then
-        result=${success};
-    else
-        result=${failure};
+        return ${generic_error};
     fi;
 
     return ${result};
@@ -680,21 +860,23 @@ _log_store_log_level() {
 
 # Retrieves the log level from "log level" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#  0. If log level was retrieved successfully.
-#  1. Otherwise.
+# Returns:
+#  SUCCESS - If log level was retrieved successfully.
+#  GENERIC_ERROR - Otherwise.
 #  
-# Obvervations
+# Obvervations:
 #  When retrieved, the log level will be stored on "_log_level" variable.
+#
 _log_retrieve_log_level() {
+
     local result=${success};
     local is_log_level_file_defined_result;
     local temporary_log_level;
 
-    # Check if "log level" file is defined.
+    # Checks if "log level" file is defined.
     _log_is_log_level_file_defined;
     is_log_level_file_defined_result=${?};
     if [ ${is_log_level_file_defined_result} -eq ${success} ];
@@ -705,7 +887,7 @@ _log_retrieve_log_level() {
         cat_result=${?};
         if [ ${cat_result} -eq ${success} ];
         then
-            # Define the log file path.
+            # Defines the log file path.
             _log_level="${temporary_log_level}";
             result=${success};
         else
@@ -720,14 +902,16 @@ _log_retrieve_log_level() {
 
 # Deletes the "log level" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "log level" file was deleted successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If "log level" file was deleted successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 _log_delete_log_level_file() {
-    local result;
+
+    local result=${success};
     local rm_result;
 
     # Checks if "log level" file exists.
@@ -750,20 +934,22 @@ _log_delete_log_level_file() {
 
 # Checks if "log level" file is defined.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "log level" is defined.
-#   1. If "log level" is not defined.
-#   2. If there was an error.
+# Returns:
+#   SUCCESS - If "log level" file is defined.
+#   GENERIC_ERROR - If "log level" file is not defined or if there was an error while checking it.
+#
 _log_is_log_level_file_defined() {
+
     local result;
     local log_level_file_defined;
 
     # Checks if "log level" file exists.
     if [ -f "${_log_level_file_path}" ];
     then
+
         # Check if "log level" file has content.
         log_level_file_defined=$(cat ${_log_level_file_path} | wc -l);
         if [ ${log_level_file_defined} -eq 1 ];
@@ -781,16 +967,20 @@ _log_is_log_level_file_defined() {
 
 # Sets the start log level on "start log level" file.
 #
-# Parameters
+# Parameters:
 #   The start log level value.
 #
-# Returns
-#  0. If start log level was defined successfully.
-#  1. Otherwise.
+# Returns:
+#  SUCCESS - If start log level was defined successfully.
+#  GENERIC_ERROR -  Otherwise.
+#
 set_start_log_level() {
+
     local result;
     local echo_result;
+    local start_log_level;
 
+    # Checks function parameters.
     if [ ${#} -ne 1 ];
     then
         return ${generic_error};
@@ -798,9 +988,9 @@ set_start_log_level() {
         start_log_level=${1};
     fi;
 
+    # Writes start log level on "start log level" file.
     echo -e "${start_log_level}" > ${_log_start_log_level_file_path};
     echo_result=${?};
-
     if [ ${echo_result} -eq ${success} ];
     then
         result=${success};
@@ -813,19 +1003,20 @@ set_start_log_level() {
 
 # Retrieves the start log level from "start log level" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#  0. If start log level was retrieved successfully.
-#  1. Otherwise.
+# Returns:
+#  SUCCESS - If start log level was retrieved successfully.
+#  GENERIC_ERROR - Otherwise.
 #  It also returns the start log level through "echo".
+#
 _log_retrieve_start_log_level() {
     local result;
     local is_start_log_level_file_defined_result;
     local start_log_level;
 
-    # Check if "start log level" file is defined.
+    # Checks if "start log level" file is defined.
     _log_is_start_log_level_file_defined;
     is_start_log_level_file_defined_result=${?};
     if [ ${is_start_log_level_file_defined_result} -eq ${success} ];
@@ -836,7 +1027,7 @@ _log_retrieve_start_log_level() {
         cat_result=${?};
         if [ ${cat_result} -eq ${success} ];
         then
-            # Define the log file path.
+            # Defines the log file path.
             echo "${start_log_level}";
             result=${success};
         else
@@ -851,12 +1042,13 @@ _log_retrieve_start_log_level() {
 
 # Deletes the "start log level" file.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "start log level" file was deleted successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If "start log level" file was deleted successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 delete_start_log_level_file() {
     local result;
     local rm_result;
@@ -881,20 +1073,22 @@ delete_start_log_level_file() {
 
 # Checks if "start log level" file is defined.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If "start log level" is defined.
-#   1. If "start log level" is not defined.
-#   2. If there was an error.
+# Returns:
+#   SUCCESS - If "start log level" is defined.
+#   GENERIC_ERROR - If "start log level" is not defined or there was an error while checking "start log level" file existance.
+#
 _log_is_start_log_level_file_defined() {
+
     local result;
     local log_level_file_defined;
 
     # Checks if "start log level" file exists.
     if [ -f "${_log_start_log_level_file_path}" ];
     then
+
         # Check if "start log level" file has content.
         start_log_level_file_defined=$(cat ${_log_start_log_level_file_path} | wc -l);
         if [ ${start_log_level_file_defined} -eq 1 ];
@@ -912,38 +1106,38 @@ _log_is_start_log_level_file_defined() {
 
 # Checks if a log is already defined.
 #
-# Parameters
-#  None.
+# Parameters:
+#   None.
 #
-# Returns
-#  0. If a log is already defined.
-#  1. Otherwise.
+# Returns:
+#   SUCCESS - If a log is already defined.
+#   GENERIC_ERRO - Otherwise.
 is_log_defined(){
-    local result;
+
     local is_log_path_file_defined_result;
 
-    # Checks if "log path" is defined.
+    # Checks if "log path" file is defined.
     _log_is_log_path_file_defined;
     is_log_path_file_defined_result=${?};
-    if [ ${is_log_path_file_defined_result} -eq ${success} ];
+    if [ ${is_log_path_file_defined_result} -ne ${success} ];
     then
-        result=${success};
-    else
-        result=${generic_error};
+        return ${generic_error};
     fi;
 
-    return ${result};
+    return ${success};
 }
 
 # Continues a log file that is already defined.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If log file was continued successfully.
-#   1. Otherwise.
+# Returns:
+#   SUCCESS - If log file was continued successfully.
+#   GENERIC_ERROR - Otherwise.
+#
 continue_log_file(){
+
     local result;
     local is_log_defined_result;
     local retrieve_log_file_path_result;
@@ -961,11 +1155,10 @@ continue_log_file(){
         retrieve_log_file_path_result=${?};
         if [ ${retrieve_log_file_path_result} -eq ${success} ];
         then
-            
+
             # Retrieves log level.
             _log_retrieve_log_level;
             retrieve_log_level_result=${?};
-
             # If could not retrieve log level.
             if [ ${retrieve_log_level_result} -ne ${success} ];
             then
@@ -994,12 +1187,13 @@ continue_log_file(){
 
 # Initializes the log level.
 #
-# Parameters
+# Parameters:
 #   None.
 #
-# Returns
-#   0. If log level was initialized successfully.
-#   1. Otherwise
+# Returns:
+#   SUCCESS - If log level was initialized successfully.
+#   GENERIC_ERROR - Otherwise
+#
 _log_initialize_log_level() {
     local is_start_log_level_defined;
     local start_log_level;
@@ -1024,7 +1218,7 @@ _log_initialize_log_level() {
     else
         new_log_level=${log_message_type_trace};
     fi;
-    
+
     set_log_level ${new_log_level};
 
     return ${success};

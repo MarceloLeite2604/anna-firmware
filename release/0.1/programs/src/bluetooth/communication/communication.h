@@ -1,25 +1,33 @@
 /*
- * This header file contains all components required to control the bluetooh communication.
+ * This header file contains the declaration of all components required to control the bluetooh communication.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
+
 #ifndef BLUETOOTH_COMMUNICATION_H
 #define BLUETOOTH_COMMUNICATION_H
+
 
 /*
  * Includes.
  */
+
 #include <time.h>
-#include "../package/package.h"
+
 #include "../connection/connection.h"
+#include "../package/package.h"
 
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Code returned when no package was received. */
 #define NO_PACKAGE_RECEIVED 50
+
 
 /*
  * Function headers.
@@ -28,14 +36,11 @@
 /* Checks if a device is connected. */
 int check_connection(int);
 
-/* Checks if a device is connected. */
-/* int is_connected(int); */
-
 /* Receives a package from a connection. */
 int receive_package(int, package_t*);
 
 /* Sends a disconnect signal through a connection. */
-int send_disconnect(int);
+int send_disconnect_signal(int);
 
 /* Sends a file through a connection. */
 int send_file(int, char*);

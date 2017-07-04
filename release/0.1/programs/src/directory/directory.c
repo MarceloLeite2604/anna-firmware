@@ -1,21 +1,27 @@
 /*
- * This source file contains the functions used to get the directories for input and output files.
+ * This source file contains the definition of all components required to get the directories for input and output files.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 /*
  * Includes.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "directory.h"
+
 #include "../log/log.h"
+#include "directory.h"
+
 
 /*
- * Definitions.
+ * Macros.
  */
 
 /* Default directory for input and output files. */
@@ -29,20 +35,21 @@
 
 
 /*
- * Functions.
+ * Function elaborations.
  */
 
 /*
  * Returns the input directory
  *
- * Parameters:
+ * Parameters
  *  None.
  * 
- * Returns:
+ * Returns
  *  The input directory location.
  */
 char* get_input_directory() {
     LOG_TRACE_POINT;
+
     char* result;
     size_t input_directory_size;
     char* input_directory;
@@ -69,10 +76,10 @@ char* get_input_directory() {
 /*
  * Returns the output directory
  *
- * Parameters:
+ * Parameters
  *  None.
  * 
- * Returns:
+ * Returns
  *  The output directory location.
  */
 char* get_output_directory() {
@@ -83,7 +90,6 @@ char* get_output_directory() {
     char* output_directory;
 
     output_directory = getenv(OUTPUT_DIRECTORY_VARIABLE_NAME);
-    LOG_TRACE_POINT;
 
     if ( output_directory == NULL ) {
         LOG_TRACE_POINT;

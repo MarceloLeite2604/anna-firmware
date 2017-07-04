@@ -1,8 +1,11 @@
 /*
- * This header file contains all componentes required to retrieve informations about system time.
+ * This header file contains the declaration of all componentes required to retrieve informations about system time.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version: 
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
 
 #ifndef TIME_H
@@ -11,11 +14,13 @@
 /*
  * Includes.
  */
+
 #include <sys/time.h>
 #include <time.h>
 
+
 /*
- * Constants.
+ * Macros.
  */
 
 /* Length of time string formatted to read. */
@@ -40,6 +45,9 @@ typedef struct instant_t {
  * Function headers.
  */
 
+/* Converts an structure "instant" to an structure "timeval" */
+struct timeval convert_instant_to_timeval(instant_t);
+
 /* Formats an instant as a human-readable string. */
 char* format_instant_to_read(instant_t); 
 
@@ -50,7 +58,7 @@ char* format_instant_to_sort_files(instant_t);
 instant_t get_instant();
 
 /* Calculates the difference between two instants. */
-instant_t get_instant_difference (instant_t,  instant_t);
+int get_instant_difference (instant_t*, instant_t,  instant_t);
 
 /* Retrieves the current instant formatted as a string to sort files. */
 char* get_instant_file_formatted();

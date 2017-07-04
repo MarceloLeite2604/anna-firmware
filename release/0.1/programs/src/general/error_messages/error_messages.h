@@ -1,12 +1,22 @@
 /*
  * This header file contains all error messages used by the program.
  *
- * Version: 0.1
- * Author: Marcelo Leite
+ * Version:
+ *  0.1
+ *
+ * Author: 
+ *  Marcelo Leite
  */
+
 #ifndef ERROR_MESSAGES_H
 #define ERROR_MESSAGES_H
 
+
+/*
+ * Macros.
+ */
+
+/* Error messages used by the program. */
 #define ERROR_MESSAGE_000 "No error."
 #define ERROR_MESSAGE_001 "Could not start log."
 #define ERROR_MESSAGE_002 "Could not start bluetooth service."
@@ -31,6 +41,12 @@
 #define ERROR_MESSAGE_021 "Could not send file trailer."
 #define ERROR_MESSAGE_022 "Could not close connection gracefully."
 
+
+/*
+ * Constants.
+ */
+
+/* The array of error messages. */
 extern const char* error_messages[];
 
 #endif
