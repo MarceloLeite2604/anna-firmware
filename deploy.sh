@@ -74,7 +74,7 @@ print_error_message() {
 
     local error_message;
 
-    if [ ${#} -gt 1 ];
+    if [ ${#} -ge 1 ];
     then
         error_message="${1}";
         >&2 echo "${error_message_preffix} ${error_message}";
@@ -95,12 +95,13 @@ print_error_message() {
 create_directory() {
 
     local directory="${1}";
+    local mkdir_result;
 
     if [ ! -d "${directory}" ];
     then
         echo -e "Creating directory \"${directory}\".";
         mkdir -p "${directory}";
-        local mkdir_result=${?};
+        mkdir_result=${?};
         if [ ${mkdir_result} -ne 0 ];
         then
             print_error_message "Error creating directory \"${directory}\" (${mkdir_result}).";
