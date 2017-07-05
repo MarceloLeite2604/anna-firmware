@@ -14,7 +14,15 @@
 # ###
 
 # Load generic functions script.
-source "$(dirname ${BASH_SOURCE})/functions.sh";
+source "$(dirname ${BASH_SOURCE})/generic/functions.sh";
+
+# Load constants used on project controlling.
+source "$(dirname ${BASH_SOURCE})/constants.sh";
+
+
+# ###
+# Function elaborations.
+# ###
 
 # Creates the additional directories required for project execution.
 #
@@ -119,7 +127,7 @@ create_current_release_version_directory(){
 
         # Creates the current release version directory.
         mkdir -p "${current_release_version_directory}";
-        mkdir_result = ${?};
+        mkdir_result=${?};
 
         if [ ${mkdir_result} -ne 0 ];
         then

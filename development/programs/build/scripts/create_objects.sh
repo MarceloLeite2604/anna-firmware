@@ -14,68 +14,12 @@
 #   Marcelo Leite
 #
 
-# Preffix used to identify error messages.
-if [ -z "${error_messages_preffix}" ];
-then
-    readonly error_message_preffix="[ERROR]:";
-fi;
+# ###
+# Source scripts.
+# ###
 
-# Prints an error message.
-#
-# Parameters:
-#   1. The error message to print.
-#
-# Returns:
-#   The result of this method is always 0.
-print_error_message() {
-
-    local error_message;
-
-    if [ ${#} -ge 1 ];
-    then
-        error_message="${1}";
-        >&2 echo "${error_message_preffix} ${error_message}";
-    fi;
-
-    return 0;
-}
-
-# Creates a directory.
-#
-# Parameters:
-#   1. Path to directory to create.
-#
-# Returns:
-#   0 - If directory was created successfully.
-#   1 - Otherwise.
-#
-create_directory() {
-
-    local directory;
-    local mkdir_result;
-
-    if [ ${#} -ne 1 ];
-    then
-        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
-        return 1;
-    else
-        directory="${1}";
-    fi;
-
-    if [ ! -d "${directory}" ];
-    then
-        echo -e "Creating directory \"${directory}\".";
-        mkdir -p "${directory}";
-        local mkdir_result=${?};
-        if [ ${mkdir_result} -ne 0 ];
-        then
-            print_error_message "Error creating directory \"${directory}\" (${mkdir_result}).";
-            return 1;
-        fi;
-    fi;
-
-    return 0;
-}
+# Load generic constants script.
+source "$(dirname ${BASH_SOURCE})/generic/functions.sh";
 
 # Create an object from a source file.
 #

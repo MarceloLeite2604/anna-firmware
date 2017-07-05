@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Generic functions used throughout the project.
+# Generic functions used throughout the project controlling and development.
 #
 # Version: 
 #   0.1
@@ -11,9 +11,9 @@
 # ###
 # Include guard.
 # ###
-if [ -z "${DEVELOPMENT_GENERIC_FUNCTIONS_SH}" ];
+if [ -z "${GENERIC_FUNCTIONS_SH}" ];
 then
-    DEVELOPMENT_GENERIC_FUNCTIONS_SH=1;
+    GENERIC_FUNCTIONS_SH=1;
 else
     return;
 fi;

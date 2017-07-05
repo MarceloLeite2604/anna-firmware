@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Generic constants used on project controlling.
+# Constants used on project controlling.
 #
 # Version: 
 #   0.1
@@ -32,13 +32,13 @@ fi;
 # Path to project's development directory.
 if [ -z "${development_directory_path}" ];
 then
-    development_directory_path="$(dirname ${BASH_SOURCE})/development/";
+    development_directory_path="$(dirname ${BASH_SOURCE})/../development/";
 fi;
 
 # Project's release directory.
 if [ -z "${release_versions_directory_path}" ];
 then
-    release_versions_directory_path="$(dirname ${BASH_SOURCE})/release/";
+    release_versions_directory_path="$(dirname ${BASH_SOURCE})/../release/";
 fi;
 
 # Path to development directory of "configuration" project's subdivision.
@@ -70,10 +70,3 @@ if [ -z "${current_release_version_directory}" ];
 then
     readonly current_release_version_directory="${release_versions_directory_path}${current_release_version}/";
 fi;
-
-# Preffix used to identify error messages.
-if [ -z "${error_messages_preffix}" ];
-then
-    readonly error_message_preffix="[ERROR]:";
-fi;
-
