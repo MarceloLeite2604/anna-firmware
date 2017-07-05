@@ -1,116 +1,20 @@
 #!/bin/bash
 
-# The purpose of this script is to deploy the project divisions.
+# This script controls the deployment of project's subdivisions.
 #
-# Version: 0.1
-# Author: Marcelo Leite
+# Version: 
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
 
 # ###
-# Constants.
+# Source scripts.
 # ###
 
-# Current version to release project divsions.
-if [ -z "${current_release_version}" ];
-then
-    readonly current_release_version="0.1";
-fi;
-
-# Path to project development directory.
-if [ -z "${development_directory_path}" ];
-then
-    readonly development_directory_path="$(dirname ${BASH_SOURCE})/development/";
-fi;
-
-# Path to project release versions directory.
-if [ -z "${release_versions_directory_path}" ];
-then
-    readonly release_versions_directory_path="$(dirname ${BASH_SOURCE})/release/";
-fi;
-
-# Path to "configuration" project subdivision.
-if [ -z "${subdivision_configuration_directory_path}" ];
-then
-    readonly subdivision_configuration_directory_path="${development_directory_path}configuration/";
-fi;
-
-# Path to "scripts" project subdivision.
-if [ -z "${subdivision_scripts_directory_path}" ];
-then
-    readonly subdivision_scripts_directory_path="${development_directory_path}scripts/";
-fi;
-
-# Path to "programs" project subdivision.
-if [ -z "${subdivision_programs_directory_path}" ];
-then
-    readonly subdivision_programs_directory_path="${development_directory_path}programs/";
-fi;
-
-# Path to "installation" project subdivision.
-if [ -z "${subdivision_installation_directory_path}" ];
-then
-    readonly subdivision_installation_directory_path="${development_directory_path}installation/";
-fi;
-
-# Path to directory which the current release version are being stored.
-if [ -z "${current_release_version_directory}" ];
-then
-    readonly current_release_version_directory="${release_versions_directory_path}${current_release_version}/";
-fi;
-
-# Preffix used to identify error messages.
-if [ -z "${error_messages_preffix}" ];
-then
-    readonly error_message_preffix="[ERROR]:";
-fi;
-
-# Prints an error message.
-#
-# Parameters:
-#   1. The error message to print.
-#
-# Returns:
-#   The result of this method is always 0.
-print_error_message() {
-
-    local error_message;
-
-    if [ ${#} -ge 1 ];
-    then
-        error_message="${1}";
-        >&2 echo "${error_message_preffix} ${error_message}";
-    fi;
-
-    return 0;
-}
-
-# Creates a directory.
-#
-# Parameters:
-#   1. Path to directory to create.
-#
-# Returns:
-#   0 - If directory was created successfully.
-#   1 - Otherwise.
-#
-create_directory() {
-
-    local directory="${1}";
-    local mkdir_result;
-
-    if [ ! -d "${directory}" ];
-    then
-        echo -e "Creating directory \"${directory}\".";
-        mkdir -p "${directory}";
-        mkdir_result=${?};
-        if [ ${mkdir_result} -ne 0 ];
-        then
-            print_error_message "Error creating directory \"${directory}\" (${mkdir_result}).";
-            return 1;
-        fi;
-    fi;
-
-    return 0;
-}
+# Load generic functions script.
+source "$(dirname ${BASH_SOURCE})/functions.sh";
 
 # Creates the additional directories required for project execution.
 #
@@ -195,7 +99,7 @@ create_directory() {
 #     return 0;
 # }
 
-# Creates directory to store the release of the current version.
+# Creates the directory to store the current release version.
 #
 # Parameters:
 #   None.
@@ -206,10 +110,22 @@ create_directory() {
 #
 create_current_release_version_directory(){
 
+    local mkdir_result;
+
+    # If current release version directory does not exist.
     if [ ! -d "${current_release_version_directory}" ];
     then
         echo -n "Creating release version directory.";
+
+        # Creates the current release version directory.
         mkdir -p "${current_release_version_directory}";
+        mkdir_result = ${?};
+
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            print_error_message "Error while creating directory \"${current_release_version_directory}\": ${mkdir_result}";
+            return 1;
+        fi;
     fi;
 
     # create_directory_structure "${current_release_version_directory}";
