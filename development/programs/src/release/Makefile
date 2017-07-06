@@ -1,6 +1,8 @@
 CC = gcc
 LIBS = -lbluetooth -lm
 
+toptargets := all clean muni store_instant
+
 subdirs := $(wildcard */.)
 
 objects_directory=$(OUTPUT_FILES_DIRECTORY)objects/
@@ -9,10 +11,16 @@ _muni_dependencies=audio.o communication.o connection.o command_result.o confirm
 muni_dependencies = $(patsubst %,$(objects_directory)%,$(_muni_dependencies))
 muni_program_path = $(OUTPUT_FILES_DIRECTORY)bin/muni
 
-all: $(subdirs) muni
+_store_instant_dependencies=directory.o script.o time.o log.o store_instant.o
+store_instant_dependencies = $(patsubst %,$(objects_directory)%,$(_store_instant_dependencies))
+store_instant_program_path = $(OUTPUT_FILES_DIRECTORY)bin/store_instant
+
+$(toptargets): $(subdirs)
+
+all: $(subdirs) muni store_instant
 
 $(subdirs):
-	@$(MAKE) -C $@ OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
+	@$(MAKE) -C $@ $(MAKECMDGOALS) OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
 
 
 $(objects_directory)%.o: %.c
@@ -23,8 +31,13 @@ muni: $(muni_program_path)
 $(muni_program_path): $(muni_dependencies)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-clean:
-	rm -r $(objects_directory)*.o
-	rm $(muni_program_path)
+store_instant: $(store_instant_program_path)
 
-.PHONY: clean muni $(subdirs)
+$(store_instant_program_path): $(store_instant_dependencies)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+clean:
+	rm -f $(muni_program_path)
+	rm -f $(store_instant_program_path)
+
+.PHONY: $(toptargets) $(subdirs) $(objects_directory)
