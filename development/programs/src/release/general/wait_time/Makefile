@@ -1,8 +1,10 @@
 CC = gcc
 objects_directory=$(OUTPUT_FILES_DIRECTORY)objects/
 
-_objects = wait_time.o
+_objects = $(subst .c,.o,$(wildcard *.c))
+ifneq ($(_objects),)
 objects = $(patsubst %,$(objects_directory)%,$(_objects))
+endif
 
 subdirs := $(wildcard */.)
 
@@ -17,4 +19,4 @@ $(objects_directory)%.o: %.c
 clean:
 	rm $(objects)
 
-.PHONY: clean $(subdirs)
+.PHONY: clean $(subdirs) $(objects_directory)

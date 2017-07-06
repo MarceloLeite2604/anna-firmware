@@ -1,7 +1,7 @@
 CC = gcc
 objects_directory=$(OUTPUT_FILES_DIRECTORY)objects/
 
-_objects = confirmation.o
+_objects = $(subst .c,.o,$(wildcard *.c));
 objects = $(patsubst %,$(objects_directory)%,$(_objects))
 
 subdirs := $(wildcard */.)

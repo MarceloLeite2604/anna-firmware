@@ -1,5 +1,5 @@
 CC = gcc
-LIBS=-lbluetooth -lm
+LIBS = -lbluetooth -lm
 
 subdirs := $(wildcard */.)
 
