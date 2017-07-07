@@ -18,9 +18,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "../../general/return_codes.h"
-#include "../package/codes/codes.h"
-#include "connection.h"
+#include "general/return_codes.h"
+#include "bluetooth/package/codes/codes.h"
+#include "bluetooth/connection/connection.h"
 
 
 /*

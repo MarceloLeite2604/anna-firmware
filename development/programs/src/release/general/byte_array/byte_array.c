@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 
-#include "../return_codes.h"
-#include "byte_array.h"
+#include "general/byte_array/byte_array.h"
+#include "general/return_codes.h"
 
 
 /*

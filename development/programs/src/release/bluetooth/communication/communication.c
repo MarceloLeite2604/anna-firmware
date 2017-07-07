@@ -16,11 +16,11 @@
 #include <libgen.h>
 #include <stdlib.h>
 
-#include "../../general/file/file.h"
-#include "../../general/return_codes.h"
-#include "../../general/wait_time/wait_time.h"
-#include "../package/codes/codes.h"
-#include "communication.h"
+#include "bluetooth/package/codes/codes.h"
+#include "bluetooth/communication/communication.h"
+#include "general/file/file.h"
+#include "general/return_codes.h"
+#include "general/wait_time/wait_time.h"
 
 
 /*

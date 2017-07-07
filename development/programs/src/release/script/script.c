@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../directory/directory.h"
-#include "../general/return_codes.h"
-#include "../log/log.h"
-#include "script.h"
+#include "directory/directory.h"
+#include "general/return_codes.h"
+#include "log/log.h"
+#include "script/script.h"
 
 
 /*

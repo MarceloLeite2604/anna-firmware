@@ -14,10 +14,10 @@
 
 #include <stdlib.h>
 
-#include "../../../../general/return_codes.h"
-#include "../../../../log/log.h"
-#include "../codes/codes.h"
-#include "send_file_trailer.h"
+#include "bluetooth/package/content/codes/codes.h"
+#include "bluetooth/package/content/send_file_trailer/send_file_trailer.h"
+#include "general/return_codes.h"
+#include "log/log.h"
 
 
 /*

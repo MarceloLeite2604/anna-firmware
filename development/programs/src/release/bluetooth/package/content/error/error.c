@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 
-#include "../../../../general/return_codes.h"
-#include "error.h"
+#include "bluetooth/package/content/error/error.h"
+#include "general/return_codes.h"
 
 
 /*

@@ -1,18 +1,70 @@
+# This Makefile creates an object for each "C" source file found on current directory.
+#
+# Parameters:
+#   INCLUDE_FILES_DIRECTORY - Path to the root directory where the header files are stored.
+# 	OUTPUT_FILES_DIRECTORY - Path to the root directory where the "objects" directory is. This directory will be the output directory to the objects created.
+#	ADDITIONAL_C_FLAGS_OBJECTS - Addicional flags to inform on compilator execution to create the objects. (Optional)
+#
+# Version:
+# 	0.1
+#
+# Author:
+# 	Marcelo Leite.
+
+# Check Makefile parameters.
+ifeq ($(INCLUDE_FILES_DIRECTORY),)
+$(error Parameter "INCLUDE_FILES_DIRECTORY" not informed)
+endif
+
+ifeq ($(OUTPUT_FILES_DIRECTORY),)
+$(error Parameter "OUTPUT_FILES_DIRECTORY" not informed)
+endif
+
+# Defines the compilator to use.
 CC = gcc
-LIBS = -lbluetooth -lm
 
-toptargets := all clean muni store_instant
+# Default flags used to compile.
+CFLAGS = -Wall
 
+# Top targets of this Makefile.
+toptargets := all clean
+
+# Subdirectories of this directory.
 subdirs := $(wildcard */.)
 
+# Subdirectories of this directory.
 objects_directory=$(OUTPUT_FILES_DIRECTORY)objects/
+
+# Objects this Makefile should create.
+_objects = $(subst .c,.o,$(wildcard *.c))
+
+# If there are objects to create for this Makefile.
+ifneq ($(_objects),)
+# Define the path of the objects to be created.	
+objects = $(patsubst %,$(objects_directory)%,$(_objects))
+endif
+
+# Flags informed to the compilator to create the objects.
+cflags_objects=$(CFLAGS) $(ADDITIONAL_C_FLAGS_OBJECTS)
+
+# Parameter to inform when executing makefiles on subdirectories.
+parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
+parameters_make_subdirectories += INCLUDE_FILES_DIRECTORY=../$(INCLUDE_FILES_DIRECTORY)
+parameters_make_subdirectories += ADDITIONAL_C_FLAGS_OBJECTS=$(ADDITIONAL_C_FLAGS_OBJECTS)
 
 _muni_dependencies=audio.o communication.o connection.o command_result.o confirmation.o content.o error.o send_file_chunk.o send_file_header.o send_file_trailer.o package.o service.o directory.o byte_array.o error_messages.o file.o random.o time.o wait_time.o log.o muni.o script.o 
 muni_dependencies = $(patsubst %,$(objects_directory)%,$(_muni_dependencies))
+
+muni_libs= -lbluetooth -lm
+
 muni_program_path = $(OUTPUT_FILES_DIRECTORY)bin/muni
 
 _store_instant_dependencies=directory.o script.o time.o log.o store_instant.o
+
 store_instant_dependencies = $(patsubst %,$(objects_directory)%,$(_store_instant_dependencies))
+
+store_instant_libs=-lm
+
 store_instant_program_path = $(OUTPUT_FILES_DIRECTORY)bin/store_instant
 
 $(toptargets): $(subdirs)
@@ -20,24 +72,24 @@ $(toptargets): $(subdirs)
 all: $(subdirs) muni store_instant
 
 $(subdirs):
-	@$(MAKE) -C $@ $(MAKECMDGOALS) OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
-
+	@$(MAKE) -C $@ $(MAKECMDGOALS) $(parameters_make_subdirectories)
 
 $(objects_directory)%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(cflags_objects) -I$(INCLUDE_FILES_DIRECTORY)
 
 muni: $(muni_program_path)
 
 $(muni_program_path): $(muni_dependencies)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) -I$(INCLUDE_FILES_DIRECTORY) $(muni_libs)
 
 store_instant: $(store_instant_program_path)
 
 $(store_instant_program_path): $(store_instant_dependencies)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) -I$(INCLUDE_FILES_DIRECTORY) $(store_instant_libs)
 
 clean:
 	rm -f $(muni_program_path)
 	rm -f $(store_instant_program_path)
+	rm -f $(objects)
 
-.PHONY: $(toptargets) $(subdirs) $(objects_directory)
+.PHONY: $(toptargets) $(subdirs) $(objects_directory) muni store_instant $(muni_program_path) $(store_instant_program_path)

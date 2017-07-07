@@ -20,10 +20,10 @@
 #include <bluetooth/sdp_lib.h>
 #include <stdint.h>
 
-#include "../../general/return_codes.h"
-#include "../../log/log.h"
-#include "../connection/connection.h"
-#include "service.h"
+#include "bluetooth/connection/connection.h"
+#include "bluetooth/service/service.h"
+#include "general/return_codes.h"
+#include "log/log.h"
 
 
 /*

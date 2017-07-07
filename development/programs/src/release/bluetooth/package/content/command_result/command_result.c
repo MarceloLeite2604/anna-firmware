@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 
-#include "../../../../general/return_codes.h"
-#include "command_result.h"
+#include "bluetooth/package/content/command_result/command_result.h"
+#include "general/return_codes.h"
 
 
 /*

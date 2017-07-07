@@ -14,9 +14,9 @@
 
 #include <stdlib.h>
 
-#include "../../../general/return_codes.h"
-#include "../codes/codes.h"
-#include "content.h"
+#include "bluetooth/package/codes/codes.h"
+#include "bluetooth/package/content/content.h"
+#include "general/return_codes.h"
 
 
 /*

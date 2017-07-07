@@ -16,11 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../directory/directory.h"
-#include "../general/file/file.h"
-#include "../general/return_codes.h"
-#include "../log/log.h"
-#include "../script/script.h"
+#include "audio/audio.h"
+#include "directory/directory.h"
+#include "general/file/file.h"
+#include "general/return_codes.h"
+#include "log/log.h"
+#include "script/script.h"
 
 
 /*

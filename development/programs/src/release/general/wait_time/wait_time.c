@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../../log/log.h"
-#include "../return_codes.h"
-#include "wait_time.h"
+#include "log/log.h"
+#include "general/return_codes.h"
+#include "general/wait_time/wait_time.h"
 
 /*
  * Macros.

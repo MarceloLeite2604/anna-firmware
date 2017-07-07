@@ -19,11 +19,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../directory/directory.h"
-#include "../general/return_codes.h"
-#include "../general/time/time.h"
-#include "../script/script.h"
-#include "log.h"
+#include "directory/directory.h"
+#include "general/return_codes.h"
+#include "general/time/time.h"
+#include "log/log.h"
+#include "script/script.h"
 
 
 /*

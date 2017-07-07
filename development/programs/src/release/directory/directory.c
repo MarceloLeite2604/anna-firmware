@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../log/log.h"
-#include "directory.h"
+#include "directory/directory.h"
+#include "log/log.h"
 
 
 /*

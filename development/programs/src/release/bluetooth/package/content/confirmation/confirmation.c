@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 
-#include "../../../../general/return_codes.h"
-#include "confirmation.h"
+#include "bluetooth/package/content/confirmation/confirmation.h"
+#include "general/return_codes.h"
 
 
 /*

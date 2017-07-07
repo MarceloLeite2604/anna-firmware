@@ -16,9 +16,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "../../general/return_codes.h"
-#include "../../log/log.h"
-#include "file.h"
+#include "general/return_codes.h"
+#include "log/log.h"
+#include "general/file/file.h"
 
 
 /*

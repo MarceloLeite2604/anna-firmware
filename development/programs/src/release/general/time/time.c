@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../log/log.h"
-#include "../return_codes.h"
-#include "time.h"
+#include "general/return_codes.h"
+#include "general/time/time.h"
+#include "log/log.h"
 
 
 /*
