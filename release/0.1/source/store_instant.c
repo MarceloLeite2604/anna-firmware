@@ -22,9 +22,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "general/return_codes.h"
-#include "general/time/time.h"
-#include "log/log.h"
+#include "log.h"
+#include "return_codes.h"
+#include "instant.h"
 
 /*
  * Function headers.
@@ -56,7 +56,6 @@ int main(int argc, char** argv) {
     }
 
     char* file_path;
-    char* instant_read_formatted;
     size_t file_path_size;
     int store_current_instant_result;
 

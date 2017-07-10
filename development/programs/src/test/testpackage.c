@@ -8,14 +8,16 @@
 /*
  * Includes.
  */
-#include <stdlib.h>
+/* #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include "../release/log/log.h"
-#include "../release/general/error_messages/error_messages.h"
-#include "../release/bluetooth/package/codes/codes.h"
-#include "../release/bluetooth/package/package.h"
+#include <sys/stat.h> */
+#include <stdlib.h>
+
+#include "log.h"
+#include "error_messages.h"
+#include "bluetooth/package/codes.h"
+#include "bluetooth/package/package.h"
 
 /*
  * Definitions.

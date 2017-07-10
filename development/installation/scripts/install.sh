@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script install all files required to execute Anna.
+# This script installs all files required to execute Anna.
 #
 # Parameters:
 #   None.
@@ -64,37 +64,37 @@ copy_system_files() {
     local copy_result;
 
     # Copies all directories on base directory exception the installation scripts directory.
-    l --hide=${installation_scripts_directory_name} | xargs cp -r "${installation_directory}";
+    l --hide=${installation_directory_name} | xargs cp -r "${system_destination_directory}";
     copy_result=${?};
     if [ ${copy_result} -ne 0 ];
     then
-        print_error_message "Error copying base directories to installation directory: ${copy_result}";
+        print_error_message "Error copying base directories to destination directory: ${copy_result}";
         return 1;
     fi;
 
     return 0;
 }
 
-# Creates the installation directory.
+# Creates the system's destination directory.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If installation directory was created successfullly.
+#   0 - If destination directory was created successfullly.
 #   1 - Otherwise.
-create_installation_directory() {
+create_destination_directory() {
 
     local mkdir_result;
 
     # If installation directory does not exist.
-    if [ ! -d "${installation_directory}" ];
+    if [ ! -d "${system_destination_directory}" ];
     then
 
-        echo "Creating directory \"${installation_directory}\".";
+        echo "Creating directory \"${system_destination_directory}\".";
 
         # Creates the installation directory.
-        mkdir -p "${installation_directory}";
+        mkdir -p "${system_destination_directory}";
         mkdir_result=${?};
         if [ ${mkdir_result} -ne 0 ];
         then
@@ -102,9 +102,99 @@ create_installation_directory() {
             return 1;
         fi;
     else
-        echo "Directory \"${installation_directory}\" already exists.";
+        echo "Directory \"${system_destination_directory}\" already exists.";
     fi;
 
+    return 0;
+}
+
+# Builds the binaries required for the system.
+#
+# Parameters:
+#   None.
+#
+# Returns:
+#   0 - If binaries were built successfully.
+#   1 - Otherwise. 
+#
+build_binaries() {
+
+    local build_directory_path;
+    local build_output_directory_path;
+    local build_output_binaries_directory_path;
+    local mkdir_result;
+    local cp_result;
+    local build_script_execution_result;
+    local rm_result;
+
+    build_directory_path="${temporary_directory}/build/";
+    
+    build_output_directory_path="${temporary_directory}/output/";
+
+    # Creates the required directories to deploy the objects built.
+    mkdir -p "${build_output_directory_path}/objects/";
+    mkdir_result=${?};
+    if [ ${mkdir_result} -ne 0 ];
+    then
+        print_error_message "Error while creating temporary directory for built objects \"${build_output_directory_path}\": ${mkdir_result}";
+        return 1;
+    fi;
+
+    build_output_binaries_directory_path="${build_output_directory_path}/bin/"
+
+    mkdir -p "${build_output_binaries_directory_path}";
+    mkdir_result=${?};
+    if [ ${mkdir_result} -ne 0 ];
+    then
+        print_error_message "Error while creating temporary directory for build binaries \"${build_output_binaries_directory_path}\": ${mkdir_result}";
+        return 1;
+    fi;
+
+    # Copies the source files to the temporary build path.
+    cp "${source_directory_path}" "${build_directory_path}";
+    cp_result=${?};
+    if [ ${cp_result} -ne 0 ];
+    then
+        print_error_message "Error copying \"${source_directory_path}\" to \"${build_directory_path}\": ${cp_result}.";
+        return 1;
+    fi;
+
+    # Executes the build script.
+    ${build_script_path} release "${build_directory_path}" "${build_output_directory_path}";
+    build_script_execution_result=${?};
+    if [ ${build_script_execution_result} -ne 0 ];
+    then
+        print_error_message "Error while building the binaries for system installation: ${build_script_execution_result}";
+        return 1;
+    fi;
+
+    # Copy the binaries built to the "binaries" directory.
+    cp "${build_output_binaries_directory_path}" "${system_binaries_directory}";
+    cp_result=${?};
+    if [ ${cp_result} -ne 0 ];
+    then
+        print_error_message "Error while copying the binaries to destination directory. ${cp_result}";
+        return 1;
+    fi;
+
+    # Removes the build directories.
+    rm -rf "${build_directory_path}";
+    rm_result=${?};
+    if [ ${rm_result} -ne 0 ];
+    then
+        print_error_message "Error while removing the build directories. ${rm_result}";
+        return 1;
+    fi;
+
+    # Removes the output directories.
+    rm -rf "${build_output_directory_path}";
+    rm_result=${?};
+    if [ ${rm_result} -ne 0 ];
+    then
+        print_error_message "Error while removing the build output directories. ${rm_result}";
+        return 1;
+    fi;
+    
     return 0;
 }
 
@@ -119,21 +209,22 @@ create_installation_directory() {
 #
 install() {
 
-    local create_installation_directory_result;
+    local build_binaries_result;
+    local create_destination_directory_result;
     local copy_system_files_result;
     local create_additional_directories_result;
     local install_units_result;
-    
-    # Creates the installation directory.
-    create_installation_directory;
-    create_installation_directory_result=${?};
+
+    # Creates the system's destination directory.
+    create_destination_directory;
+    create_destination_directory_result=${?};
     if [ ${create_installation_directory_result} -ne 0 ];
     then
-        print_error_message "Error while creating installation directory.";
+        print_error_message "Error while creating destination directory.";
         return 1;
     fi;
 
-    # Copy system files to installation directory.
+    # Copy system files to destination directory.
     copy_system_files;
     copy_system_files_result=${?};
     if [ ${copy_system_files_result} -ne 0 ];
@@ -148,6 +239,15 @@ install() {
     if [ ${create_additional_directories_result} -ne 0 ];
     then
         print_error_message "Error creating additional directories on installation directory.";
+        return 1;
+    fi;
+
+    # Build the binaries required for system execution.
+    build_binaries;
+    build_binaries_result=${?};
+    if [ ${build_binaries_result} -ne 0 ];
+    then
+        print_error_message "Error while building the system binaries.";
         return 1;
     fi;
 

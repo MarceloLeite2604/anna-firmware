@@ -333,6 +333,15 @@ deploy_programs() {
         return 1;
     fi;
 
+    echo -e "Deploying build scripts to \"installation\" project subdivision.";
+    copy_directory "${subdivision_programs_directory_path}/build/scripts/" "${subdivision_installation_directory_path}scripts/build/"
+    copy_directory_result=${?};
+    if [ ${copy_directory_result} -ne 0 ];
+    then
+        print_error_message "Error while deploying build scripts to \"installation\" project subdivision.";
+        return 1;
+    fi;
+
     return 0;
 }
 

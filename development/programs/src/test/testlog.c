@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "../release/log/log.h"
+
+#include "log.h"
 
 /*
  * Definitions.

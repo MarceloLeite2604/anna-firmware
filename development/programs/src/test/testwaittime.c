@@ -8,9 +8,11 @@
 /*
  * Includes.
  */
+
 #include <stdio.h>
-#include "../release/log/log.h"
-#include "../release/general/wait_time/wait_time.h"
+
+#include "log.h"
+#include "wait_time.h"
 
 /*
  * Definitions.

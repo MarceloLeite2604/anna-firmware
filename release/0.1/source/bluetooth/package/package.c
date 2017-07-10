@@ -16,11 +16,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../general/random/random.h"
-#include "../../general/return_codes.h"
-#include "../../log/log.h"
-#include "package.h"
-#include "codes/codes.h"
+#include "bluetooth/package/package.h"
+#include "bluetooth/package/codes.h"
+#include "log.h"
+#include "random.h"
+#include "return_codes.h"
 
 
 /*

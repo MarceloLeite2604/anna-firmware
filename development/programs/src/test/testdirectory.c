@@ -9,10 +9,11 @@
  * Includes.
  */
 #include <stdio.h>
-#include <stdlib.h>
+/* #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include "../release/directory/directory.h"
+#include <sys/stat.h> */
+
+#include "directory.h"
 
 /*
  * Definitions.

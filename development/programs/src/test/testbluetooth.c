@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* #include <stdio.h>
 #include <unistd.h>
 #include <bluetooth/bluetooth.h>
 #include <sys/types.h>
@@ -11,12 +10,16 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
-#include <byteswap.h>
-#include "../release/bluetooth/bluetooth.h"
-#include "../release/log/log.h"
-#include "../release/bluetooth/package/package.h"
-#include "../release/bluetooth/package/codes/codes.h"
-#include "../release/general/error_messages/error_messages.h"
+#include <byteswap.h> */
+
+#include <stdlib.h>
+
+#include "log.h"
+#include "bluetooth/package/package.h"
+#include "bluetooth/package/codes.h"
+#include "bluetooth/service.h"
+#include "error_messages.h"
+#include "return_codes.h"
 
 #define ERROR_MESSAGE_SIZE 512
 
@@ -176,13 +179,6 @@ int register_service(bluetooth_service_infos_t bluetooth_service_infos)
 
 int main( int argc, char** argv){
 
-    bluetooth_service_infos_t bluetooth_service_infos;
-    struct timeval wait_connection_time;
-    int client_socket_id;
-    struct timeval read_content_time;
-    char* buffer;
-    int buffer_size = 1024;
-    int read_result;
     int counter;
 
     /*
@@ -224,7 +220,10 @@ int main( int argc, char** argv){
     /* byte_array = create_send_file_trailer_content_byte_array(content); */
     int conversion_result;
     conversion_result = convert_package_to_byte_array(&byte_array, package);
-
+    if ( conversion_result != SUCCESS ) {
+        LOG_ERROR("Error while converting package to byte array.");
+        return GENERIC_ERROR;
+    }
     
     for (counter = 0; counter < byte_array.size; counter++ ) {
         printf("%02x ", byte_array.data[counter]);
