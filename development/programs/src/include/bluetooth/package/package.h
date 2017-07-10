@@ -19,8 +19,8 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "../../general/byte_array/byte_array.h"
-#include "content/content.h"
+#include "byte_array.h"
+#include "bluetooth/package/content/content.h"
 
 
 /*

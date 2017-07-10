@@ -16,12 +16,12 @@
  * Includes.
  */
 
-#include "confirmation/confirmation.h"
-#include "command_result/command_result.h"
-#include "error/error.h"
-#include "send_file_chunk/send_file_chunk.h"
-#include "send_file_header/send_file_header.h"
-#include "send_file_trailer/send_file_trailer.h"
+#include "bluetooth/package/content/command_result.h"
+#include "bluetooth/package/content/confirmation.h"
+#include "bluetooth/package/content/error.h"
+#include "bluetooth/package/content/send_file_chunk.h"
+#include "bluetooth/package/content/send_file_header.h"
+#include "bluetooth/package/content/send_file_trailer.h"
 
 
 /*

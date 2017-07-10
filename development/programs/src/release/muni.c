@@ -17,15 +17,16 @@
 
 #include <stdlib.h>
 
-#include "audio/audio.h"
-#include "bluetooth/service/service.h"
-#include "bluetooth/communication/communication.h"
+#include "audio.h"
+#include "bluetooth/service.h"
+#include "bluetooth/communication.h"
+#include "bluetooth/connection.h"
+#include "bluetooth/package/codes.h"
 #include "bluetooth/package/package.h"
-#include "bluetooth/package/codes/codes.h"
-#include "general/parameters.h"
-#include "general/return_codes.h"
-#include "general/time/time.h"
-#include "log/log.h"
+#include "instant.h"
+#include "log.h"
+#include "parameters.h"
+#include "return_codes.h"
 
 
 /*
@@ -277,7 +278,7 @@ int check_arguments(int argc, char** argv) {
             }
 
             /* Checks the argument informed. */
-            check_argument_result = check_argument(argv[counter], argv[counter+1]);
+            check_argument_result = check_argument(argument, value);
             LOG_TRACE_POINT;
 
             if ( check_argument_result != SUCCESS ) {
@@ -866,7 +867,6 @@ int remote_device_communication_loop(int btc_socket_fd) {
     int receive_package_result;
     int check_command_received_result;
     int close_socket_result;
-    int check_connection_result;
     package_t package;
     bool device_connected = true;
     int error_counter = 0;

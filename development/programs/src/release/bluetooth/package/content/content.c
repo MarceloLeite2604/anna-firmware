@@ -14,9 +14,10 @@
 
 #include <stdlib.h>
 
-#include "bluetooth/package/codes/codes.h"
+#include "bluetooth/package/codes.h"
 #include "bluetooth/package/content/content.h"
-#include "general/return_codes.h"
+#include "log.h"
+#include "return_codes.h"
 
 
 /*
@@ -38,7 +39,6 @@
 int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, uint32_t package_type_code){
     LOG_TRACE("Byte array size: %zu, package type: 0x%x.", byte_array.size, package_type_code);
 
-    int result;
     int convertion_result;
     content_t temporary_content;
 
@@ -210,7 +210,7 @@ int delete_content(uint32_t package_type, content_t content){
         case REQUEST_AUDIO_FILE_CODE:
         case START_RECORD_CODE:
         case STOP_RECORD_CODE:
-            LOG_TRACE_POINT("This package type doesn't have a content.");
+            LOG_TRACE("This package type doesn't have a content.");
             break;
 
         case CONFIRMATION_CODE:
