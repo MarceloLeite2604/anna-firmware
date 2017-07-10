@@ -12,7 +12,7 @@
 #   Marcelo Leite
 
 # Names of the additional directories required to execute the system.
-readonly additional_directories_name="audio logs pids temporary";
+readonly additional_directories_name=(audio logs pids temporary);
 
 # Creates the additional directories required to execute the system.
 #
@@ -29,7 +29,7 @@ create_additional_directories() {
 
     if [ ${#} -ne 1 ];
     then
-        >&2 echo "Invalid parameters informed to create the additional directories.";
+        >&2 echo "[ERROR]: Invalid parameters informed to create the additional directories.";
         return 1;
     else
         base_directory="${1}";
@@ -49,14 +49,20 @@ create_additional_directories() {
     fi;
 
     # Creates each of the additional directories.
-    for directory_name in "${additional_directories_name}";
+    for directory_name in ${additional_directories_name[@]};
     do
-        mkdir ${base_directory}${directory_name};
-        mkdir_result=${?};
-        if [ ${mkdir_result} -ne 0 ];
+        directory_path="${base_directory}${directory_name}";
+        if [ ! -d "${directory_path}" ];
         then
-            >&2 echo "Error creating additional directory \"${directory_name}\" on \"${base_directory}\".";
-            return 1;
+            mkdir -p "${directory_path}";
+            mkdir_result=${?};
+            if [ ${mkdir_result} -ne 0 ];
+            then
+                >&2 echo "[ERROR]: Error creating directory \"${directory_path}\".";
+                return 1;
+            fi;
+        else
+            printf "Directory \"${directory_path}\" already exists.";
         fi;
     done;
 

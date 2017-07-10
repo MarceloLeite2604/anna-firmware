@@ -49,10 +49,10 @@ print_error_message() {
 
     local error_message;
 
-    if [ ${#} -gt 1 ];
+    if [ ${#} -ge 1 ];
     then
         error_message="${1}";
-        >&2 echo "${error_preffix}: ${error_message}";
+        >&2 echo "${error_preffix} ${error_message}";
     fi;
 
     return 0;

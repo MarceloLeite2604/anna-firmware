@@ -35,6 +35,12 @@ then
     readonly make_parameter_additional_compile_flags="ADDITIONAL_C_FLAGS_OBJECTS";
 fi;
 
+# Makefile parameter which defines the directory where the files should be created.
+if [ -z "${make_parameter_output_files_directory}" ];
+then
+    readonly make_parameter_output_files_directory="OUTPUT_FILES_DIRECTORY";
+fi;
+
 # Deafault path to source file's directory.
 if [ -z "${default_source_files_directory}" ];
 then

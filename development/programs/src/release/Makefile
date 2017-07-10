@@ -1,9 +1,8 @@
 # This Makefile creates an object for each "C" source file found on current directory.
 #
 # Parameters:
-#   TARGET - The target which is being built.
-#   ADDITIONAL_C_FLAGS_OBJECTS - Addicional flags to inform on compilator execution to create the objects. (Optional)
 #   OUTPUT_FILES_DIRECTORY - Path to the directory which the output files will be created.
+#   ADDITIONAL_C_FLAGS_OBJECTS - Addicional flags to inform on compilator execution to create the objects. (Optional)
 #
 # Observations: 
 #    When using the "OUTPUT_FILES_DIRECTORY" parameter, the path must be relative to this Makefile, otherwise the fila creation will fail.
@@ -15,8 +14,8 @@
 #   Marcelo Leite.
 
 # Check Makefile parameters.
-ifeq ($(TARGET),)
-$(error Parameter "TARGET" not informed)
+ifeq ($(OUTPUT_FILES_DIRECTORY),)
+$(error Parameter "OUTPUT_FILES_DIRECTORY" not informed)
 endif
 
 # Defines the compilator to use.

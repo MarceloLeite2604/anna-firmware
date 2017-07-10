@@ -31,7 +31,7 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 # ###
 
 # Path to the source files to build.
-source_files_directory=${default_source_files_directory}
+source_files_directory=${default_source_files_directory};
 
 
 # ###
@@ -55,6 +55,7 @@ build_programs() {
     local command_to_execute;
     local make_result;
 
+    set -x;
     # Checks function parameters.
     if [ ${#} -lt 2 ];
     then
@@ -74,6 +75,11 @@ build_programs() {
     # Builds the command to execute.
     command_to_execute="make -C ${makefile_directory} ${make_parameter_target}=${target}";
 
+    if [ -z "${output_files_directory}" ];
+    then
+        command_to_execute="${command_to_execute} ${makefile_output_files_directory}=${source_files_directory}";
+    fi;
+
     # If the third parameter was informed, add it to the command.
     if [ -z "${additional_compile_flags}" ];
     then
@@ -91,7 +97,7 @@ build_programs() {
         print_error_message "Error while buiding the programs.";
         return 1;
     fi;
-
+    set +x;
     return 0;
 }
 
@@ -151,6 +157,11 @@ build() {
         if [ ${#} -ge 2 ];
         then
             source_files_directory="${2}";
+        fi;
+
+        if [ ${#} -ge 3 ];
+        then
+            output_files_directory="${3}";
         fi;
     fi;
 

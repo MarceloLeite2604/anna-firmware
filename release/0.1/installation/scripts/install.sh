@@ -37,17 +37,15 @@ source "$(dirname ${BASH_SOURCE})/functions.sh";
 #   0 - If the additional directories were created successfully.
 #   1 - Otherwise.
 create_additional_directories(){
-
     local additional_directories_script_execution_result;
 
-    ${additional_directories_script_path}; 
+    ${additional_directories_script_path} "${system_destination_directory}"; 
     additional_directories_script_execution_result=${?};
     if [ ${additional_directories_script_execution_result} -ne 0 ];
     then
-        print_error_message "Error while creating additional directories on system directory: ${additional_directories_script_execution_result}";
+        print_error_message "Error while creating additional directories on \"${system_destination_directory}\": ${additional_directories_script_execution_result}.";
         return 1;
     fi;
-
     return 0;
 }
 
@@ -60,11 +58,10 @@ create_additional_directories(){
 #   0 - If system files' copy was executed successfully.
 #   1 - Otherwise.
 copy_system_files() {
-
     local copy_result;
 
     # Copies all directories on base directory exception the installation scripts directory.
-    l --hide=${installation_directory_name} | xargs cp -r "${system_destination_directory}";
+    ls --hide=${installation_directory_name} --hide=${source_directory_name} | xargs -I {} cp -r {} "${system_destination_directory}.";
     copy_result=${?};
     if [ ${copy_result} -ne 0 ];
     then
@@ -90,6 +87,12 @@ create_destination_directory() {
     # If installation directory does not exist.
     if [ ! -d "${system_destination_directory}" ];
     then
+
+        if [ ! -w "/opt" ];
+        then
+            print_error_message "User \"$(whoami)\" does not have permission to write on \"/opt\" directory.";
+            return 1;
+        fi;
 
         echo "Creating directory \"${system_destination_directory}\".";
 
@@ -120,38 +123,78 @@ create_destination_directory() {
 build_binaries() {
 
     local build_directory_path;
+    local build_release_directory_path;
     local build_output_directory_path;
+    local build_output_objects_directory_path;
     local build_output_binaries_directory_path;
     local mkdir_result;
     local cp_result;
     local build_script_execution_result;
     local rm_result;
 
-    build_directory_path="${temporary_directory}/build/";
-    
-    build_output_directory_path="${temporary_directory}/output/";
+    build_directory_path="${temporary_directory}build/";
 
-    # Creates the required directories to deploy the objects built.
-    mkdir -p "${build_output_directory_path}/objects/";
-    mkdir_result=${?};
-    if [ ${mkdir_result} -ne 0 ];
+    if [ ! -d "${build_directory_path}" ];
     then
-        print_error_message "Error while creating temporary directory for built objects \"${build_output_directory_path}\": ${mkdir_result}";
-        return 1;
+        mkdir -p "${build_directory_path}";
+        mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            print_error_message "Error while creating temporary directory \"${build_directory_path}\": ${mkdir_result}.";
+            return 1;
+        fi;
+    fi;
+
+    # build_release_directory_path="${build_directory_path}release/";
+    # if [ ! -d "${build_release_directory_path}" ];
+    # then
+    #     mkdir -p "${build_release_directory_path}";
+    #     mkdir_result=${?};
+    #     if [ ${mkdir_result} -ne 0 ];
+    #     then
+    #         print_error_message "Error while creating temporary directory \"${build_release_directory_path}\": ${mkdir_result}.";
+    #         return 1;
+    #     fi;
+    # fi;
+
+    build_output_directory_path="${temporary_directory}output/";
+    if [ ! -d "${build_output_directory_path}" ];
+    then
+        mkdir -p "${build_output_directory_path}";
+        mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            print_error_message "Error while creating temporary directory \"${build_output_directory_path}\": ${mkdir_result}.";
+            return 1;
+        fi;
+    fi;
+
+    build_output_objects_directory_path="${build_output_directory_path}objects/"
+    if [ ! -d "${build_output_objects_directory_path}" ];
+    then
+        mkdir -p "${build_output_objects_directory_path}";
+        mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            print_error_message "Error while creating temporary directory \"${build_output_objects_directory_path}\": ${mkdir_result}.";
+            return 1;
+        fi;
     fi;
 
     build_output_binaries_directory_path="${build_output_directory_path}/bin/"
-
-    mkdir -p "${build_output_binaries_directory_path}";
-    mkdir_result=${?};
-    if [ ${mkdir_result} -ne 0 ];
+    if [ ! -d "${build_output_binaries_directory_path}" ];
     then
-        print_error_message "Error while creating temporary directory for build binaries \"${build_output_binaries_directory_path}\": ${mkdir_result}";
-        return 1;
+        mkdir -p "${build_output_binaries_directory_path}";
+        mkdir_result=${?};
+        if [ ${mkdir_result} -ne 0 ];
+        then
+            print_error_message "Error while creating temporary directory \"${build_output_binaries_directory_path}\": ${mkdir_result}.";
+            return 1;
+        fi;
     fi;
 
     # Copies the source files to the temporary build path.
-    cp "${source_directory_path}" "${build_directory_path}";
+    cp -r "${source_directory_path}" "${build_directory_path}release";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
@@ -159,6 +202,7 @@ build_binaries() {
         return 1;
     fi;
 
+    set -x;
     # Executes the build script.
     ${build_script_path} release "${build_directory_path}" "${build_output_directory_path}";
     build_script_execution_result=${?};
@@ -194,7 +238,7 @@ build_binaries() {
         print_error_message "Error while removing the build output directories. ${rm_result}";
         return 1;
     fi;
-    
+    set +x;   
     return 0;
 }
 
@@ -218,7 +262,7 @@ install() {
     # Creates the system's destination directory.
     create_destination_directory;
     create_destination_directory_result=${?};
-    if [ ${create_installation_directory_result} -ne 0 ];
+    if [ ${create_destination_directory_result} -ne 0 ];
     then
         print_error_message "Error while creating destination directory.";
         return 1;
@@ -250,6 +294,8 @@ install() {
         print_error_message "Error while building the system binaries.";
         return 1;
     fi;
+
+    exit 0;
 
     # Installs the systemctl units required to run the system.
     install_units;

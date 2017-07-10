@@ -56,7 +56,7 @@ fi;
 # Path to base directory.
 if [ -z "${base_directory}" ];
 then
-    readonly base_directory="$(dirname ${BASH_SOURCE})/../";
+    readonly base_directory="$(dirname ${BASH_SOURCE})/../../";
 fi;
 
 # Name of the directory which contains the installation files on base directory.
@@ -74,7 +74,7 @@ fi;
 # Path to the installation scripts on base directory.
 if [ -z "${installation_scripts_directory_path}" ];
 then
-    readonly installation_scripts_directory_path="${installation_directory_path}/scripts/";
+    readonly installation_scripts_directory_path="${installation_directory_path}scripts/";
 fi;
 
 # Path to the script used to build the binaries.
@@ -104,7 +104,8 @@ fi;
 # Script to create the additional directories for system execution.
 if [ -z "${additional_directories_script_name}" ];
 then
-readonly additional_directories_script_name="create_directories.sh";
+    readonly additional_directories_script_name="create_directories.sh";
+fi;    
 
 # Path to the script which creates the additional directories for system execution on base directory.
 if [ -z "${additional_directories_script_path}" ];

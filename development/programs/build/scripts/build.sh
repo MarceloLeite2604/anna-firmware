@@ -5,6 +5,7 @@
 # Parameters:
 #   1. The type of build to be done ("debug", "release" or "all").
 #   2. The path to the source files to build (optional).
+#   3. The path to the output directory to build the files (optional).
 #
 # Returns:
 #   0 - If the programs were built successfully.
@@ -31,7 +32,7 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 # ###
 
 # Path to the source files to build.
-source_files_directory=${default_source_files_directory}
+source_files_directory=${default_source_files_directory};
 
 
 # ###
@@ -47,10 +48,20 @@ print_usage(){
     echo -e "\tall - Build all programs for debug and release.\n"
 }
 
+# Executes the makefile in a specified folder with the parameters informed.
+#
+# Parameters:
+#   1. The path to the directory where the makefile to be executed is.
+#   2. The output directory for binaries created by the makefile.
+#   3. The list of additional arguments to inform on the object creation (optional).
+#   
+# Returns:
+#   0 - If the programs were build successfully.
+#   1 - Otherwise.
+#
 build_programs() {
 
     local makefile_directory;
-    local build_target;
     local additional_compile_flags;
     local command_to_execute;
     local make_result;
@@ -63,7 +74,7 @@ build_programs() {
     else
 
         makefile_directory="${1}";
-        build_target="${2}";
+        output_directory="${2}";
 
         if [ ${#} -eq 3 ];
         then
@@ -72,10 +83,10 @@ build_programs() {
     fi;
 
     # Builds the command to execute.
-    command_to_execute="make -C ${makefile_directory} ${make_parameter_target}=${target}";
+    command_to_execute="make -C ${makefile_directory} ${make_parameter_output_files_directory}=${output_directory}";
 
     # If the third parameter was informed, add it to the command.
-    if [ -z "${additional_compile_flags}" ];
+    if [ -n "${additional_compile_flags}" ];
     then
         command_to_execute="${command_to_execute} ${make_parameter_additional_compile_flags}=${additional_compile_flags}";
     fi;
@@ -95,13 +106,34 @@ build_programs() {
     return 0;
 }
 
+# Builds the programs for release.
+#
+# Parameters:
+#   1. The path to the source files to build.
+#   2. The path to the output directory to build the files.
+#   
+# Returns:
+#   0 - If the programs were build successfully.
+#   1 - Otherwise.
+#
 build_release() {
-    echo -e "\nBuilding programs for release.";
+    echo -e "Building programs for release.";
 
-    local target="release";
+    local source_files_directory;
+    local output_files_directory;
     local build_programs_result;
 
-    build_programs "${source_files_directory}release/" "${target}";
+    # Checks function parameters.
+    if [ ${#} -lt 2 ];
+    then
+        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return 1;
+    else
+        source_files_directory="${1}";
+        output_files_directory="${2}";
+    fi;
+
+    build_programs "${source_files_directory}release/" "${output_files_directory}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
@@ -111,21 +143,45 @@ build_release() {
     return 0;
 }
 
+# Builds the programs for debug.
+#
+# Parameters:
+#   1. The path to the source files to build.
+#   2. The path to the output directory to build the files.
+#   
+# Returns:
+#   0 - If the programs were build successfully.
+#   1 - Otherwise.
+#
 build_debug() {
-    echo -e "\nBuilding programs for debug.";
 
-    local target="debug";
-    local additional_compile_flags="-g";
+    local source_files_directory;
+    local output_files_directory;
+    local additional_compile_flags;
     local build_programs_result;
 
-    build_programs "${source_files_directory}release/" "${target}" "${additional_compile_flags}";
+    # Checks function parameters.
+    if [ ${#} -lt 2 ];
+    then
+        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
+        return 1;
+    else
+        source_files_directory="${1}";
+        output_files_directory="${2}";
+    fi;
+
+    echo -e "Building programs for debug.";
+
+    additional_compile_flags="-g";
+
+    build_programs "${source_files_directory}release/" "${output_files_directory}release/" "${additional_compile_flags}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
         return 1;
     fi;
 
-    build_programs "${source_files_directory}test/" "${target}" "${additional_compile_flags}";
+    build_programs "${source_files_directory}test/" "${output_files_directory}test/" "${additional_compile_flags}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
@@ -135,10 +191,25 @@ build_debug() {
     return 0;
 }
 
+# Builds the programs.
+#
+# Parameters:
+#   1. The type of build to be done ("debug", "release" or "all").
+#   2. The path to the source files to build (optional).
+#   3. The path to the output directory to build the files (optional).
+#   
+# Returns:
+#   0 - If the programs were build successfully.
+#   1 - Otherwise.
+#
 build() {
 
     local build_type;
     local build_result;
+    local source_files_directory;
+    local output_files_directory;
+
+    set -x;
 
     # Checks function parameters.
     if [ ${#} -lt 1 ];
@@ -151,6 +222,15 @@ build() {
         if [ ${#} -ge 2 ];
         then
             source_files_directory="${2}";
+        else
+            source_files_directory="${default_source_files_directory}";
+        fi;
+
+        if [ ${#} -ge 3 ];
+        then
+            output_files_directory="${3}";
+        else
+            output_files_directory="${default_output_files_directory}";
         fi;
     fi;
 
@@ -163,7 +243,7 @@ build() {
 
     case "${build_type}" in
         "debug")
-            build_debug;
+            build_debug "${source_files_directory}" "${output_files_directory}";
             build_result=${?};
             if [ ${build_result} -ne 0 ];
             then
@@ -173,7 +253,7 @@ build() {
             ;;
 
         "release")
-            build_release;
+            build_release "${source_files_directory}" "${output_files_directory}";
             build_result=${?};
             if [ ${build_result} -ne 0 ];
             then
@@ -211,6 +291,7 @@ build() {
             ;;
     esac
 
+    set +x;
     return 0;
 }
 
