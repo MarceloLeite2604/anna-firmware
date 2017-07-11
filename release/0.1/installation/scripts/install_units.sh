@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script install all systemctl units required for project.
+# This script install all systemd units required for project.
 #
 # Parameters:
 #   None.
@@ -15,6 +15,13 @@
 # Author:
 #   Marcelo Leite
 #
+
+# ###
+# Script sources.
+# ###
+
+# Load functions.
+source "$(dirname ${BASH_SOURCE})/functions.sh";
 
 
 # ###
@@ -32,6 +39,8 @@
 #
 install_unit() {
 
+    local unit_file_path;
+    local unit_file_name;
     local cp_result;
     local file_name;
     local installed_unit_file_path;
@@ -39,27 +48,27 @@ install_unit() {
     local systemctl_reload_result;
     local systemctl_enable_result;
 
-        # Check function parameters.
+    # Check function parameters.
     if [ ${#} -ne 1 ];
     then
-        print_error_message "${error_preffix} Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
+        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
         return 1;
     else
-        unit_file_path="$(dirname "${BASH_SOURCE}")/${1}";
-        file_name=$(basename "${unit_file_path}");
+        unit_file_path="${1}";
+        unit_file_name=$(basename "${unit_file_path}");
     fi;
 
     # Checks if unit file path exists.
     if [ ! -f "${unit_file_path}" ];
     then
-        print_error_message "${error_preffix} Could not find unit file \"${unit_file_path}\".";
+        print_error_message "Could not find unit file \"${unit_file_path}\".";
         return 1;
     fi;
 
     # Checks if current user has write permission on unit directory.
     if [ ! -w "${unit_directory_path}" ];
     then
-        print_error_message "${error_preffix} User \"$(whoami)\" does not have permission to write on directory \"${unit_directory_path}\".";
+        print_error_message "User \"$(whoami)\" does not have permission to write on directory \"${unit_directory_path}\".";
         return 1;
     fi;
 
@@ -68,20 +77,18 @@ install_unit() {
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        print_error_message "${error_preffix} Error while copying \"${unit_file_path}\" to \"${unit_directory_path}\".";
-        print_error_message "${error_preffix} Returned code from command: ${cp_result}";
+        print_error_message "Error while copying \"${unit_file_path}\" to \"${unit_directory_path}\": ${cp_result}";
         return 1;
     fi;
 
-    installed_unit_file_path="${unit_directory_path}${file_name}";
+    installed_unit_file_path="${unit_directory_path}${unit_file_name}";
 
     # Changes file permission
     chmod 644 "${installed_unit_file_path}";
     chmod_result=${?};
     if [ ${chmod_result} -ne 0 ];
     then
-        print_error_message "${error_preffix} Error while changing file permissions on \"${installed_unit_file_path}\".";
-        print_error_message "${error_preffix} Returned code from command: ${chmod_result}";
+        print_error_message "Error while changing file permissions on \"${installed_unit_file_path}\": ${chmod_result}";
         return 1;
     fi;
 
@@ -90,18 +97,16 @@ install_unit() {
     systemctl_reload_result=${?};
     if [ ${systemctl_reload_result} -ne 0 ];
     then
-        print_error_message "${error_preffix} Error while reloading list of units on systemctl.";
-        print_error_message "${error_preffix} Returned code from command: ${systemctl_reload_result}";
+        print_error_message "Error while reloading list of units on systemctl: ${systemctl_reload_result}";
         return 1;
     fi;
 
     # Enables systemctl unit.
-    systemctl enable ${file_name};
+    systemctl enable ${unit_file_name};
     systemctl_enable_result=${?};
     if [ ${systemctl_enable_result} -ne 0 ];
     then
-        print_error_message "${error_preffix} Error while enabling unit \"${unit_name}\".";
-        print_error_message "${error_preffix} Returned code from command: ${systemctl_enable_result}";
+        print_error_message "Error while enabling unit \"${unit_name}\": ${systemctl_enable_result}.";
         return 1;
     fi;
 
@@ -117,6 +122,7 @@ install_unit() {
 #   0 - If unit file was created successfully.
 #   1 - Otherwise.
 #   It also returns the unit file path through "echo".
+#
 create_unit_file() {
 
     local unit_model_file_path;
@@ -134,28 +140,25 @@ create_unit_file() {
         return 1;
     else
         unit_model_file_path="${1}";
-    fi;
-
-    unit_file_name="$(basename ${unit_model_file_path})";
-    basename_result=${?};
-    if [ ${basename_result} -ne 0 -o -z "${unit_file_name}" ];
-        print_error_message "Error while retrieving the file name of unit model file \"${unit_model_file_path}\": ${basename_result}.";
-        return 1;
+        unit_file_name="$(basename ${unit_model_file_path})";
     fi;
 
     # Copies the unit model to a temporary directory.
-    cp "${unit_model_file_path}" "${temporary_directory}.";
+    cp "${unit_model_file_path}" "${temporary_unit_files_directory_path}";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        print_error_message "Error while copying unit model file to temporary directory \"${temporary_directory}\": ${cp_result}.";
+        print_error_message "Error while copying unit model file to temporary directory \"${temporary_unit_files_directory_path}\": ${cp_result}.";
         return 1;
     fi;
 
-    temporary_unit_file_path="${temporary_directory}${unit_file_name}";
+    temporary_unit_file_path="${temporary_unit_files_directory_path}${unit_file_name}";
+
+    # On the "service scripts directory path" variable, precedes the forward slashes with backward slashed (escape character to "sed" command).
+    replace_string="${service_scripts_directory_path//\//\\/}";
 
     # Replaces the "system service scripts directory" term by its value.
-    sed -i \'s/${system_service_scripts_directory_term}/${system_service_scripts_directory}/g\' ${temporary_unit_file_path};
+    sed -i -e "s/${service_scripts_directory_path_term}/${replace_string}/g" ${temporary_unit_file_path};
     sed_result=${?};
     if [ ${sed_result} -ne 0 ];
     then
@@ -213,9 +216,6 @@ request_installation() {
     then
         print_error_message "Error while installing \"${unit_model_file_name}\" unit.";
         return 1;
-    else
-        echo "Unit \"${unit_model_file_name}\" installed successfuly.";
-        return 0;
     fi;
 
     # Removes the temporary unit file.
@@ -230,25 +230,69 @@ request_installation() {
     return 0; 
 }
 
-# Install the scripts required to execute the system services.
+# Installs systemd unit files.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If the scripts were instaled successfully.
+#   0 - If unit files were installed successfully.
 #   1 - Otherwise.
-install_system_services_scripts() {
+#
+install_unit_files() {
 
+    echo -e "Installing systemd unit files.";
+
+    # Request the installtion of each unit model informed.
+    for unit_model_file_path in ${unit_models_to_install[@]};
+    do
+        echo "Installing unit model \"$(basename ${unit_model_file_path})\".";
+
+        request_installation "${unit_model_file_path}";
+        request_installation_result=${?};
+        if [ ${request_installation_result} -ne 0 ];
+        then
+            print_error_message "Error while installing unit model \"$(basename ${unit_model_file_path})\".";
+            return 1;
+        fi;
+    done;
+
+    return 0;
+}
+
+# Installs scripts executed by systemd units.
+#
+# Parameters:
+#   None.
+#
+# Returns:
+#   0 - If the scripts were installed successfully.
+#   1 - Otherwise.
+#
+install_unit_scripts() {
+
+    local mkdir_result;
     local cp_result;
 
-    for script_path in "${system_services_scripts}";
+    echo -e "Instaling scripts required for systemd units execution.";
+
+    mkdir -p "${service_scripts_directory_path}";
+    mkdir_result=${?};
+    if [ ${mkdir_result} -ne 0 ];
+    then
+        print_error_message "Error while creating the directory to store system scripts \"${service_scripts_directory_path}\".";
+        return 1;
+    fi;
+
+    for script_to_install in ${system_services_scripts[@]};
     do
-        cp "${script_path}" "${system_service_scripts_directory}"
+        echo "Installing script \"$(basename ${script_to_install})\".";
+
+        cp "${script_to_install}" "${service_scripts_directory_path}";
         cp_result=${?};
         if [ ${cp_result} -ne 0 ];
         then
-            print_error_message "Error while copying system service script \"${script_path}\" to \"${system_service_scripts_directory}\": ${cp_result}";
+            print_error_message "Error while copying script \"${script_to_install}\" to \"${service_scripts_directory_path}\".";
             return 1;
         fi;
     done;
@@ -267,29 +311,25 @@ install_system_services_scripts() {
 #
 install_units() {
 
-    local request_installation_result;
     local install_unit_scripts_result;
+    local request_installation_result;
 
-    # Request the installtion of each unit model informed.
-    for unit_model_file_path in "${unit_models_to_install}";
-    do
-        echo "Installing unit model \"${unit_model_file_path}\".";
-
-        request_installation "${unit_model_file_path}";
-        request_installation_result=${?};
-        if [ ${request_installation_result} -ne 0 ];
-        then
-            print_error_message "Error while installing unit model \"${unit_model_file_path}\".";
-            return 1;
-        fi;
-    done;
-
-    # Install the scripts required for systemctl unit executions.
+    # Installs the scripts required for systemctl unit executions.
     install_unit_scripts;
     install_unit_scripts_result=${?};
     if [ ${install_unit_scripts_result} -ne 0 ];
     then
         print_error_message "Error while installing scripts required to execute system services.";
+        return 1;
+    fi;
+
+
+    # Installs unit files.
+    install_unit_files;
+    install_unit_files_result=${?};
+    if [ ${install_unit_files_result} -ne 0 ];
+    then
+        print_error_message "Error while installing systemd units.";
         return 1;
     fi;
 

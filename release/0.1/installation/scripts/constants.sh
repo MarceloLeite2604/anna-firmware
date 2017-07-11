@@ -53,6 +53,36 @@ then
     readonly temporary_directory="/tmp/${company_name}/${system_name}/";
 fi;
 
+# Path to the temporary build directory.
+if [ -z "${temporary_build_directory_path}" ];
+then
+    readonly temporary_build_directory_path="${temporary_directory}build/";
+fi;
+
+# Path to the temporary build output directory.
+if [ -z "${temporary_build_output_directory_path}" ];
+then
+    readonly temporary_build_output_directory_path="${temporary_build_directory_path}output/";
+fi;
+
+# Path to the temporary binaries output directory.
+if [ -z "${temporary_binaries_output_directory_path}" ];
+then
+    readonly temporary_binaries_output_directory_path="${temporary_build_output_directory_path}bin/";
+fi;
+
+# Path to the temporary objects output directory.
+if [ -z "${temporary_objects_output_directory_path}" ];
+then
+    readonly temporary_objects_output_directory_path="${temporary_build_output_directory_path}objects/";
+fi;
+
+# Path to the temporary unit files directory.
+if [ -z "${temporary_unit_files_directory_path}" ];
+then
+    readonly temporary_unit_files_directory_path="${temporary_directory}units/";
+fi;
+
 # Path to base directory.
 if [ -z "${base_directory}" ];
 then
@@ -105,7 +135,19 @@ fi;
 if [ -z "${additional_directories_script_name}" ];
 then
     readonly additional_directories_script_name="create_directories.sh";
-fi;    
+fi;
+
+# Script to install systemd units.
+if [ -z "${install_systemd_units_script_name}" ];
+then
+    readonly install_systemd_units_script_name="install_units.sh";
+fi;
+
+# Path to the script which installs system units.
+if [ -z "${install_systemd_units_script_path}" ];
+then
+    readonly install_systemd_units_script_path="${installation_scripts_directory_path}${install_systemd_units_script_name}";
+fi;
 
 # Path to the script which creates the additional directories for system execution on base directory.
 if [ -z "${additional_directories_script_path}" ];
@@ -126,32 +168,38 @@ then
 fi;
 
 # The directory which the system stores scripts used on system services.
-if [ -z "${system_service_scripts_directory}" ];
+if [ -z "${service_scripts_directory_path}" ];
 then
-    readonly system_service_scripts_directory="${system_destination_directory}${scripts_directory_name}system/";
+    readonly service_scripts_directory_path="${system_destination_directory}${scripts_directory_name}system/";
 fi;
 
 # The directory which the system stores its programs.
 if [ -z "${system_binaries_directory}" ];
 then
-    readonly system_binaries_directory="${system_destination_directory}bin/"
+    readonly system_binaries_directory="${system_destination_directory}bin/";
 fi;
 
 # Term used to identify teh location which the system service scripts directory path must be inserted on sysctl unit model files.
-if [ -z "${system_service_scripts_directory_term}" ];
+if [ -z "${service_scripts_directory_path_term}" ];
 then
-    readonly system_service_scripts_directory_term="<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>";
+    readonly service_scripts_directory_path_term="<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>";
+fi;
+
+# Path to the directory which stores the files required to install systemd units.
+if [ -z "${unit_files_directory_path}" ];
+then
+    readonly unit_files_directory_path="${installation_directory_path}units/";
 fi;
 
 # Scripts required to execute system services.
 if [ -z "${system_services_scripts}" ];
 then
-    readonly system_services_scripts="../units/bluetooth/pairing/scripts/bluetoothctl-commands.sh ../units/bluetooth/pairing/scripts/bluetooth-pairing.sh"
+    readonly system_services_scripts=("${unit_files_directory_path}bluetooth/pairing/scripts/bluetoothctl-commands.sh" "${unit_files_directory_path}bluetooth/pairing/scripts/bluetooth-pairing.sh");
 fi;
 
 # Unit models to request installation.
 if [ -z "${unit_models_to_install}" ];
 then
-    readonly unit_models_to_install="../units/bluetooth/var-run-sdp/unit_models/var-run-sdp.path ../units/bluetooth/var-run-sdp/unit_models/var-run-sdp.service ../units/bluetooth/pairing/unit_models/bluetooth-pairing.service"
+    readonly unit_models_to_install=("${unit_files_directory_path}bluetooth/var-run-sdp/unit_models/var-run-sdp.path" "${unit_files_directory_path}bluetooth/var-run-sdp/unit_models/var-run-sdp.service" "${unit_files_directory_path}bluetooth/pairing/unit_models/bluetooth-pairing.service");
 fi;
 

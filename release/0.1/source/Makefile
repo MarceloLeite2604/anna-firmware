@@ -1,9 +1,8 @@
 # This Makefile creates an object for each "C" source file found on current directory.
 #
 # Parameters:
-#   TARGET - The target which is being built.
-#   ADDITIONAL_C_FLAGS_OBJECTS - Addicional flags to inform on compilator execution to create the objects. (Optional)
 #   OUTPUT_FILES_DIRECTORY - Path to the directory which the output files will be created.
+#   ADDITIONAL_C_FLAGS_OBJECTS - Addicional flags to inform on compilator execution to create the objects. (Optional)
 #
 # Observations: 
 #    When using the "OUTPUT_FILES_DIRECTORY" parameter, the path must be relative to this Makefile, otherwise the fila creation will fail.
@@ -15,8 +14,8 @@
 #   Marcelo Leite.
 
 # Check Makefile parameters.
-ifeq ($(TARGET),)
-$(error Parameter "TARGET" not informed)
+ifeq ($(OUTPUT_FILES_DIRECTORY),)
+$(error Parameter "OUTPUT_FILES_DIRECTORY" not informed)
 endif
 
 # Defines the compilator to use.
@@ -38,6 +37,7 @@ output_files_directory=../../build/$(TARGET)/
 else
 output_files_directory=$(OUTPUT_FILES_DIRECTORY)
 endif
+output_files_directory := $(realpath $(output_files_directory))/
 
 # Path to the root directory where the header files are stored.
 include_files_directory=include/
@@ -61,7 +61,8 @@ binaries_directory=$(output_files_directory)bin/
 cflags_objects=$(CFLAGS) $(ADDITIONAL_C_FLAGS_OBJECTS)
 
 # Parameter to inform when executing makefiles on subdirectories.
-parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(output_files_directory)
+# parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(output_files_directory)
+parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=$(output_files_directory)
 parameters_make_subdirectories += INCLUDE_FILES_DIRECTORY=../$(include_files_directory)
 parameters_make_subdirectories += ADDITIONAL_C_FLAGS_OBJECTS=$(ADDITIONAL_C_FLAGS_OBJECTS)
 

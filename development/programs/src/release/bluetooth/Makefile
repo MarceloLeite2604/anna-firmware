@@ -48,7 +48,8 @@ endif
 cflags_objects=$(CFLAGS) $(ADDITIONAL_C_FLAGS_OBJECTS)
 
 # Parameter to inform when executing makefiles on subdirectories.
-parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
+# parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(OUTPUT_FILES_DIRECTORY)
+parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=$(OUTPUT_FILES_DIRECTORY)
 parameters_make_subdirectories += INCLUDE_FILES_DIRECTORY=../$(INCLUDE_FILES_DIRECTORY)
 parameters_make_subdirectories += ADDITIONAL_C_FLAGS_OBJECTS=$(ADDITIONAL_C_FLAGS_OBJECTS)
 

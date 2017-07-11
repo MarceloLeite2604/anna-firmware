@@ -52,3 +52,9 @@ if [ -z "${default_source_files_directory}" ];
 then
     readonly default_source_files_directory="$(dirname ${BASH_SOURCE})/../../src/";
 fi;
+
+# Default target to execute on makefiles.
+if [ -z "${default_makefile_target}" ];
+then
+    readonly default_makefile_target="all";
+fi;

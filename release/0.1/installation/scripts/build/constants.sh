@@ -24,10 +24,10 @@ fi;
 # ###
 
 # Makefile parameter which defines the target to build.
-if [ -z "${make_parameter_target}" ];
-then
-    readonly make_parameter_target="TARGET";
-fi;
+# if [ -z "${make_parameter_target}" ];
+# then
+#     readonly make_parameter_target="TARGET";
+# fi;
 
 # Makefile parameter which defines the additional flags to build objects.
 if [ -z "${make_parameter_additional_compile_flags}" ];
@@ -41,8 +41,20 @@ then
     readonly make_parameter_output_files_directory="OUTPUT_FILES_DIRECTORY";
 fi;
 
-# Deafault path to source file's directory.
+# Default directory to output the files created.
+if [ -z "${default_output_files_directory}" ];
+then
+    readonly default_output_files_directory="../../build/";
+fi;
+
+# Default path to source file's directory.
 if [ -z "${default_source_files_directory}" ];
 then
     readonly default_source_files_directory="$(dirname ${BASH_SOURCE})/../../src/";
+fi;
+
+# Default target to execute on makefiles.
+if [ -z "${default_makefile_target}" ];
+then
+    readonly default_makefile_target="all";
 fi;

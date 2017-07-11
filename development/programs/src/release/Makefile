@@ -37,6 +37,7 @@ output_files_directory=../../build/$(TARGET)/
 else
 output_files_directory=$(OUTPUT_FILES_DIRECTORY)
 endif
+output_files_directory := $(realpath $(output_files_directory))/
 
 # Path to the root directory where the header files are stored.
 include_files_directory=include/
@@ -60,7 +61,8 @@ binaries_directory=$(output_files_directory)bin/
 cflags_objects=$(CFLAGS) $(ADDITIONAL_C_FLAGS_OBJECTS)
 
 # Parameter to inform when executing makefiles on subdirectories.
-parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(output_files_directory)
+# parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=../$(output_files_directory)
+parameters_make_subdirectories = OUTPUT_FILES_DIRECTORY=$(output_files_directory)
 parameters_make_subdirectories += INCLUDE_FILES_DIRECTORY=../$(include_files_directory)
 parameters_make_subdirectories += ADDITIONAL_C_FLAGS_OBJECTS=$(ADDITIONAL_C_FLAGS_OBJECTS)
 

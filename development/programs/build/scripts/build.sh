@@ -6,6 +6,7 @@
 #   1. The type of build to be done ("debug", "release" or "all").
 #   2. The path to the source files to build (optional).
 #   3. The path to the output directory to build the files (optional).
+#   4. The target to run on makefile script (optional).
 #
 # Returns:
 #   0 - If the programs were built successfully.
@@ -42,10 +43,12 @@ source_files_directory=${default_source_files_directory};
 print_usage(){
     echo -e "Use this script to build the programs of this project.\n"
     echo -e "Usage:"
-    echo -e "\t$(basename ${0}) {debug, release, all}\n"
-    echo -e "\tdebug - Builds all programs for debug."
-    echo -e "\trelease - Builds all programs for release."
-    echo -e "\tall - Build all programs for debug and release.\n"
+    echo -e "\t$(basename ${0}) {type} [target] [{source path} {output path}]\n"
+    echo -e "\tWhere:";
+    echo -e "\t\ttype - Type of build to execute. It can be \"debug\", \"release\" or \"all\".";
+    echo -e "\t\ttarget - Target to execute on makefile (p. ex. \"all\").";
+    echo -e "\t\tsource path - Path to the directory which the source files to compile are."
+    echo -e "\t\toutput path - Path to directory where the binaries will be created.\n"
 }
 
 # Executes the makefile in a specified folder with the parameters informed.
@@ -53,7 +56,8 @@ print_usage(){
 # Parameters:
 #   1. The path to the directory where the makefile to be executed is.
 #   2. The output directory for binaries created by the makefile.
-#   3. The list of additional arguments to inform on the object creation (optional).
+#   3. The target to run on makefile script.
+#   4. The list of additional arguments to inform on the object creation (optional).
 #   
 # Returns:
 #   0 - If the programs were build successfully.
@@ -67,7 +71,7 @@ build_programs() {
     local make_result;
 
     # Checks function parameters.
-    if [ ${#} -lt 2 ];
+    if [ ${#} -lt 3 ];
     then
         print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return 1;
@@ -75,10 +79,11 @@ build_programs() {
 
         makefile_directory="${1}";
         output_directory="${2}";
+        makefile_target="${3}";
 
-        if [ ${#} -eq 3 ];
+        if [ ${#} -ge 4 ];
         then
-            additional_compile_flags="${3}";
+            additional_compile_flags="${4}";
         fi;
     fi;
 
@@ -92,7 +97,7 @@ build_programs() {
     fi;
 
     # Concatenate the target to execute.
-    command_to_execute="${command_to_execute} all";
+    command_to_execute="${command_to_execute} ${makefile_target}";
 
     # Executes the command.
     ${command_to_execute};
@@ -111,6 +116,7 @@ build_programs() {
 # Parameters:
 #   1. The path to the source files to build.
 #   2. The path to the output directory to build the files.
+#   3. The target to run on makefile script.
 #   
 # Returns:
 #   0 - If the programs were build successfully.
@@ -121,6 +127,7 @@ build_release() {
 
     local source_files_directory;
     local output_files_directory;
+    local makefile_target;
     local build_programs_result;
 
     # Checks function parameters.
@@ -131,9 +138,10 @@ build_release() {
     else
         source_files_directory="${1}";
         output_files_directory="${2}";
+        makefile_target="${3}";
     fi;
 
-    build_programs "${source_files_directory}release/" "${output_files_directory}";
+    build_programs "${source_files_directory}release/" "${output_files_directory}" "${makefile_target}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
@@ -148,6 +156,7 @@ build_release() {
 # Parameters:
 #   1. The path to the source files to build.
 #   2. The path to the output directory to build the files.
+#   3. The target to run on makefile script.
 #   
 # Returns:
 #   0 - If the programs were build successfully.
@@ -157,31 +166,33 @@ build_debug() {
 
     local source_files_directory;
     local output_files_directory;
+    local makefile_target;
     local additional_compile_flags;
     local build_programs_result;
 
     # Checks function parameters.
-    if [ ${#} -lt 2 ];
+    if [ ${#} -lt 3 ];
     then
         print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return 1;
     else
         source_files_directory="${1}";
         output_files_directory="${2}";
+        makefile_target="${3}";
     fi;
 
     echo -e "Building programs for debug.";
 
     additional_compile_flags="-g";
 
-    build_programs "${source_files_directory}release/" "${output_files_directory}release/" "${additional_compile_flags}";
+    build_programs "${source_files_directory}release/" "${output_files_directory}" "${makefile_target}" "${additional_compile_flags}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
         return 1;
     fi;
 
-    build_programs "${source_files_directory}test/" "${output_files_directory}test/" "${additional_compile_flags}";
+    build_programs "${source_files_directory}test/" "${output_files_directory}" "${makefile_target}" "${additional_compile_flags}";
     build_programs_result=${?};
     if [ ${build_programs_result} -ne 0 ];
     then
@@ -197,6 +208,7 @@ build_debug() {
 #   1. The type of build to be done ("debug", "release" or "all").
 #   2. The path to the source files to build (optional).
 #   3. The path to the output directory to build the files (optional).
+#   4. The target to run on makefile script (optional).
 #   
 # Returns:
 #   0 - If the programs were build successfully.
@@ -208,42 +220,40 @@ build() {
     local build_result;
     local source_files_directory;
     local output_files_directory;
+    local makefile_target;
 
-    set -x;
-
-    # Checks function parameters.
-    if [ ${#} -lt 1 ];
-    then
-        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
-        return 1;
-    else
-        build_type="${1}";
-
-        if [ ${#} -ge 2 ];
-        then
-            source_files_directory="${2}";
-        else
-            source_files_directory="${default_source_files_directory}";
-        fi;
-
-        if [ ${#} -ge 3 ];
-        then
-            output_files_directory="${3}";
-        else
-            output_files_directory="${default_output_files_directory}";
-        fi;
-    fi;
-
-    if [ -z "${build_type}" ];
+    if [ ${#} -ne 1 -a ${#} -ne 2 -a ${#} -ne 4 ];
     then
         print_usage;
-        >&2 echo "ERROR: Build type not informed.";
+        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\".";
         return 1;
+    fi;
+
+    build_type="${1}";
+
+    # Checks function parameters.
+    if [ ${#} -ge 2 ];
+    then
+        makefile_target="${2}";
+
+        if [ ${#} -eq 4 ];
+        then
+            source_files_directory="${3}";
+            output_files_directory="${4}";
+        else
+            source_files_directory="${default_source_files_directory}";
+            output_files_directory="${default_output_files_directory}${build_type}/";
+        fi;
+
+    else
+        makefile_target="${default_makefile_target}";
+        source_files_directory="${default_source_files_directory}";
+        output_files_directory="${default_output_files_directory}${build_type}/";
     fi;
 
     case "${build_type}" in
         "debug")
-            build_debug "${source_files_directory}" "${output_files_directory}";
+            build_debug "${source_files_directory}" "${output_files_directory}" "${makefile_target}";
             build_result=${?};
             if [ ${build_result} -ne 0 ];
             then
@@ -253,7 +263,7 @@ build() {
             ;;
 
         "release")
-            build_release "${source_files_directory}" "${output_files_directory}";
+            build_release "${source_files_directory}" "${output_files_directory}" "${makefile_target}";
             build_result=${?};
             if [ ${build_result} -ne 0 ];
             then
@@ -290,8 +300,7 @@ build() {
             return 1;
             ;;
     esac
-
-    set +x;
+set +x;
     return 0;
 }
 
