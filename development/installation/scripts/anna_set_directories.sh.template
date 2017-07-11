@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This script sets the variables used by Anna to retrieve the location of input and output files.
+#
+# Version: 
+#   0.1
+#
+# Author: 
+#   Marcelo Leite
+#
+
+export ANNA_INPUT_DIRECTORY="<ANNA_INPUT_DIRECTORY_VALUE>";
+export ANNA_OUTPUT_DIRECTORY="<ANNA_OUTPUT_DIRECTORY_VALUE>";

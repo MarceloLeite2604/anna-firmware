@@ -850,7 +850,7 @@ _log_store_log_level() {
     # Stores current log level on "log level" file.
     echo -e "${_log_level}" > ${_log_level_file_path};
     echo_result=${?};
-    if [ ${echo_result} -eq ${success} ];
+    if [ ${echo_result} -ne ${success} ];
     then
         return ${generic_error};
     fi;

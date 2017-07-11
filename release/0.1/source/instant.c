@@ -132,7 +132,7 @@ char* format_instant_to_sort_files(instant_t instant) {
     char* result;
 
     result = malloc((TIME_STRING_FILE_LENGTH + 1)*sizeof(char));
-    strftime(result, TIME_STRING_FILE_LENGTH + 1, "%d%m%Y_%H%M%S", &instant.date);
+    strftime(result, TIME_STRING_FILE_LENGTH + 1, "%Y%m%d_%H%M%S", &instant.date);
 
     LOG_TRACE_POINT;
     return result;

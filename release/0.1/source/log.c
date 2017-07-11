@@ -433,6 +433,7 @@ char* get_log_directory() {
         LOG_TRACE_POINT;
     }
 
+
     LOG_TRACE_POINT;
     return log_directory;
 }
@@ -543,7 +544,11 @@ int initialize_log_directory() {
 bool is_log_open() {
     LOG_TRACE_POINT;
 
-    return ( log_file == NULL );
+    if ( log_file == NULL ) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /*

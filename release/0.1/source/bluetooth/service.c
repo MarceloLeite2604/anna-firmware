@@ -206,7 +206,11 @@ int check_connection_attempt(int* socket_fd) {
 bool is_bluetooth_service_registered(){
     LOG_TRACE_POINT;
 
-    return ( sdp_connect_session == NULL );
+    if ( sdp_connect_session == NULL ) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /*

@@ -1,4 +1,4 @@
-n#!/bin/bash
+#!/bin/bash
 
 # This script installs all files required to execute Anna.
 #
@@ -53,6 +53,51 @@ create_additional_directories(){
     return 0;
 }
 
+# Defines the location of input files, output files and binaries on destination.
+#
+# Parameters:
+#   None.
+#
+# Returns:
+#   0 - If locations were defined successfully.
+#   1 - Otherwise.
+#
+define_file_locations() {
+
+    local echo_result;
+
+    echo "Defining locations for input files, output files and binaries.";
+
+    echo ${scripts_input_location_file_path};
+    echo "../../" > ${scripts_input_location_file_path};
+    echo_result=${?};
+    if [ ${echo_result} -ne 0 ];
+    then
+        print_error_message "Error while defining location for input files for scripts: ${echo_result}.";
+        return 1;
+    fi;
+
+    echo ${scripts_output_location_file_path};
+    echo "../../" > ${scripts_output_location_file_path};
+    echo_result=${?};
+    if [ ${echo_result} -ne 0 ];
+    then
+        print_error_message "Error while defining location for output files for scripts: ${echo_result}.";
+        return 1;
+    fi;
+
+    echo ${scripts_output_location_file_path};
+    echo "../../bin/" > ${scripts_binaries_location_file_path};
+    echo_result=${?};
+    if [ ${echo_result} -ne 0 ];
+    then
+        print_error_message "Error while defining location for binaries for scripts: ${echo_result}.";
+        return 1;
+    fi;
+
+    return 0;
+}
+
 # Copy system files to installation directory.
 #
 # Parameters:
@@ -68,8 +113,8 @@ copy_system_files() {
     echo "Copying system files to destination directory.";
 
     # Copies all directories on base directory exception the installation scripts directory.
-    set -x;
-    ls --hide=${installation_directory_name} --hide=${source_directory_name} | xargs -I {} cp -r {} "${system_destination_directory}.";
+    # Observation: Removes the forward slash on directories' names so "ls" command hide it when listing.
+    ls --hide=${installation_directory_name/\//} --hide=${source_directory_name/\//} | xargs -I {} cp -r {} "${system_destination_directory}.";
     copy_result=${?};
     if [ ${copy_result} -ne 0 ];
     then
@@ -133,7 +178,7 @@ create_destination_directory() {
 create_temporary_directories() {
 
     local mkdir_result;
-    local temporary_directories_array=(${temporary_directory} ${temporary_build_directory_path} ${temporary_build_output_directory} ${temporary_binaries_output_directory_path} ${temporary_objects_output_directory_path} ${temporary_unit_files_directory_path});
+    local temporary_directories_array=(${temporary_directory} ${temporary_build_directory_path} ${temporary_build_output_directory} ${temporary_binaries_output_directory_path} ${temporary_objects_output_directory_path} ${temporary_unit_files_directory_path} ${temporary_script_files_directory_path});
 
     echo -e "Creating temporary directories.";
 
@@ -147,7 +192,7 @@ create_temporary_directories() {
             mkdir_result=${?};
             if [ ${mkdir_result} -ne 0 ];
             then
-                print_error_message "Error while creating temporary directory \"${directory_to_createi}\": ${mkdir_result}.";
+                print_error_message "Error while creating temporary directory \"${directory_to_create}\": ${mkdir_result}.";
                 return 1;
             fi;
         else
@@ -184,6 +229,52 @@ remove_temporary_directories() {
     return 0;
 }
 
+# Installs the script which defined the system variables.
+#
+# Parameters:
+#   None.
+#
+# Returns:
+#   0 - If the script was installed successfully.
+#   1 - Otherwise.
+install_variables_script() {
+
+    local sudo_check_result;
+    local command_line;
+    local install_system_variables_script_execution_result;
+
+    echo -e "Installing system variables script.";
+
+    # If user is not root.
+    if [ $(whoami) != "root" ];
+    then
+
+        # Check if user is a superuser.
+        sudo_check_result=$(sudo -l -U $(whoami) | grep "not allowed" | wc -l);
+        if [ ${sudo_check_result} -eq 1 ];
+        then
+            print_error_message "System variables script installation requires a user with superuser privileges. User \"$(whoami)\" is not a superuser.";
+            print_error_message "Cancelling installation.";
+            return 1;
+        fi;
+
+        echo -e "System variables script installation will require superuser privileges. If prompted, please inform password for user \"$(whoami)\" or hit [CTRL+C] to abort installation.";
+        command_line="sudo -A ";
+    fi;
+
+    command_line="${command_line} ${install_system_variables_script_path}";
+
+    ${command_line};
+    install_system_variables_script_execution_result=${?};
+    if [ ${install_system_variables_script_execution_result} -ne 0 ];
+    then
+        print_error_message "Error while executing script to install system variables script.";
+        return 1;
+    fi;
+
+    return 0;
+}
+
 # Installs the systemd units
 #
 # Parameters:
@@ -197,7 +288,7 @@ install_systemd_units() {
 
     local sudo_check_result;
     local command_line;
-    local install_systemd_units_script_exeution_result;
+    local install_systemd_units_script_execution_result;
 
     echo -e "Installing systemd units.";
 
@@ -209,12 +300,12 @@ install_systemd_units() {
         sudo_check_result=$(sudo -l -U $(whoami) | grep "not allowed" | wc -l);
         if [ ${sudo_check_result} -eq 1 ];
         then
-            print_error_message "System services installation requires a user with superuser privileges. Used \"$(whoami)\" is not a superuser.";
+            print_error_message "System services installation requires a user with superuser privileges. User \"$(whoami)\" is not a superuser.";
             print_error_message "Cancelling installation.";
             return 1;
         fi;
 
-        echo -e "System services installation will require superuser privileges. If prompted, please inform password for used \"$(whoami)\" or hit [CTRL+C] to abort installation.";
+        echo -e "System services installation will require superuser privileges. If prompted, please inform password for user \"$(whoami)\" or hit [CTRL+C] to abort installation.";
         command_line="sudo -A ";
     fi;
 
@@ -297,6 +388,8 @@ install() {
     local create_additional_directories_result;
     local install_systemd_units_result;
     local remove_temporary_directories_result;
+    local define_file_locations_result;
+    local install_variables_script_result;
 
     # Creates the system's destination directory.
     create_destination_directory;
@@ -322,6 +415,15 @@ install() {
     if [ ${create_additional_directories_result} -ne 0 ];
     then
         print_error_message "Error creating additional directories on installation directory.";
+        return 1;
+    fi;
+
+    # Defines the input, output and binary directories on installation.
+    define_file_locations;
+    define_file_locations_result=${?};
+    if [ ${define_file_locations_result} -ne 0 ];
+    then
+        print_error_message "Error while defining directory files.";
         return 1;
     fi;
 
@@ -352,7 +454,14 @@ install() {
         return 1;
     fi;
 
-    exit 0;
+    # Installs the script which defines the system variables.
+    install_variables_script;
+    install_variables_script_result=${?};
+    if [ ${install_variables_script_result} -ne 0 ];
+    then
+        print_error_message "Error while installing system variables script.";
+        return 1;
+    fi;
 
     # Removes the temporary directories.
     remove_temporary_directories;

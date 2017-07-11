@@ -5,6 +5,6 @@
 # Version: 0.1
 # Author: Marcelo Leite
 
-export INPUT_DIRECTORY="$(dirname ${BASH_SOURCE})/../../resources/";
-export OUTPUT_DIRECTORY="${INPUT_DIRECTORY}";
+export ANNA_INPUT_DIRECTORY="$(dirname ${BASH_SOURCE})/../../../resources/";
+export ANNA_OUTPUT_DIRECTORY="${ANNA_INPUT_DIRECTORY}";
 

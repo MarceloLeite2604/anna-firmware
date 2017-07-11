@@ -28,10 +28,10 @@
 #define DEFAULT_INPUT_OUTPUT_DIRECTORY "./"
 
 /* Name of the environment variable which contains the input directory location. */
-#define INPUT_DIRECTORY_VARIABLE_NAME "INPUT_DIRECTORY"
+#define INPUT_DIRECTORY_VARIABLE_NAME "ANNA_INPUT_DIRECTORY"
 
 /* Name of the environment variable which contains the output directory location. */
-#define OUTPUT_DIRECTORY_VARIABLE_NAME "OUTPUT_DIRECTORY"
+#define OUTPUT_DIRECTORY_VARIABLE_NAME "ANNA_OUTPUT_DIRECTORY"
 
 
 /*

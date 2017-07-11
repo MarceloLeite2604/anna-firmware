@@ -47,6 +47,7 @@ install_unit() {
     local chmod_result;
     local systemctl_reload_result;
     local systemctl_enable_result;
+    local systemctl_start_result;
 
     # Check function parameters.
     if [ ${#} -ne 1 ];
@@ -107,6 +108,15 @@ install_unit() {
     if [ ${systemctl_enable_result} -ne 0 ];
     then
         print_error_message "Error while enabling unit \"${unit_name}\": ${systemctl_enable_result}.";
+        return 1;
+    fi;
+
+    # Starts systemctl unit.
+    systemctl start ${unit_file_name};
+    systemctl_start_result=${?};
+    if [ ${systemctl_start_result} -ne 0 ];
+    then
+        print_error_message "Error while starting unit \"${unit_name}\": ${systemctl_start_result}.";
         return 1;
     fi;
 

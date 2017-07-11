@@ -83,6 +83,12 @@ then
     readonly temporary_unit_files_directory_path="${temporary_directory}units/";
 fi;
 
+# Path to the temporary script files directory.
+if [ -z "${temporary_script_files_directory_path}" ];
+then
+    readonly temporary_script_files_directory_path="${temporary_directory}scripts/";
+fi;
+
 # Path to base directory.
 if [ -z "${base_directory}" ];
 then
@@ -149,10 +155,58 @@ then
     readonly install_systemd_units_script_path="${installation_scripts_directory_path}${install_systemd_units_script_name}";
 fi;
 
+# Script to install system variables script.
+if [ -z "${install_system_variables_script_name}" ];
+then
+    readonly install_system_variables_script_name="install_variables_script.sh";
+fi;
+
+# Path to the script which installs the variable scripts.
+if [ -z "${install_system_variables_script_path}" ];
+then
+    readonly install_system_variables_script_path="${installation_scripts_directory_path}${install_system_variables_script_name}";
+fi;
+
 # Path to the script which creates the additional directories for system execution on base directory.
 if [ -z "${additional_directories_script_path}" ];
 then
     readonly additional_directories_script_path="${system_destination_directory}${scripts_directory_name}${additional_directories_script_name}";
+fi;
+
+# Name of the file which defines the input file's location for scripts.
+if [ -z "${scripts_input_location_file_name}" ];
+then
+    readonly scripts_input_location_file_name="input_directory";
+fi;
+
+# Path of the file which defines the input file's location for scripts.
+if [ -z "${scripts_input_location_file_path}" ];
+then
+    readonly scripts_input_location_file_path="${system_destination_directory}${scripts_directory_name}directories/${scripts_input_location_file_name}";
+fi;
+
+# Name of the file which defines the output file's location for scripts.
+if [ -z "${scripts_output_location_file_name}" ];
+then
+    readonly scripts_output_location_file_name="output_directory";
+fi;
+
+# Path of the file which defines the output file's location for scripts.
+if [ -z "${scripts_output_location_file_path}" ];
+then
+    readonly scripts_output_location_file_path="${system_destination_directory}${scripts_directory_name}directories/${scripts_output_location_file_name}";
+fi;
+
+# Name of the file which defines the location of binaries for scripts.
+if [ -z "${scripts_binaries_location_file_name}" ];
+then
+    readonly scripts_binaries_location_file_name="binaries_directory";
+fi;
+
+# Path of the file which defines the location of binaries for scripts.
+if [ -z "${scripts_binaries_location_file_path}" ];
+then
+    readonly scripts_binaries_location_file_path="${system_destination_directory}${scripts_directory_name}directories/${scripts_binaries_location_file_name}";
 fi;
 
 # Preffix to show an error message.
@@ -167,10 +221,46 @@ then
     readonly unit_directory_path="/etc/systemd/system/";
 fi;
 
+# Path to deploy the script which defines the required variables for system execution.
+if [ -z "${script_deploy_directory_path}" ];
+then
+    readonly script_deploy_directory_path="/etc/profile.d/";
+fi;
+
 # The directory which the system stores scripts used on system services.
 if [ -z "${service_scripts_directory_path}" ];
 then
     readonly service_scripts_directory_path="${system_destination_directory}${scripts_directory_name}system/";
+fi;
+
+# Final name of the script used to define the required variables for system execution.
+if [ -z "${variables_script_name}" ];
+then
+    variables_script_name="anna_set_directories.sh";
+fi;
+
+# Path to the deployed variables script.
+if [ -z "${deployed_variables_script_path}" ];
+then
+    deployed_variables_script_path="${script_deploy_directory_path}${variables_script_name}";
+fi;
+
+# Name of the script template used to define the required variables for system execution.
+if [ -z "${variables_script_template_name}" ];
+then
+    variables_script_template_name="${variables_script_name}.template";
+fi;
+
+# Path to the script which defines the variables on the temporary folder.
+if [ -z "${temporary_variables_script_path}" ];
+then
+    temporary_variables_script_path="${temporary_script_files_directory_path}${variables_script_name}";
+fi;
+
+# Path to the script template used to define the required variables for system execution.
+if [ -z "${variables_script_template_path}" ];
+then
+    variables_script_template_path="${installation_scripts_directory_path}${variables_script_template_name}";
 fi;
 
 # The directory which the system stores its programs.
@@ -203,3 +293,14 @@ then
     readonly unit_models_to_install=("${unit_files_directory_path}bluetooth/var-run-sdp/unit_models/var-run-sdp.path" "${unit_files_directory_path}bluetooth/var-run-sdp/unit_models/var-run-sdp.service" "${unit_files_directory_path}bluetooth/pairing/unit_models/bluetooth-pairing.service");
 fi;
 
+# Term used to identify the value location for variable which identifies the input files root directory on script used to define the projects variables.
+if [ -z "${input_files_location_value_term}" ];
+then
+    readonly input_files_location_value_term="<ANNA_INPUT_DIRECTORY_VALUE>";
+fi;
+
+# Term used to identify the value location for variable which identifies the output files root directory on script used to define the projects variables.
+if [ -z "${output_files_location_value_term}" ];
+then
+    readonly output_files_location_value_term="<ANNA_OUTPUT_DIRECTORY_VALUE>";
+fi;
