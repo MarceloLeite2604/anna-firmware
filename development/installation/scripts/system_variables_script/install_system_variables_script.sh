@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This script installs the script which defines the system variables required for Anna to execute.
+# This script installs the script which defines the system variables required for the system to execute.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If the script was deployed successfully.
+#   0 - If the system variables' script was installed successfully.
 #   1 - Otherwise.
 #
 # Version:
@@ -20,8 +20,8 @@
 # Script sources.
 # ###
 
-# Load functions.
-source "$(dirname ${BASH_SOURCE})/functions.sh";
+# Load installation generic functions.
+source "$(dirname ${BASH_SOURCE})/../generic/functions.sh";
 
 
 # ###
@@ -116,26 +116,26 @@ copy_script_template() {
 
     local cp_result;
 
-    echo -e "Copying script template to temporary directory.";
+    echo -e "Copying system variables' script template to temporary directory.";
 
-    cp "${variables_script_template_path}" "${temporary_variables_script_path}";
+    cp "${system_variables_script_template_path}" "${temporary_system_variables_script_path}";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        print_error_message "Error while copying template script \"${variables_script_template_path}\" to \"${temporary_variables_script_path}\": ${cp_result}.";
+        print_error_message "Error while copying template script \"${system_variables_script_template_path}\" to \"${temporary_system_variables_script_path}\": ${cp_result}.";
         return 1;
     fi;
 
     return 0;
 }
 
-# Installs the script which defined the system variables required for Anna to execute.
+# Installs the script which defines the system variables required for the system to execute.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If the script was deployed successfully.
+#   0 - If the system variables' script was installed successfully.
 #   1 - Otherwise.
 #
 install_variables_script() {
@@ -145,9 +145,9 @@ install_variables_script() {
     local deploy_script_result;
 
     # Checks if current user has permission to write on deploy directory.
-    if [ ! -w "${script_deploy_directory_path}" ];
+    if [ ! -w "${variables_script_deploy_directory_path}" ];
     then
-        print_error_message "User \"$(whoami)\" does not have permission to write on directory \"${script_deploy_directory_path}\".";
+        print_error_message "User \"$(whoami)\" does not have permission to write on directory \"${variables_script_deploy_directory_path}\".";
         return 1;
     fi;
 
@@ -163,7 +163,7 @@ install_variables_script() {
     replace_terms_on_script_result=${?};
     if [ ${replace_terms_on_script_result} -ne 0 ];
     then
-        print_error_message "Error while replacing terms on variables script.";
+        print_error_message "Error while replacing terms on system variables' script.";
         return 1;
     fi;
 
@@ -171,12 +171,12 @@ install_variables_script() {
     deploy_script_result=${?};
     if [ ${deploy_script_result} -ne 0 ];
     then
-        print_error_message "Error while deploying variables script.";
+        print_error_message "Error while deploying system variables' script.";
         return 1;
     fi;
 
     return 0;
 }
 
-install_variables_script ${@};
+install_system_variables_script ${@};
 exit ${?};
