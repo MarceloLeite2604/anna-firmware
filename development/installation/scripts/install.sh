@@ -30,8 +30,11 @@ fi;
 # Script sources.
 # ###
 
-# Load geeneric functions.
-source "$(dirname ${BASH_SOURCE})/generic/constants.sh";
+# Load generic functions.
+source "$(dirname ${BASH_SOURCE})/generic/functions.sh";
+
+# Load installation constants.
+source "$(dirname ${BASH_SOURCE})/constants.sh";
 
 
 # ###
@@ -74,35 +77,35 @@ create_additional_directories(){
 #   0 - If locations were defined successfully.
 #   1 - Otherwise.
 #
-define_file_locations() {
+    define_file_locations() {
 
-    local echo_result;
-    local location;
+        local echo_result;
+        local location;
 
-    echo "Defining locations for input and output files and binaries.";
+        echo "Defining locations for input and output files and binaries.";
 
-    # echo ${scripts_input_location_file_path};
-    
-    location="../../";
-    
-    echo "${location}" > ${destination_file_name_location_input_files_script_path};
-    echo_result=${?};
-    if [ ${echo_result} -ne 0 ];
-    then
-        print_error_message "Error while defining input_files' location for scripts: ${echo_result}.";
-        return 1;
-    fi;
+        # echo ${scripts_input_location_file_path};
+        
+        location="../../";
+        
+        echo "${location}" > ${destination_file_name_location_input_files_script_path};
+        echo_result=${?};
+        if [ ${echo_result} -ne 0 ];
+        then
+            print_error_message "Error while defining input_files' location for scripts: ${echo_result}.";
+            return 1;
+        fi;
 
-    echo ${location} > ${destination_file_name_location_output_files_script_path};
-    echo_result=${?};
-    if [ ${echo_result} -ne 0 ];
-    then
-        print_error_message "Error while defining output files' location for scripts: ${echo_result}.";
-        return 1;
-    fi;
+        echo ${location} > ${destination_file_name_location_output_files_script_path};
+        echo_result=${?};
+        if [ ${echo_result} -ne 0 ];
+        then
+            print_error_message "Error while defining output files' location for scripts: ${echo_result}.";
+            return 1;
+        fi;
 
-    echo "${location}/bin/" > ${destination_file_name_location_binaries_script_path};
-    echo_result=${?};
+        echo "${location}bin/" > ${destination_file_name_location_binaries_script_path};
+        echo_result=${?};
     if [ ${echo_result} -ne 0 ];
     then
         print_error_message "Error while defining binaries' location for scripts: ${echo_result}.";
@@ -245,7 +248,7 @@ remove_temporary_directories() {
     return 0;
 }
 
-# Installs the script which defined the system variables.
+# Installs the script which defines the system variables.
 #
 # Parameters:
 #   None.
@@ -253,7 +256,8 @@ remove_temporary_directories() {
 # Returns:
 #   0 - If the script was installed successfully.
 #   1 - Otherwise.
-install_variables_script() {
+#
+install_system_variables_script() {
 
     local install_system_variables_script_execution_result;
 
@@ -270,7 +274,7 @@ install_variables_script() {
     return 0;
 }
 
-# Installs the system services
+# Creates the system services
 #
 # Parameters:
 #   None.
@@ -279,17 +283,17 @@ install_variables_script() {
 #   0 - If system services were installed successfully.
 #   1 - Otherwise.
 #
-install_system_services() {
+create_system_services() {
 
-    local install_system_services_script_execution_result;
+    local create_system_services_script_execution_result;
 
-    echo -e "Installing system services.";
+    echo -e "Creating system services.";
     
-    execute_command_as_superuser "${command_line}";
-    install_system_services_script_execution_result=${?};
-    if [ ${install_systemd_units_script_execution_result} -ne 0 ];
+    execute_command_as_superuser "${base_installation_create_services_script_path}";
+    create_system_services_script_execution_result=${?};
+    if [ ${create_system_services_script_execution_result} -ne 0 ];
     then
-        print_error_message "Error while executing script to install system services.";
+        print_error_message "Error while executing script to create system services.";
         return 1;
     fi;
 
@@ -360,7 +364,7 @@ install() {
     local define_file_locations_result;
     local create_temporary_directories_result;
     local build_binaries_result;
-    local install_system_services_result;
+    local create_system_services_result;
     local install_system_variables_script;
     local remove_temporary_directories_result;
     
@@ -411,31 +415,32 @@ install() {
     fi;
 
     # Build the binaries required for system execution.
-    build_binaries;
-    build_binaries_result=${?};
-    if [ ${build_binaries_result} -ne 0 ];
-    then
-        print_error_message "Error while building the system binaries.";
-        return 1;
-    fi;
+    # build_binaries;
+    # build_binaries_result=${?};
+    # if [ ${build_binaries_result} -ne 0 ];
+    # then
+    #     print_error_message "Error while building the system binaries.";
+    #     return 1;
+    # fi;
 
-    # Installs the system services.
-    install_system_services;
-    install_system_services_result=${?};
-    if [ ${install_system_services_result} -ne 0 ];
+    # Creates the system services.
+    create_system_services;
+    create_system_services_result=${?};
+    if [ ${create_system_services_result} -ne 0 ];
     then
-        print_error_message "Error while installing systemd units to system execution.";
+        print_error_message "Error while creating the system services.";
         return 1;
     fi;
 
     # Installs the script which defines the system variables.
     install_system_variables_script;
     install_system_variables_script_result=${?};
-    if [ ${install_variables_script_result} -ne 0 ];
+    if [ ${install_system_variables_script_result} -ne 0 ];
     then
         print_error_message "Error while installing system variables script.";
         return 1;
     fi;
+    exit 0;
 
     # Removes the temporary directories.
     remove_temporary_directories;

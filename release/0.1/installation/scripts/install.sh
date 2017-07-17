@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This script installs all files required to execute Anna.
+# This script installs the system.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If units were installed successfully.
+#   0 - If the system was installed successfully.
 #   1 - Otherwise.
 #
 # Version:
@@ -17,18 +17,31 @@
 #
 
 # ###
-# Source scripts.
+# Include guard.
+# ###
+if [ -z "${INSTALL_SH}" ]
+then
+    INSTALL_SH=1;
+else
+    return;
+fi;
+
+# ###
+# Script sources.
 # ###
 
-# Load functions.
-source "$(dirname ${BASH_SOURCE})/functions.sh";
+# Load generic functions.
+source "$(dirname ${BASH_SOURCE})/generic/functions.sh";
+
+# Load installation constants.
+source "$(dirname ${BASH_SOURCE})/constants.sh";
 
 
 # ###
 # Function elaborations.
 # ###
 
-# Creates the additional directories on installation directory.
+# Creates on destination directory the additional directories required for system execution.
 #
 # Parameters:
 #   None.
@@ -38,22 +51,24 @@ source "$(dirname ${BASH_SOURCE})/functions.sh";
 #   1 - Otherwise.
 #
 create_additional_directories(){
-    local additional_directories_script_execution_result;
+
+    local create_additional_directories_script_result;
 
     echo -e "Creating additional directories on destination directory.";
 
-    ${additional_directories_script_path} "${system_destination_directory}"; 
-    additional_directories_script_execution_result=${?};
-    if [ ${additional_directories_script_execution_result} -ne 0 ];
+    # Executes the script which creates the additional directories required to execute the system.
+    ${destination_create_additional_directories_script_path} "${destination_directory_path}"; 
+    create_additional_directories_script_result=${?};
+    if [ ${create_additional_directories_script_result} -ne 0 ];
     then
-        print_error_message "Error while creating additional directories on \"${system_destination_directory}\": ${additional_directories_script_execution_result}.";
+        print_error_message "Error while executing the script which creates the additional system directories on \"${destination_directory_path}\": ${create_additional_directories_script_result}.";
         return 1;
     fi;
 
     return 0;
 }
 
-# Defines the location of input files, output files and binaries on destination.
+# Defines the input, output and binary directories on destination directory.
 #
 # Parameters:
 #   None.
@@ -62,66 +77,68 @@ create_additional_directories(){
 #   0 - If locations were defined successfully.
 #   1 - Otherwise.
 #
-define_file_locations() {
+    define_file_locations() {
 
-    local echo_result;
+        local echo_result;
+        local location;
 
-    echo "Defining locations for input files, output files and binaries.";
+        echo "Defining locations for input and output files and binaries.";
 
-    echo ${scripts_input_location_file_path};
-    echo "../../" > ${scripts_input_location_file_path};
-    echo_result=${?};
+        # echo ${scripts_input_location_file_path};
+        
+        location="../../";
+        
+        echo "${location}" > ${destination_file_name_location_input_files_script_path};
+        echo_result=${?};
+        if [ ${echo_result} -ne 0 ];
+        then
+            print_error_message "Error while defining input_files' location for scripts: ${echo_result}.";
+            return 1;
+        fi;
+
+        echo ${location} > ${destination_file_name_location_output_files_script_path};
+        echo_result=${?};
+        if [ ${echo_result} -ne 0 ];
+        then
+            print_error_message "Error while defining output files' location for scripts: ${echo_result}.";
+            return 1;
+        fi;
+
+        echo "${location}bin/" > ${destination_file_name_location_binaries_script_path};
+        echo_result=${?};
     if [ ${echo_result} -ne 0 ];
     then
-        print_error_message "Error while defining location for input files for scripts: ${echo_result}.";
-        return 1;
-    fi;
-
-    echo ${scripts_output_location_file_path};
-    echo "../../" > ${scripts_output_location_file_path};
-    echo_result=${?};
-    if [ ${echo_result} -ne 0 ];
-    then
-        print_error_message "Error while defining location for output files for scripts: ${echo_result}.";
-        return 1;
-    fi;
-
-    echo ${scripts_output_location_file_path};
-    echo "../../bin/" > ${scripts_binaries_location_file_path};
-    echo_result=${?};
-    if [ ${echo_result} -ne 0 ];
-    then
-        print_error_message "Error while defining location for binaries for scripts: ${echo_result}.";
+        print_error_message "Error while defining binaries' location for scripts: ${echo_result}.";
         return 1;
     fi;
 
     return 0;
 }
 
-# Copy system files to installation directory.
+# Copies the system files to destination directory.
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If system files' copy was executed successfully.
+#   0 - If system files were copied successfully.
 #   1 - Otherwise.
 #
 copy_system_files() {
+
     local copy_result;
 
     echo "Copying system files to destination directory.";
 
-    # Copies all directories on base directory exception the installation scripts directory.
-    # Observation: Removes the forward slash on directories' names so "ls" command hide it when listing.
-    ls --hide=${installation_directory_name/\//} --hide=${source_directory_name/\//} | xargs -I {} cp -r {} "${system_destination_directory}.";
+    # Copies all directories on base directory except the installation scripts and source files' directory.
+    # Observation: Removes the forward slash on directories' names so "ls" command hide them when listing.
+    ls --hide=${installation_directory_name/\//} --hide=${source_directory_name/\//} | xargs -I {} cp -r {} "${destination_directory_path}.";
     copy_result=${?};
     if [ ${copy_result} -ne 0 ];
     then
-        print_error_message "Error copying base directories to destination directory: ${copy_result}";
+        print_error_message "Error copying base directories to destination directory: ${copy_result}.";
         return 1;
     fi;
-    set +x;
 
     return 0;
 }
@@ -132,35 +149,36 @@ copy_system_files() {
 #   None.
 #
 # Returns:
-#   0 - If destination directory was created successfullly.
+#   0 - If system's destination directory was created successfullly.
 #   1 - Otherwise.
 #
 create_destination_directory() {
 
     local mkdir_result;
 
-    # If installation directory does not exist.
-    if [ ! -d "${system_destination_directory}" ];
+    # If system's destination directory does not exist.
+    if [ ! -d "${destination_directory_path}" ];
     then
 
+         # If user does not have the privilege to write on "/opt" directory.
         if [ ! -w "/opt" ];
         then
             print_error_message "User \"$(whoami)\" does not have permission to write on \"/opt\" directory.";
             return 1;
         fi;
 
-        echo "Creating directory \"${system_destination_directory}\".";
+        echo "Creating directory \"${destination_directory_path}\".";
 
         # Creates the installation directory.
-        mkdir -p "${system_destination_directory}";
+        mkdir -p "${destination_directory_path}";
         mkdir_result=${?};
         if [ ${mkdir_result} -ne 0 ];
         then
-            print_error_message "\"mkdir\" command returned value ${mkdir_result}.";
+            print_error_message "Error creating directory \"${destination_directory_path}\": ${mkdir_result}.";
             return 1;
         fi;
     else
-        echo "Directory \"${system_destination_directory}\" already exists.";
+        echo "Directory \"${destination_directory_path}\" already exists.";
     fi;
 
     return 0;
@@ -178,12 +196,13 @@ create_destination_directory() {
 create_temporary_directories() {
 
     local mkdir_result;
-    local temporary_directories_array=(${temporary_directory} ${temporary_build_directory_path} ${temporary_build_output_directory} ${temporary_binaries_output_directory_path} ${temporary_objects_output_directory_path} ${temporary_unit_files_directory_path} ${temporary_script_files_directory_path});
-
+    
     echo -e "Creating temporary directories.";
 
-    for directory_to_create in ${temporary_directories_array[@]};
+    for directory_to_create in ${temporary_directories[@]};
     do
+    
+        # If directory to create does not exist.
         if [ ! -d "${directory_to_create}" ];
         then
             echo -e "Creating temporary directory \"${directory_to_create}\".";
@@ -199,7 +218,7 @@ create_temporary_directories() {
             echo -e "Directory \"${directory_to_create}\" already exists.";
         fi;
     done;
-
+    
     return 0;
 }
 
@@ -222,14 +241,14 @@ remove_temporary_directories() {
     rm_result=${?};
     if [ ${rm_result} -ne 0 ];
     then
-        print_error_message "Error while removing temporary directory \"${temporary_directory}\". ${rm_result}";
+        print_error_message "Error while removing temporary directory \"${temporary_directory}\": ${rm_result}.";
         return 1;
     fi;
 
     return 0;
 }
 
-# Installs the script which defined the system variables.
+# Installs the script which defines the system variables.
 #
 # Parameters:
 #   None.
@@ -237,36 +256,16 @@ remove_temporary_directories() {
 # Returns:
 #   0 - If the script was installed successfully.
 #   1 - Otherwise.
-install_variables_script() {
+#
+install_system_variables_script() {
 
-    local sudo_check_result;
-    local command_line;
     local install_system_variables_script_execution_result;
 
     echo -e "Installing system variables script.";
 
-    # If user is not root.
-    if [ $(whoami) != "root" ];
-    then
-
-        # Check if user is a superuser.
-        sudo_check_result=$(sudo -l -U $(whoami) | grep "not allowed" | wc -l);
-        if [ ${sudo_check_result} -eq 1 ];
-        then
-            print_error_message "System variables script installation requires a user with superuser privileges. User \"$(whoami)\" is not a superuser.";
-            print_error_message "Cancelling installation.";
-            return 1;
-        fi;
-
-        echo -e "System variables script installation will require superuser privileges. If prompted, please inform password for user \"$(whoami)\" or hit [CTRL+C] to abort installation.";
-        command_line="sudo -A ";
-    fi;
-
-    command_line="${command_line} ${install_system_variables_script_path}";
-
-    ${command_line};
+    execute_command_as_superuser "${base_installation_install_system_variables_script_path}";
     install_system_variables_script_execution_result=${?};
-    if [ ${install_system_variables_script_execution_result} -ne 0 ];
+   if [ ${install_system_variables_script_execution_result} -ne 0 ];
     then
         print_error_message "Error while executing script to install system variables script.";
         return 1;
@@ -275,47 +274,26 @@ install_variables_script() {
     return 0;
 }
 
-# Installs the systemd units
+# Creates the system services
 #
 # Parameters:
 #   None.
 #
 # Returns:
-#   0 - If systemd units were installed successfully.
-#   1 - If there was an error installing systemd units.
+#   0 - If system services were installed successfully.
+#   1 - Otherwise.
 #
-install_systemd_units() {
+create_system_services() {
 
-    local sudo_check_result;
-    local command_line;
-    local install_systemd_units_script_execution_result;
+    local create_system_services_script_execution_result;
 
-    echo -e "Installing systemd units.";
-
-    # If user is not root.
-    if [ $(whoami) != "root" ];
+    echo -e "Creating system services.";
+    
+    execute_command_as_superuser "${base_installation_create_services_script_path}";
+    create_system_services_script_execution_result=${?};
+    if [ ${create_system_services_script_execution_result} -ne 0 ];
     then
-
-        # Check if user is a superuser.
-        sudo_check_result=$(sudo -l -U $(whoami) | grep "not allowed" | wc -l);
-        if [ ${sudo_check_result} -eq 1 ];
-        then
-            print_error_message "System services installation requires a user with superuser privileges. User \"$(whoami)\" is not a superuser.";
-            print_error_message "Cancelling installation.";
-            return 1;
-        fi;
-
-        echo -e "System services installation will require superuser privileges. If prompted, please inform password for user \"$(whoami)\" or hit [CTRL+C] to abort installation.";
-        command_line="sudo -A ";
-    fi;
-
-    command_line="${command_line} ${install_systemd_units_script_path}";
-
-    ${command_line};
-    install_systemd_units_script_execution_result=${?};
-    if [ ${install_systemd_units_script_execution_result} -ne 0 ];
-    then
-        print_error_message "Error while executing script to install systemd units.";
+        print_error_message "Error while executing script to create system services.";
         return 1;
     fi;
 
@@ -340,32 +318,31 @@ build_binaries() {
     echo -e "Building system binaries.";
 
     # Copies the source files to the temporary build path.
-    cp -r "${source_directory_path}" "${temporary_build_directory_path}release";
+    cp -r "${base_source_directory_path}" "${temporary_source_directory_path}";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        print_error_message "Error copying \"${source_directory_path}\" to \"${temporary_build_directory_path}\": ${cp_result}.";
+        print_error_message "Error copying \"${base_source_directory_path}\" to \"${temporary_source_directory_path}\": ${cp_result}.";
         return 1;
     fi;
 
     # Executes the build script.
-    ${build_script_path} release all "${temporary_build_directory_path}" "${temporary_build_output_directory_path}";
+    ${base_installation_build_script_path} release all "${temporary_build_directory_path}" "${temporary_build_output_directory_path}";
     build_script_execution_result=${?};
     if [ ${build_script_execution_result} -ne 0 ];
     then
-        print_error_message "Error while building the binaries for system installation: ${build_script_execution_result}";
+        print_error_message "Error while building the binaries for system installation: ${build_script_execution_result}.";
         return 1;
     fi;
 
-    # Copy the binaries built to the destination's binaries directory.
-    cp -r "${temporary_binaries_output_directory_path}" "${system_binaries_directory}";
+    # Copies the binaries built to the destination directory.
+    cp -r "${temporary_binaries_output_directory_path}" "${destination_binaries_directory_path}";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        print_error_message "Error while copying the binaries to destination directory. ${cp_result}";
+        print_error_message "Error while copying the built binaries to destination directory: ${cp_result}.";
         return 1;
     fi;
-
 
     return 0;
 }
@@ -381,44 +358,45 @@ build_binaries() {
 #
 install() {
 
-    local build_binaries_result;
     local create_destination_directory_result;
-    local create_temporary_directories_result;
     local copy_system_files_result;
     local create_additional_directories_result;
-    local install_systemd_units_result;
-    local remove_temporary_directories_result;
     local define_file_locations_result;
-    local install_variables_script_result;
+    local create_temporary_directories_result;
+    local build_binaries_result;
+    local create_system_services_result;
+    local install_system_variables_script;
+    local remove_temporary_directories_result;
+    
 
     # Creates the system's destination directory.
     create_destination_directory;
     create_destination_directory_result=${?};
     if [ ${create_destination_directory_result} -ne 0 ];
     then
-        print_error_message "Error while creating destination directory.";
+        print_error_message "Error while creating system's destination directory.";
         return 1;
     fi;
 
-    # Copy system files to destination directory.
+    # Copies the system files to destination directory.
     copy_system_files;
     copy_system_files_result=${?};
     if [ ${copy_system_files_result} -ne 0 ];
     then
-        print_error_message "Error while copying system files to installation directory.";
+        print_error_message "Error while copying system files to destination directory.";
         return 1;
     fi;
 
-    # Creates additional directories required for system execution.
+    # Creates on destination directory the additional directories required for system execution.
     create_additional_directories;
     create_additional_directories_result=${?};
     if [ ${create_additional_directories_result} -ne 0 ];
     then
-        print_error_message "Error creating additional directories on installation directory.";
+        print_error_message "Error creating additional directories on destination directory.";
         return 1;
     fi;
 
-    # Defines the input, output and binary directories on installation.
+    # Defines the input, output and binary directories on destination directory.
     define_file_locations;
     define_file_locations_result=${?};
     if [ ${define_file_locations_result} -ne 0 ];
@@ -437,31 +415,32 @@ install() {
     fi;
 
     # Build the binaries required for system execution.
-    build_binaries;
-    build_binaries_result=${?};
-    if [ ${build_binaries_result} -ne 0 ];
-    then
-        print_error_message "Error while building the system binaries.";
-        return 1;
-    fi;
+    # build_binaries;
+    # build_binaries_result=${?};
+    # if [ ${build_binaries_result} -ne 0 ];
+    # then
+    #     print_error_message "Error while building the system binaries.";
+    #     return 1;
+    # fi;
 
-    # Installs the systemd units required to run the system.
-    install_systemd_units;
-    install_systemd_units_result=${?};
-    if [ ${install_systemd_units_result} -ne 0 ];
+    # Creates the system services.
+    create_system_services;
+    create_system_services_result=${?};
+    if [ ${create_system_services_result} -ne 0 ];
     then
-        print_error_message "Error while installing systemd units to system execution.";
+        print_error_message "Error while creating the system services.";
         return 1;
     fi;
 
     # Installs the script which defines the system variables.
-    install_variables_script;
-    install_variables_script_result=${?};
-    if [ ${install_variables_script_result} -ne 0 ];
+    install_system_variables_script;
+    install_system_variables_script_result=${?};
+    if [ ${install_system_variables_script_result} -ne 0 ];
     then
         print_error_message "Error while installing system variables script.";
         return 1;
     fi;
+    exit 0;
 
     # Removes the temporary directories.
     remove_temporary_directories;

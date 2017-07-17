@@ -6,4 +6,4 @@ WantedBy=bluetooth.service
 
 [Path]
 PathExists=/var/run/sdp
-Unit=var-run-sdp.service
+Unit=sdp-file-group-change-verification.service

@@ -2,7 +2,7 @@
 Description=Set permission of /var/run/sdp
 
 [Install]
-RequiredBy=var-run-sdp.path
+RequiredBy=sdp-file-verification.path
 
 [Service]
 Type=simple
