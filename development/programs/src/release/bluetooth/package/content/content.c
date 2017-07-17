@@ -46,6 +46,8 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
         case CHECK_CONNECTION_CODE:
         case DISCONNECT_CODE:
         case REQUEST_AUDIO_FILE_CODE:
+        case START_RECORD_CODE:
+        case STOP_RECORD_CODE:
             LOG_TRACE_POINT;
             /* These types of package does not have content. */
             convertion_result = SUCCESS;

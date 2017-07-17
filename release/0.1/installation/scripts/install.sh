@@ -215,7 +215,7 @@ create_temporary_directories() {
                 return 1;
             fi;
         else
-            echo -e "Directory \"${directory_to_create}\" already exists.";
+            echo "Directory \"${directory_to_create}\" already exists.";
         fi;
     done;
     
@@ -415,13 +415,13 @@ install() {
     fi;
 
     # Build the binaries required for system execution.
-    # build_binaries;
-    # build_binaries_result=${?};
-    # if [ ${build_binaries_result} -ne 0 ];
-    # then
-    #     print_error_message "Error while building the system binaries.";
-    #     return 1;
-    # fi;
+    build_binaries;
+    build_binaries_result=${?};
+    if [ ${build_binaries_result} -ne 0 ];
+    then
+        print_error_message "Error while building the system binaries.";
+        return 1;
+    fi;
 
     # Creates the system services.
     create_system_services;

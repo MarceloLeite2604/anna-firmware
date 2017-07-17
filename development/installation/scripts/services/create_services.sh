@@ -53,6 +53,8 @@ install_services() {
     local create_services_scripts_directory_result;
     local create_service_bluetooth_pairing_script_execution_result;
     local create_service_sdp_file_verification_script_execution_result;
+    local create_service_clean_up_script_execution_result;
+    local create_service_communication_script_execution_result;
     
     # Creates the services' shell scripts' directory on system destination directory.
     create_services_scripts_directory;
@@ -90,6 +92,23 @@ install_services() {
         return 1;
     fi;
     
+    # Requests the creation of cleaning up service.
+    ${create_service_clean_up_script_path};
+    create_service_clean_up_script_execution_result=${?};
+    if [ ${create_service_clean_up_script_execution_result} -ne 0 ];
+    then
+        print_error_message "Error while creating cleaning up service.";
+        return 1;
+    fi;
+
+    # Requests the creation of communication service.
+    ${create_service_communication_script_path};
+    create_service_communication_script_execution_result=${?};
+    if [ ${create_service_clean_up_script_execution_result} -ne 0 ];
+    then
+        print_error_message "Error while creating communication service.";
+        return 1;
+    fi;
     return 0;
 }
 

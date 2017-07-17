@@ -18,7 +18,7 @@
 # ###
 # Include guard.
 # ###
-if [-z "${PROCESS_CONSTANTS_SH}" ];
+if [ -z "${PROCESS_CONSTANTS_SH}" ];
 then
     PROCESS_CONSTANTS_SH=1;
 else

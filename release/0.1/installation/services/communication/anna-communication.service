@@ -1,0 +1,14 @@
+[Unit]
+Description=Anna Communication Service
+After=bluetooth-pairing.service
+
+[Service]
+Type=simple
+# ExecStart=<SYSTEM_BINARIES_DIRECTORY>muni -l ERROR
+ExecStart=<SYSTEM_BINARIES_DIRECTORY>muni
+Restart=on-failure
+# User=pi
+# Group=pi
+
+[Install]
+WantedBy=multi-user.target

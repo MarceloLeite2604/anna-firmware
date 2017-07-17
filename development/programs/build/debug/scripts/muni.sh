@@ -19,7 +19,7 @@ then
     fi;
 fi;
 
-${command_preffix} $(dirname ${BASH_SOURCE})/../bin/muni -l TRACE;
+${command_preffix} $(dirname ${BASH_SOURCE})/../bin/muni -l ERROR;
 program_exit_code=${?};
 echo "Program finished with value "${program_exit_code}".";
 exit ${program_exit_code};

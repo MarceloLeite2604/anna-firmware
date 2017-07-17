@@ -902,9 +902,10 @@ int remote_device_communication_loop(int btc_socket_fd) {
                         LOG_TRACE("Device disconnected.");
 
                         error_counter = 0;
-                        close_socket_result = close_socket(btc_socket_fd);
-                        LOG_TRACE_POINT;
                         device_connected = false;
+                        result = receive_package_result;
+                        /* close_socket_result = close_socket(btc_socket_fd);
+                        LOG_TRACE_POINT;
 
                         if ( close_socket_result == SUCCESS ) {
                             LOG_TRACE_POINT;
@@ -912,7 +913,7 @@ int remote_device_communication_loop(int btc_socket_fd) {
                         }
                         else {
                             LOG_ERROR("Error while closing bluetooth communication socket with remote device.");
-                        }
+                        } */
                         break;
 
                     case RESTART_PROGRAM_CODE:

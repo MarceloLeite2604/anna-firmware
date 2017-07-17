@@ -12,7 +12,7 @@
 #   Marcelo Leite
 
 # Names of the additional directories required to execute the system.
-readonly additional_directories_name=(audio logs pids temporary);
+readonly additional_directories_name=(audio logs pids temporary trash);
 
 # Creates the additional directories required to execute the system.
 #

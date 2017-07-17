@@ -100,7 +100,7 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
     FD_SET(socket_fd, &socket_fd_set);
     select_result = select((socket_fd+1), &socket_fd_set, (fd_set*)NULL, (fd_set*)NULL, &check_time);
     FD_CLR(socket_fd, &socket_fd_set);
-    LOG_TRACE_POINT;
+    LOG_TRACE("Select result: %d.", select_result);
 
     switch (select_result) {
         case 0:
@@ -189,6 +189,7 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                         errno_value = errno;
                         LOG_ERROR("Error while reading socket content.");
                         LOG_ERROR("%d: %s", errno_value, strerror(errno_value));
+                        /* TODO: Inform when the connection was reseted by the peer. This should return a "DISCONNECTED" value. */
                         error = true;
                         done_reading = true;
                         result = GENERIC_ERROR;

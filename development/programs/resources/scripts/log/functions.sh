@@ -101,7 +101,7 @@ _log_write_stderr(){
     fi;
 
     # Writes message on stderr.
-    $(>&2 echo ${stderr_message});
+    $(>&2 echo ${message});
     echo_result=${?};
     if [ ${echo_result} -ne ${success} ];
     then
@@ -389,7 +389,7 @@ _log_write_log_message() {
     if [ -z "${_log_file_location}" ];
     then
         # Writes message on stderr.
-        _log_write_stderr ${message_content};
+        _log_write_stderr "${message_content}";
     else
         # Writes messsage on log file.
         echo "${message_content}" >> ${_log_file_location};
@@ -419,6 +419,8 @@ log() {
     local message_index;
     local log_message;
     local _log_write_log_message_result;
+
+    set +x;
 
     # Check function parameters.
     if [ ${#} -lt 1 -o ${#} -gt 2 ];

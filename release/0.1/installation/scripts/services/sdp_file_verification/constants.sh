@@ -44,13 +44,13 @@ then
     readonly service_sdp_file_verification_unit_models_directory_path="${base_installation_services_directory_path}sdp_file_verification/";
 fi;
 
-# Name of the "var/run/sdp" file group change service's unit model.
+# Name of the "var/run/sdp" file verification service's unit model.
 if [ -z "${service_sdp_file_verification_unit_model_name}" ];
 then
     readonly service_sdp_file_verification_unit_model_name="sdp-file-verification.path";
 fi;
 
-# Path to the model used to create the "var/run/sdp" file group change service systemd unit.
+# Path to the model used to create the "var/run/sdp" file verification service systemd unit.
 if [ -z "${service_sdp_file_verification_unit_model_path}" ];
 then
     readonly service_sdp_file_verification_unit_model_path="${service_sdp_file_verification_unit_models_directory_path}${service_sdp_file_verification_unit_model_name}";

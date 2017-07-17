@@ -45,10 +45,22 @@ then
     readonly systemd_unit_files_deploy_directory_path="/etc/systemd/system/";
 fi;
 
-# Term used to identify the location where the services' shell scripts' directory path must be inserted on systemd unit model files.
+# Term used to identify the location where the services' shell scripts' directory path must be inserted on service files.
 if [ -z "${term_destination_services_scripts_directory_path}" ];
 then
     readonly term_destination_services_scripts_directory_path="<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>";
+fi;
+
+# Term used to identify the location where the shell scripts' directory path must be inserted on service files.
+if [ -z "${term_destination_scripts_directory_path}" ];
+then
+    readonly term_destination_scripts_directory_path="<SYSTEM_SCRIPTS_DIRECTORY>";
+fi;
+
+# Term used to identify the location where the binaries' directory path must be inserted on service files.
+if [ -z "${term_destination_binaries_directory_path}" ];
+then
+    readonly term_destination_binaries_directory_path="<SYSTEM_BINARIES_DIRECTORY>";
 fi;
 
 # Path to the script which creates the bluetooth pairing service.
@@ -67,4 +79,16 @@ fi;
 if [ -z "${create_service_sdp_file_group_changing_verification_script_path}" ];
 then
     readonly create_service_sdp_file_group_changing_verification_script_path="${base_installation_create_services_scripts_directory_path}sdp_file_group_change_verification/create_service.sh";
+fi;
+
+# Path to the script which creates the clean up service.
+if [ -z "${create_service_clean_up_script_path}" ];
+then
+    readonly create_service_clean_up_script_path="${base_installation_create_services_scripts_directory_path}clean_up/create_service.sh";
+fi;
+
+# Path to the script which creates the communication service.
+if [ -z "${create_service_communication_script_path}" ];
+then
+    readonly create_service_communication_script_path="${base_installation_create_services_scripts_directory_path}communication/create_service.sh";
 fi;

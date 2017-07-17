@@ -169,7 +169,7 @@ int receive_confirmation(int socket_fd, package_t package) {
                         }
                     }
                     else {
-                        LOG_TRACE("The pacakge received is being ignored. It is not a confirmation code.");
+                        LOG_TRACE("The package received is being ignored. It is not a confirmation code.");
                     }
                 }
                 break;

@@ -49,7 +49,7 @@ find_latest_audio_record(){
     local latest_audio_record_file_name;
     local echo_result;
     local log_file_created;
-    local audio_file_pattern;
+    # local audio_file_pattern;
 
     continue_log_file_result=1;
     log_file_created=1;

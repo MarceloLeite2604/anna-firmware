@@ -261,7 +261,7 @@ deploy_systemd_unit() {
 #   0 - If the term were substituted successfully.
 #   1 - Otherwise.
 #
-replace_systemd_unit_model_terms() {
+replace_terms() {
 
     local unit_model_file_path;
     local replacement_string;
@@ -272,22 +272,50 @@ replace_systemd_unit_model_terms() {
         print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
         return 1;
     else
-        unit_file_model_path="${1}";
+        file_path="${1}";
     fi;
+
+    echo "Replacing terms on file \"${file_path}\".";
     
     # Elaborates the replacement string to the "service' shell scripts' directory path" substitution term.
     # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
     replacement_string="${destination_services_scripts_directory_path//\//\\/}";
 
     # Replaces the "system services' shell scripts' directory path" substitution term by its value.
-    sed -i -e "s/${term_destination_services_scripts_directory_path}/${replacement_string}/g" "${unit_file_model_path}";
+    sed -i -e "s/${term_destination_services_scripts_directory_path}/${replacement_string}/g" "${file_path}";
     sed_result=${?};
     if [ ${sed_result} -ne 0 ];
     then
-        print_error_message "Error replacing the \"system services' shell scripts' directory path\" substitution term on unit file model \"${unit_file_model_path}\": ${sed_result}.";
+        print_error_message "Error replacing the \"system services' shell scripts' directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
         return 1;
     fi;
-    
+
+    # Elaborates the replacement string to the "system' shell scripts' directory path" substitution term.
+    # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
+    replacement_string="${destination_scripts_directory_path//\//\\/}";
+
+    # Replaces the "system services' shell scripts' directory path" substitution term by its value.
+    sed -i -e "s/${term_destination_scripts_directory_path}/${replacement_string}/g" "${file_path}";
+    sed_result=${?};
+    if [ ${sed_result} -ne 0 ];
+    then
+        print_error_message "Error replacing the \"system services' shell scripts' directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
+        return 1;
+    fi;
+
+    # Elaborates the replacement string to the "system binaries directory path" substitution term.
+    # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
+    replacement_string="${destination_binaries_directory_path//\//\\/}";
+
+    # Replaces the "system binaries directory path" substitution term by its value.
+    sed -i -e "s/${term_destination_binaries_directory_path}/${replacement_string}/g" "${file_path}";
+    sed_result=${?};
+    if [ ${sed_result} -ne 0 ];
+    then
+        print_error_message "Error replacing the \"system binaries directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
+        return 1;
+    fi;
+
     return 0;
 }
 
@@ -305,7 +333,7 @@ create_systemd_unit_file() {
     local unit_file_model_path;
     local unit_file_model_name;
     local temporary_unit_file_model_path;
-    local replace_systemd_unit_model_terms_result;
+    local replace_terms_result;
     local deploy_system_unit_result;
 
     # Check function parameters.
@@ -330,9 +358,9 @@ create_systemd_unit_file() {
     temporary_unit_file_model_path="${temporary_unit_files_directory_path}${unit_file_model_name}";
     
     # Replaces the substitution terms on systemd unit file model.
-    replace_systemd_unit_model_terms "${temporary_unit_file_model_path}";
-    replace_systemd_unit_model_terms_result=${?};
-    if [ ${replace_systemd_unit_model_terms_result} -ne 0 ];
+    replace_terms "${temporary_unit_file_model_path}";
+    replace_terms_result=${?};
+    if [ ${replace_terms_result} -ne 0 ];
     then
         print_error_message "Error while replacing substitution terms on unit file model \"${temporary_unit_file_model_path}\".";
         return 1;
@@ -377,21 +405,31 @@ install_service_script() {
         service_script_name="$(basename ${service_script_path})";
     fi;
 
+    echo "Installing service script \"${service_script_name}\".";
+
     destination_service_script_path="${destination_services_scripts_directory_path}${service_script_name}";
     
     cp "${service_script_path}" "${destination_service_script_path}";
     cp_result=${?};
     if [ ${cp_result} -ne 0 ];
     then
-        echo "Error while copying service script \"${service_script_path}\" to \"${destination_service_script_path}\": ${cp_result}.";
+        print_error_message "Error while copying service script \"${service_script_path}\" to \"${destination_service_script_path}\": ${cp_result}.";
         return 1;
     fi;
 
-    chmod 644 "${destination_service_script_path}";
+    replace_terms "${destination_service_script_path}";
+    replace_terms_result=${?};
+    if [ ${replace_terms_result} -ne 0 ];
+    then
+        print_error_message "Error while replacing terms on service script \"${destination_service_script_path}\".";
+        return 1;
+    fi;
+
+    chmod 554 "${destination_service_script_path}";
     chmod_result=${?};
     if [ ${chmod_result} -ne 0 ];
     then
-        echo "Error while changing permissions on file \"${destination_service_script_path}\".";
+        print_error_message "Error while changing permissions on file \"${destination_service_script_path}\".";
         return 1;
     fi;
     
@@ -447,7 +485,7 @@ create_service() {
         # Installs the service's scripts.
         for service_script_name in ${service_scripts_name[@]}
         do
-            echo "Installing service script \"$(basename ${service_script_name})\".";
+            # echo "Installing service script \"$(basename ${service_script_name})\".";
             service_script_path="${service_scripts_directory_path}${service_script_name}";
             install_service_script "${service_script_path}";
             install_service_script_result=${?};
