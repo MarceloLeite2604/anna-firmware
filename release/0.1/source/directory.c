@@ -62,7 +62,8 @@ char* get_input_directory() {
         strcpy(input_directory, DEFAULT_INPUT_OUTPUT_DIRECTORY);
         result = input_directory;
     } else {
-        LOG_TRACE_POINT;
+        LOG_TRACE("Value for variable \"%s\": \"%s\".", OUTPUT_DIRECTORY_VARIABLE_NAME, input_directory);
+
         input_directory_size = strlen(input_directory);
         result = (char*)malloc((input_directory_size+1)*sizeof(char));
         strcpy(result, input_directory);
@@ -98,7 +99,7 @@ char* get_output_directory() {
         strcpy(output_directory, DEFAULT_INPUT_OUTPUT_DIRECTORY);
         result = output_directory;
     } else {
-        LOG_TRACE_POINT;
+        LOG_TRACE("Value for variable \"%s\": \"%s\".", OUTPUT_DIRECTORY_VARIABLE_NAME, output_directory);
 
         output_directory_size = strlen(output_directory);
         result = (char*)malloc((output_directory_size+1)*sizeof(char));

@@ -31,8 +31,11 @@ fi;
 # Script sources.
 # ###
 
-# Load service creation functions.
+# Loads service creation functions.
 source "$(dirname ${BASH_SOURCE})/functions.sh";
+
+# Loads installation functions.
+source "$(dirname ${BASH_SOURCE})/../function.sh";
 
 
 # ###

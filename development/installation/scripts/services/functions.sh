@@ -36,6 +36,9 @@ source "$(dirname ${BASH_SOURCE})/constants.sh";
 # Loads generic installation functions.
 source "$(dirname ${BASH_SOURCE})/../generic/functions.sh";
 
+# Loads installation functions.
+source "$(dirname ${BASH_SOURCE})/../functions.sh";
+
 
 # ###
 # Functions elaborations.
@@ -249,73 +252,6 @@ deploy_systemd_unit() {
         return 1;
     fi;
     
-    return 0;
-}
-
-# Replaces the substitution terms on a systemd unit model file.
-#
-# Parameters:
-#   1. The path to the systemd unit file model.
-#
-# Returns:
-#   0 - If the term were substituted successfully.
-#   1 - Otherwise.
-#
-replace_terms() {
-
-    local unit_model_file_path;
-    local replacement_string;
-
-    # Check function parameters.
-    if [ ${#} -ne 1 ];
-    then
-        print_error_message "Invalid parameters to execute \"${FUNCNAME[0]}\" function.";
-        return 1;
-    else
-        file_path="${1}";
-    fi;
-
-    echo "Replacing terms on file \"${file_path}\".";
-    
-    # Elaborates the replacement string to the "service' shell scripts' directory path" substitution term.
-    # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
-    replacement_string="${destination_services_scripts_directory_path//\//\\/}";
-
-    # Replaces the "system services' shell scripts' directory path" substitution term by its value.
-    sed -i -e "s/${term_destination_services_scripts_directory_path}/${replacement_string}/g" "${file_path}";
-    sed_result=${?};
-    if [ ${sed_result} -ne 0 ];
-    then
-        print_error_message "Error replacing the \"system services' shell scripts' directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
-        return 1;
-    fi;
-
-    # Elaborates the replacement string to the "system' shell scripts' directory path" substitution term.
-    # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
-    replacement_string="${destination_scripts_directory_path//\//\\/}";
-
-    # Replaces the "system services' shell scripts' directory path" substitution term by its value.
-    sed -i -e "s/${term_destination_scripts_directory_path}/${replacement_string}/g" "${file_path}";
-    sed_result=${?};
-    if [ ${sed_result} -ne 0 ];
-    then
-        print_error_message "Error replacing the \"system services' shell scripts' directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
-        return 1;
-    fi;
-
-    # Elaborates the replacement string to the "system binaries directory path" substitution term.
-    # Observation: Precedes the forward slashes with backward slashes (escape character to "sed" command).
-    replacement_string="${destination_binaries_directory_path//\//\\/}";
-
-    # Replaces the "system binaries directory path" substitution term by its value.
-    sed -i -e "s/${term_destination_binaries_directory_path}/${replacement_string}/g" "${file_path}";
-    sed_result=${?};
-    if [ ${sed_result} -ne 0 ];
-    then
-        print_error_message "Error replacing the \"system binaries directory path\" substitution term on unit file model \"${file_path}\": ${sed_result}.";
-        return 1;
-    fi;
-
     return 0;
 }
 

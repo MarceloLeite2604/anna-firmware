@@ -440,7 +440,6 @@ install() {
         print_error_message "Error while installing system variables script.";
         return 1;
     fi;
-    exit 0;
 
     # Removes the temporary directories.
     remove_temporary_directories;

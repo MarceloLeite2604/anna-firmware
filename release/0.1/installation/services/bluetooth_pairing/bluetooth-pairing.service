@@ -4,7 +4,7 @@ After=bluetooth.service
 
 [Service]
 Type=simple
-ExecStart=<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>bluetooth-pairing.sh
+ExecStart=<SYSTEM_SERVICES_SCRIPTS_DIRECTORY>bluetooth_pairing.sh
 Restart=on-failure
 
 [Install]

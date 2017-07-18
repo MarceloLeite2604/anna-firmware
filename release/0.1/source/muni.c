@@ -167,7 +167,7 @@ int check_argument_log(char* value) {
         result = GENERIC_ERROR;
     }
     else {
-        LOG_TRACE_POINT;
+        LOG_TRACE("Value for argument log: \"%s\".", value);
         value_integer = atoi(value);
 
         if ( ( strcmp(value, PARAMETER_LOG_VALUE_TRACE) == 0 ) || ( value_integer == LOG_MESSAGE_TYPE_WARNING ) ) {

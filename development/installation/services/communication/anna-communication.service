@@ -5,7 +5,7 @@ After=bluetooth-pairing.service
 [Service]
 Type=simple
 # ExecStart=<SYSTEM_BINARIES_DIRECTORY>muni -l ERROR
-ExecStart=<SYSTEM_BINARIES_DIRECTORY>muni
+ExecStart=<SYSTEM_SERVICES_SCRIPTS_DIRECTORY>communication.sh
 Restart=on-failure
 # User=pi
 # Group=pi

@@ -259,3 +259,34 @@ if [ -z "${temporary_directories}" ];
 then
     readonly temporary_directories=("${temporary_directory_path}" "${temporary_build_directory_path}" "${temporary_build_output_directory_path}" "${temporary_binaries_output_directory_path}" "${temporary_objects_output_directory_path}" "${temporary_unit_files_directory_path}" "${temporary_script_files_directory_path}");
 fi;
+
+# Term used to identify the location where the scripts' input directory definition file's path must be inserted on system variables' script.
+if [ -z "${input_files_location_value_term}" ];
+then
+    readonly input_files_location_value_term="<ANNA_INPUT_DIRECTORY_VALUE>";
+fi;
+
+# Term used to identify the location where the scripts' output directory definition file's path must be inserted on system variables' script.
+if [ -z "${output_files_location_value_term}" ];
+then
+    readonly output_files_location_value_term="<ANNA_OUTPUT_DIRECTORY_VALUE>";
+fi;
+
+# Term used to identify the location where the services' shell scripts' directory path must be inserted on service files.
+if [ -z "${term_destination_services_scripts_directory_path}" ];
+then
+    readonly term_destination_services_scripts_directory_path="<SYSTEM_SERVICES_SCRIPTS_DIRECTORY>";
+fi;
+
+# Term used to identify the location where the shell scripts' directory path must be inserted on service files.
+if [ -z "${term_destination_scripts_directory_path}" ];
+then
+    readonly term_destination_scripts_directory_path="<SYSTEM_SCRIPTS_DIRECTORY>";
+fi;
+
+# Term used to identify the location where the binaries' directory path must be inserted on service files.
+if [ -z "${term_destination_binaries_directory_path}" ];
+then
+    readonly term_destination_binaries_directory_path="<SYSTEM_BINARIES_DIRECTORY>";
+fi;
+

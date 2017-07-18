@@ -3,7 +3,7 @@ Description=Clean up Anna directories
 
 [Service]
 Type=oneshot
-ExecStart=<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>clean_up.sh
+ExecStart=<SYSTEM_SERVICES_SCRIPTS_DIRECTORY>clean_up.sh
 # User=pi
 # Group=pi
 

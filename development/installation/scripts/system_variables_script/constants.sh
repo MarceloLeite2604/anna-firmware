@@ -44,18 +44,6 @@ then
     readonly system_variables_script_deploy_directory_path="/etc/profile.d/";
 fi;
 
-# Term used to identify the location where the scripts' input directory definition file's path must be inserted on system variables' script.
-if [ -z "${input_files_location_value_term}" ];
-then
-    readonly input_files_location_value_term="<ANNA_INPUT_DIRECTORY_VALUE>";
-fi;
-
-# Term used to identify the location where the scripts' output directory definition file's path must be inserted on system variables' script.
-if [ -z "${output_files_location_value_term}" ];
-then
-    readonly output_files_location_value_term="<ANNA_OUTPUT_DIRECTORY_VALUE>";
-fi;
-
 # Name of the system variables' script.
 if [ -z "${system_variables_script_name}" ];
 then

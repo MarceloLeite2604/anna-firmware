@@ -45,24 +45,6 @@ then
     readonly systemd_unit_files_deploy_directory_path="/etc/systemd/system/";
 fi;
 
-# Term used to identify the location where the services' shell scripts' directory path must be inserted on service files.
-if [ -z "${term_destination_services_scripts_directory_path}" ];
-then
-    readonly term_destination_services_scripts_directory_path="<SYSTEM_SERVICE_SCRIPTS_DIRECTORY>";
-fi;
-
-# Term used to identify the location where the shell scripts' directory path must be inserted on service files.
-if [ -z "${term_destination_scripts_directory_path}" ];
-then
-    readonly term_destination_scripts_directory_path="<SYSTEM_SCRIPTS_DIRECTORY>";
-fi;
-
-# Term used to identify the location where the binaries' directory path must be inserted on service files.
-if [ -z "${term_destination_binaries_directory_path}" ];
-then
-    readonly term_destination_binaries_directory_path="<SYSTEM_BINARIES_DIRECTORY>";
-fi;
-
 # Path to the script which creates the bluetooth pairing service.
 if [ -z "${create_service_bluetooth_pairing_script_path}" ];
 then

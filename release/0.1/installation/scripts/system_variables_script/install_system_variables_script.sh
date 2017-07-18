@@ -23,8 +23,8 @@
 # Loads system variables' script creation constants.
 source "$(dirname ${BASH_SOURCE})/constants.sh";
 
-# Loads installation generic functions.
-source "$(dirname ${BASH_SOURCE})/../generic/functions.sh";
+# Loads installation functions.
+source "$(dirname ${BASH_SOURCE})/../functions.sh";
 
 
 # ###
@@ -60,46 +60,6 @@ deploy_script() {
     if [ ${chmod_result} -ne 0 ];
     then
         print_error_message "Error while defining permissions on file \"${deployed_system_variables_script_path}\".";
-        return 1;
-    fi;
-
-    return 0;
-}
-
-# Replaces the terms on script.
-#
-# Parameters:
-#   None.
-#
-# Returns:
-#   0 - If the terms were replaced successfully.
-#   1 - Otherwise.
-#
-replace_terms_on_script() {
-
-    local replace_string;
-    local sed_result;
-
-    echo -e "Adjusting the script according to the installation.";
-
-    # On the "system destination directory" variable, precedes the forward slashes with backward slashes (escape character to "sed" command).
-    replace_string="${destination_directory_path//\//\\/}";
-
-    # Replaces the "input files location value" term by its value.
-    sed -i -e "s/${input_files_location_value_term}/${replace_string}/g" ${temporary_system_variables_script_path};
-    sed_result=${?};
-    if [ ${sed_result} -ne 0 ];
-    then
-        print_error_message "Error replacing \"input files location value\" term on temporary script file \"${temporary_system_variables_script_path}\": ${sed_result}.";
-        return 1;
-    fi;
-
-    # Replaces the "output files location value" term by its value.
-    sed -i -e "s/${output_files_location_value_term}/${replace_string}/g" ${temporary_system_variables_script_path};
-    sed_result=${?};
-    if [ ${sed_result} -ne 0 ];
-    then
-        print_error_message "Error replacing \"output files location value\" term on temporary script file \"${temporary_system_variables_script_path}\": ${sed_result}.";
         return 1;
     fi;
 
@@ -144,7 +104,7 @@ copy_script_template() {
 install_system_variables_script() {
 
     local copy_script_template_result;
-    local replace_terms_on_script_result;
+    local replace_terms_result;
     local deploy_script_result;
 
     # Checks if current user has permission to write on deploy directory.
@@ -162,9 +122,9 @@ install_system_variables_script() {
         return 1;
     fi;
 
-    replace_terms_on_script;
-    replace_terms_on_script_result=${?};
-    if [ ${replace_terms_on_script_result} -ne 0 ];
+    replace_terms "${temporary_system_variables_script_path}";
+    replace_terms_result=${?};
+    if [ ${replace_terms_result} -ne 0 ];
     then
         print_error_message "Error while replacing terms on system variables' script.";
         return 1;
