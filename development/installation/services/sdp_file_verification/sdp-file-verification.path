@@ -1,9 +1,11 @@
 [Unit]
-Description=Monitor \"/var/run/sdp\"
+Description=Anna - Monitoring "/var/run/sdp" file.
 
 [Install]
-WantedBy=bluetooth.service
+RequiredBy=bluetooth.service
 
 [Path]
+# Requires that "/var/run/sdp" exists before starting the unit.
 PathExists=/var/run/sdp
+# Unit to execute qhen "/var/run/sdp" is found.
 Unit=sdp-file-group-change-verification.service

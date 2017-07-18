@@ -1,5 +1,5 @@
 [Unit]
-Description=Set permission of /var/run/sdp
+Description=Anna - Changes the group associated with "/var/run/sdp" file.
 
 [Install]
 RequiredBy=sdp-file-verification.path

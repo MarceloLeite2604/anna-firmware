@@ -1,6 +1,7 @@
 [Unit]
-Description=Bluetooth pairing service
+Description=Anna - Bluetooth pairing service
 After=bluetooth.service
+Requires=bluetooth.service
 
 [Service]
 Type=simple
