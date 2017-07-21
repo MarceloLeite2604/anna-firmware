@@ -74,6 +74,7 @@ int send_file_trailer(int);
  *
  * Returns
  *  SUCCESS - If the remote device responded the connection check.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - If the remote device did not respond the connection check or there was an error while checking connection.
  */
 int check_connection(int socket_fd) {
@@ -89,9 +90,25 @@ int check_connection(int socket_fd) {
     send_package_result = send_package(socket_fd, check_connection_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending a check connection package.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending a check connection package.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(check_connection_package);
@@ -109,6 +126,7 @@ int check_connection(int socket_fd) {
  *
  * Returns
  *  SUCCESS - If the confirmation package was received successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int receive_confirmation(int socket_fd, package_t package) {
@@ -203,6 +221,13 @@ int receive_confirmation(int socket_fd, package_t package) {
                 }
                 break;
 
+            case DEVICE_DISCONNECTED:
+                LOG_TRACE("Device disconnected.");
+
+                read_concluded = true;
+                result = DEVICE_DISCONNECTED;
+                break;
+
             case GENERIC_ERROR:
                 LOG_ERROR("Error while reading socket content.");
                 read_concluded = true;
@@ -236,6 +261,7 @@ int receive_confirmation(int socket_fd, package_t package) {
  * Returns
  *  SUCCESS - If package was received.
  *  GENERIC_ERROR - If there was an error receiving the package.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  NO_PACKAGE_RECEIVED - If not package was received.
  */
 int receive_package(int socket_fd, package_t* package) {
@@ -303,6 +329,13 @@ int receive_package(int socket_fd, package_t* package) {
                         result = GENERIC_ERROR;
                         break;
                 }
+                break;
+
+            case DEVICE_DISCONNECTED:
+                LOG_TRACE("Device disconnected.");
+
+                receive_concluded = true;
+                result = DEVICE_DISCONNECTED;
                 break;
 
             case GENERIC_ERROR:
@@ -434,11 +467,20 @@ int send_disconnect_signal(int socket_fd) {
     send_result = send_package(socket_fd, disconnect_package);
     LOG_TRACE_POINT;
 
-    if ( send_result == SUCCESS ) {
-        result = SUCCESS;
-    }
-    else {
-        result = GENERIC_ERROR;
+    switch ( send_result ) {
+
+        case SUCCESS:
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        default:
+            LOG_ERROR("Error while sending a disconnect package.");
+
+            result = GENERIC_ERROR;
+            break;
     }
 
     LOG_TRACE_POINT;
@@ -454,6 +496,7 @@ int send_disconnect_signal(int socket_fd) {
  *
  * Returns
  *  SUCCESS - If the file was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file(int socket_fd, char* file_path) {
@@ -487,25 +530,61 @@ int send_file(int socket_fd, char* file_path) {
     send_result = send_file_header(socket_fd, file_size, file_name);
     LOG_TRACE_POINT;
 
-    if ( send_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending file header.");
-        return GENERIC_ERROR;
+    switch ( send_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+            return DEVICE_DISCONNECTED;
+            break;
+
+        default:
+            LOG_ERROR("Error while sending file header.");
+            return GENERIC_ERROR;
+            break;
     }
 
     send_result = send_file_content(socket_fd, file_path, file_size);
     LOG_TRACE_POINT;
 
-    if ( send_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending file content.");
-        return GENERIC_ERROR;
+    switch ( send_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+            return DEVICE_DISCONNECTED;
+            break;
+
+        default:
+            LOG_ERROR("Error while sending file content.");
+            return GENERIC_ERROR;
+            break;
     }
 
     send_result = send_file_trailer(socket_fd);
     LOG_TRACE_POINT;
 
-    if ( send_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending file trailer.");
-        return GENERIC_ERROR;
+    switch ( send_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+            return DEVICE_DISCONNECTED;
+            break;
+
+        default:
+            LOG_ERROR("Error while sending file trailer.");
+            return GENERIC_ERROR;
+            break;
     }
 
     LOG_TRACE_POINT;
@@ -522,6 +601,7 @@ int send_file(int socket_fd, char* file_path) {
  *
  * Returns
  *  SUCCESS - If the file chunk was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
@@ -537,9 +617,25 @@ int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
     send_package_result = send_package(socket_fd, send_file_chunk_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending the file chunk.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending the file chunk.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(send_file_chunk_package);
@@ -557,6 +653,7 @@ int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
  *
  * Returns
  *  SUCCESS - If the content was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file_content(int socket_fd, char* file_path, size_t file_size) {
@@ -615,10 +712,25 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
             send_result = send_file_chunk(socket_fd, bytes_read, data_chunk_buffer);
             LOG_TRACE_POINT;
 
-            if ( send_result == GENERIC_ERROR ) {
-                LOG_ERROR("Error while sending file data chunk.");
-                send_content_concluded = true;
-                result = GENERIC_ERROR;
+            switch ( send_result ) {
+
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+                    break;
+                    
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+
+                    send_content_concluded = true;
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                case GENERIC_ERROR:
+                    LOG_ERROR("Error while sending file data chunk.");
+
+                    send_content_concluded = true;
+                    result = GENERIC_ERROR;
+                    break;
             }
         }
     }
@@ -648,6 +760,7 @@ int send_file_content(int socket_fd, char* file_path, size_t file_size) {
  *
  * Returns
  *  SUCCESS - If the file header was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file_header(int socket_fd, size_t file_size, const char* file_name){
@@ -663,9 +776,25 @@ int send_file_header(int socket_fd, size_t file_size, const char* file_name){
     send_package_result = send_package(socket_fd, send_file_header_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending the file header.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending the file header.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(send_file_header_package);
@@ -682,6 +811,7 @@ int send_file_header(int socket_fd, size_t file_size, const char* file_name){
  *
  * Returns
  *  SUCCESS - If the file trailer was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int send_file_trailer(int socket_fd){
@@ -697,9 +827,25 @@ int send_file_trailer(int socket_fd){
     send_package_result = send_package(socket_fd, send_file_trailer_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending the file trailer.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending the file trailer.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(send_file_trailer_package);
@@ -717,6 +863,7 @@ int send_file_trailer(int socket_fd){
  *
  *  Returns
  *   SUCCESS - If the package was sent successfuly.
+ *   DEVICE_DISCONNECTED - If the device was disconnected.
  *   GENERIC_ERROR - Otherwise.
  */
 int send_package(int socket_fd, package_t package) {
@@ -754,18 +901,29 @@ int send_package(int socket_fd, package_t package) {
             receive_confirmation_result = receive_confirmation(socket_fd, package);
             LOG_TRACE_POINT;
 
-            if ( receive_confirmation_result == SUCCESS ) {
-                LOG_TRACE_POINT;
+            switch (receive_confirmation_result) {
 
-                write_concluded = true;
-                result = SUCCESS;
-            }
-            else {
-                LOG_ERROR("Did not receive confirmation for package id 0x%x.", package.id);
+                case SUCCESS:
+                    LOG_TRACE_POINT;
 
-                write_concluded = true;
-                result = GENERIC_ERROR;
+                    write_concluded = true;
+                    result = SUCCESS;
+                    break;
+
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+                    write_concluded = true;
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                default:
+                    LOG_ERROR("Did not receive confirmation for package id 0x%x.", package.id);
+
+                    write_concluded = true;
+                    result = GENERIC_ERROR;
+                    break;
             }
+
         } else {
             LOG_TRACE_POINT;
 
@@ -808,6 +966,7 @@ int send_package(int socket_fd, package_t package) {
  *
  * Returns
  *  SUCCESS - If the command result was send sucessfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int transmit_command_result(int socket_fd, int command_result, struct timeval execution_delay) {
@@ -823,9 +982,25 @@ int transmit_command_result(int socket_fd, int command_result, struct timeval ex
     send_package_result = send_package(socket_fd, command_result_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending the command result.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending the command result.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(command_result_package);
@@ -844,6 +1019,7 @@ int transmit_command_result(int socket_fd, int command_result, struct timeval ex
  *
  * Returns
  *  SUCCESS - If the error message was transmitted successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int transmit_error(int socket_fd, int error_code, const char* error_message) {
@@ -859,9 +1035,25 @@ int transmit_error(int socket_fd, int error_code, const char* error_message) {
     send_package_result = send_package(socket_fd, error_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == GENERIC_ERROR ) {
-        LOG_ERROR("Error while sending the error message.");
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+
+            LOG_ERROR("Error while sending the error message.");
+            result = GENERIC_ERROR;
+            break;
     }
 
     delete_package(error_package);

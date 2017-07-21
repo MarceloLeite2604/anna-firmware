@@ -19,7 +19,7 @@ source "$(dirname ${BASH_SOURCE})/set_input_output_directories.sh";
 #    fi;
 #fi;
 
-${command_preffix} $(dirname ${BASH_SOURCE})/bin/muni -d ERROR;
+${command_preffix} $(dirname ${BASH_SOURCE})/../bin/muni -l TRACE;
 program_exit_code=${?};
 echo "Program finished with value "${program_exit_code}".";
 exit ${program_exit_code};

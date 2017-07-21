@@ -31,6 +31,9 @@
 /* Size of the buffer to read content from the socket. */
 #define READ_CONTENT_BUFFER_SIZE 1024
 
+/* Error code received through "errno" variable when the connection was reseted by the peer. */
+#define ERROR_CODE_CONNECTION_RESET_BY_PEER 104
+
 
 /*
  * Variables.
@@ -133,6 +136,7 @@ int check_socket_content(int socket_fd, struct timeval check_time) {
  * Returns
  *  SUCCESS - If a content was successfully read from socket.
  *  NO_CONTENT_TO_READ - If there was no content to read from socket.
+ *  DEVICE_DISCONNECTED - When the connection was lost.
  *  GENERIC_ERROR - If there was an error reading the socket.
  */
 int read_socket_content(int socket_fd, byte_array_t* byte_array) {
@@ -189,10 +193,17 @@ int read_socket_content(int socket_fd, byte_array_t* byte_array) {
                         errno_value = errno;
                         LOG_ERROR("Error while reading socket content.");
                         LOG_ERROR("%d: %s", errno_value, strerror(errno_value));
-                        /* TODO: Inform when the connection was reseted by the peer. This should return a "DISCONNECTED" value. */
+                        /* Check if the error code returned is informing that the connection was reseted by the peer. */
+                        if  ( errno_value == ERROR_CODE_CONNECTION_RESET_BY_PEER ) {
+                            LOG_TRACE_POINT;
+                            result = DEVICE_DISCONNECTED;
+                        } else { 
+                            LOG_TRACE_POINT;
+                            result = GENERIC_ERROR;
+                        }
+
                         error = true;
                         done_reading = true;
-                        result = GENERIC_ERROR;
                         break;
 
                     default:

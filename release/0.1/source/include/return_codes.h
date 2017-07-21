@@ -31,5 +31,7 @@
 /* Request to shut down the audio recorder. */
 #define SHUT_DOWN_AUDIO_RECORDER_CODE 92
 
+/* Code used to indicate the remote device was/has disconnected. */
+#define DEVICE_DISCONNECTED 93
 
 #endif

@@ -33,9 +33,6 @@
  * Macros.
  */
 
-/* Code used to indicate the remote device was/has disconnected. */
-#define DEVICE_DISCONNECTED 93
-
 /* Maximum errors tolerated by the program while receiving packages from a remote device. */
 #define MAX_RECEIVE_PACKAGE_ERRORS_TOLERATED 5
 
@@ -358,13 +355,25 @@ int check_command_received(int btc_socket_fd, package_t package) {
             command_execution_result = command_transmit_latest_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
-            if ( command_execution_result == SUCCESS ) {
-                LOG_TRACE_POINT;
-                result = SUCCESS;
-            }
-            else {
-                LOG_TRACE_POINT;
-                result = GENERIC_ERROR;
+            switch ( command_execution_result ) {
+
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+
+                    result = SUCCESS;
+                    break;
+
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                default:
+                    LOG_TRACE_POINT;
+
+                    result = GENERIC_ERROR;
+                    break;
             }
 
             break;
@@ -375,15 +384,26 @@ int check_command_received(int btc_socket_fd, package_t package) {
             command_execution_result = command_start_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
-            if ( command_execution_result == SUCCESS ) {
-                LOG_TRACE_POINT;
-                result = SUCCESS;
-            }
-            else {
-                LOG_TRACE_POINT;
-                result = GENERIC_ERROR;
-            }
+            switch ( command_execution_result ) {
 
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+
+                    result = SUCCESS;
+                    break;
+
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                default:
+                    LOG_TRACE_POINT;
+
+                    result = GENERIC_ERROR;
+                    break;
+            }
             break;
 
         case STOP_RECORD_CODE:
@@ -392,13 +412,25 @@ int check_command_received(int btc_socket_fd, package_t package) {
             command_execution_result = command_stop_audio_record(btc_socket_fd);
             LOG_TRACE_POINT;
 
-            if ( command_execution_result == SUCCESS ) {
-                LOG_TRACE_POINT;
-                result = SUCCESS;
-            }
-            else {
-                LOG_TRACE_POINT;
-                result = GENERIC_ERROR;
+            switch ( command_execution_result ) {
+
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+
+                    result = SUCCESS;
+                    break;
+
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                default:
+                    LOG_TRACE_POINT;
+
+                    result = GENERIC_ERROR;
+                    break;
             }
 
             break;
@@ -454,6 +486,7 @@ int command_disconnect(int btc_socket_fd) {
  *
  * Result
  *  SUCCESS - If audio recording started successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int command_start_audio_record(int socket_fd){
@@ -505,19 +538,27 @@ int command_start_audio_record(int socket_fd){
     send_package_result = send_package(socket_fd, command_result_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == SUCCESS ) {
-        LOG_TRACE_POINT;
-        result = SUCCESS;
-    }
-    else {
-        LOG_TRACE_POINT;
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+            LOG_TRACE_POINT;
+            result = GENERIC_ERROR;
+            break;
     }
 
     LOG_TRACE_POINT;
     return result;
 }
-
 
 /*
  * Stops audio recording.
@@ -527,6 +568,7 @@ int command_start_audio_record(int socket_fd){
  *
  * Result
  *  SUCCESS - If audio record stopped successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int command_stop_audio_record(int socket_fd){
@@ -578,13 +620,22 @@ int command_stop_audio_record(int socket_fd){
     send_package_result = send_package(socket_fd, command_result_package);
     LOG_TRACE_POINT;
 
-    if ( send_package_result == SUCCESS ) {
-        LOG_TRACE_POINT;
-        result = SUCCESS;
-    }
-    else {
-        LOG_TRACE_POINT;
-        result = GENERIC_ERROR;
+    switch ( send_package_result ) {
+
+        case SUCCESS:
+            LOG_TRACE_POINT;
+            result = SUCCESS;
+            break;
+
+        case DEVICE_DISCONNECTED:
+            LOG_TRACE_POINT;
+            result = DEVICE_DISCONNECTED;
+            break;
+
+        default:
+            LOG_TRACE_POINT;
+            result = GENERIC_ERROR;
+            break;
     }
 
     LOG_TRACE_POINT;
@@ -599,6 +650,7 @@ int command_stop_audio_record(int socket_fd){
  *
  * Returns
  *  SUCCESS - If the latest audio record file was sent successfully.
+ *  DEVICE_DISCONNECTED - If the device was disconnected.
  *  GENERIC_ERROR - Otherwise.
  */
 int command_transmit_latest_audio_record(int btc_socket_fd){
@@ -626,14 +678,24 @@ int command_transmit_latest_audio_record(int btc_socket_fd){
             send_file_result = send_file(btc_socket_fd, latest_audio_record_file_path);
             LOG_TRACE_POINT;
 
-            if ( send_file_result != SUCCESS ) {
-                LOG_ERROR("Error sending latest audio record file.");
-                result = GENERIC_ERROR;
+            switch ( send_file_result ) {
+
+                case SUCCESS:
+                    LOG_TRACE_POINT;
+                    result = SUCCESS;
+                    break;
+
+                case DEVICE_DISCONNECTED:
+                    LOG_TRACE_POINT;
+                    result = DEVICE_DISCONNECTED;
+                    break;
+
+                default:
+                    LOG_ERROR("Error sending latest audio record file.");
+                    result = GENERIC_ERROR;
+                    break;
             }
-            else {
-                LOG_TRACE_POINT;
-                result = SUCCESS;
-            }
+
         }
         free(latest_audio_record_file_path);
     }
@@ -991,6 +1053,7 @@ int remote_device_communication_loop(int btc_socket_fd) {
                 }
                 break;
 
+            case DEVICE_DISCONNECTED:
             case NO_PACKAGE_RECEIVED:
                 LOG_TRACE_POINT;
                 device_connected = false;
