@@ -30,6 +30,7 @@ source "$(dirname ${BASH_SOURCE})/audio/encoder/constants.sh";
 # Load log functions script.
 source "$(dirname ${BASH_SOURCE})/log/functions.sh";
 
+
 # ###
 # Functions elaboration.
 # ###
@@ -98,6 +99,8 @@ create_new_log_tarball_file(){
         return ${generic_error};
     fi;
 
+    echo "${log_tarball_file_path}";
+
     log ${log_message_type_trace} "New tarball file created: \"${log_tarball_file_path}\".";
 
     return ${success};
@@ -136,6 +139,8 @@ retrieve_latest_log_tarball_file_path() {
         log ${log_message_type_error} "Could not retrieve latest log tarball file path: ${command_result}";
         return ${generic_error};
     fi;
+
+    echo "${latest_log_tarball_file_path}";
 
     log ${log_message_type_trace} "Latest tarball file found: \"${latest_log_tarball_file_path}\".";
 
@@ -179,44 +184,9 @@ compress_log_files() {
         return ${generic_error};
     fi;
 
-    # If a log tarball file was retrieved.
-    if [ -n "${latest_tarball_file}" ];
+    # If the latest log tarball file was not found.
+    if [ -z "${latest_tarball_file}" ];
     then
-
-        # Retrieves the latest log tarball file size.
-        latest_tarball_file_size=$(stat -c%s "${latest_tarball_file}");
-        stat_result=${?};
-        if [ ${stat_result} -ne 0 -o -z "${latest_tarball_file_size}" ];
-        then
-            log ${log_message_type_error} "Could not retrieve latest log tarball file size.";
-            return ${generic_error};
-        fi;
-
-        # If latest tarball file size exceeds the limit.
-        if [ ${latest_tarball_file_size} -ge ${log_tarball_file_size_limit} ];
-        then
-
-            log ${log_message_type_trace} "Compressing tarball file \"${latest_tarball_file}\".";
-
-            # Zips the current tarball file.
-            gzip "${latest_tarball_file}";
-            gzip_result=${?};
-            if [ ${gzip_result} -ne 0 ];
-            then
-                log ${log_message_type_error} "Error while compressing previous log tarball file: ${gzip_result}";
-                return ${generic_error};
-            fi;
-
-            # Creates a new tarball file.
-            latest_tarball_file="$(create_new_log_tarball_file)";
-            create_new_log_tarball_file_result=${?};
-            if [ ${create_new_log_tarball_file_result} -ne ${success} -o -z "${latest_tarball_file}" ];
-            then 
-                log ${log_message_type_error} "Could not create a new log tarball file.";
-                return ${generic_error};
-            fi;
-        fi;
-    else
         # Creates a new tarball file.
         latest_tarball_file=$(create_new_log_tarball_file);
         create_new_log_tarball_file_result=${?};
@@ -245,6 +215,31 @@ compress_log_files() {
         return ${generic_error};
     fi;
 
+    # Retrieves the latest log tarball file size.
+    latest_tarball_file_size=$(stat -c%s "${latest_tarball_file}");
+    stat_result=${?};
+    if [ ${stat_result} -ne 0 -o -z "${latest_tarball_file_size}" ];
+    then
+        log ${log_message_type_error} "Could not retrieve latest log tarball file size.";
+        return ${generic_error};
+    fi;
+
+    # If latest tarball file size exceeds the limit.
+    if [ ${latest_tarball_file_size} -ge ${log_tarball_file_size_limit} ];
+    then
+
+        log ${log_message_type_trace} "Compressing tarball file \"${latest_tarball_file}\".";
+
+        # Zips the current tarball file.
+        gzip "${latest_tarball_file}";
+        gzip_result=${?};
+        if [ ${gzip_result} -ne 0 ];
+        then
+            log ${log_message_type_error} "Error while compressing previous log tarball file: ${gzip_result}";
+            return ${generic_error};
+        fi;
+    fi;
+
     return ${success};
 }
 
@@ -261,6 +256,8 @@ clean_up_audio_directory() {
 
     local command_result;
     local file_exists;
+
+    set_log_level ${log_message_type_trace};
 
     log ${log_message_type_trace} "Cleaning up audio directory.";
 
