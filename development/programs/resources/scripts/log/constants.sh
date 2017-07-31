@@ -129,6 +129,6 @@ fi;
 # Limit of a log tarball size (in bytes).
 if [ -z "${log_tarball_file_size_limit}" ];
 then
-    let "_temporary_log_tarball_file_size_limit = 10 * 1024 * 1024";
+    let "_temporary_log_tarball_file_size_limit = 1 * 1024 * 1024";
     readonly log_tarball_file_size_limit=${_temporary_log_tarball_file_size_limit};
 fi;
