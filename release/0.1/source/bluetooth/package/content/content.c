@@ -102,7 +102,7 @@ int convert_byte_array_to_content(content_t* content, byte_array_t byte_array, u
             break;
 
         default:
-            LOG_ERROR("Unknown package type: 0x%x.", package_type_code);
+            LOG_WARNING("Unknown package type: 0x%x.", package_type_code);
             convertion_result = GENERIC_ERROR;
             break;
     }

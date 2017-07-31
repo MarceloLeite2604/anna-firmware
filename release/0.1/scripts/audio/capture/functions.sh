@@ -245,8 +245,8 @@ stop_audio_capture_process(){
     stop_process_result=${?};
     if [ ${stop_process_result} -ne ${success} ];
     then
-        log ${log_message_type_error} "Could not stop audio capture process.";
-        return ${generic_error};
+        log ${log_message_type_warning} "Could not stop audio capture process.";
+        # return ${generic_error};
     else
         log ${log_message_type_trace} "Audio capture process stopped.";
     fi;
