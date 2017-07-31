@@ -659,7 +659,7 @@ int send_file_chunk(int socket_fd, size_t chunk_size, uint8_t* chunk_data){
 int send_file_content(int socket_fd, char* file_path, size_t file_size) {
     LOG_TRACE("File size: %zu, file path: \"%s\".", file_size, file_path);
 
-    bool send_content_concluded;
+    bool send_content_concluded = false;
     int errno_value;
     uint8_t* data_chunk_buffer;
     size_t bytes_read;
