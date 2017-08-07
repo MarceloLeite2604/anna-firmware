@@ -263,18 +263,29 @@ clean_up_audio_directory() {
 
     # Checks if an audio files exists.
     file_exists=$(ls -1 ${audio_file_pattern} 2>/dev/null | wc -l);
-    if [ ${file_exists} -le 1 ];
+    # if [ ${file_exists} -le 1 ];
+    if [ ${file_exists} -eq 0 ];
     then
         log ${log_message_type_trace} "No files found on audio directory.";
         return ${success};
     fi;
 
     # $(eval ls -A1tr ${audio_file_pattern} | head -n -1 | xargs echo );
-    $(ls -1 ${audio_file_pattern} | head -n -1 | xargs -i mv {} "${trash_directory}" );
+    # $(ls -1 ${audio_file_pattern} | head -n -1 | xargs -i mv {} "${trash_directory}" );
+    $(ls -1 ${audio_file_pattern} | xargs -i mv {} "${trash_directory}" );
     command_result=${?};
     if [ ${command_result} -ne 0 ];
     then
-        log ${log_messsage_type_error} "Error while cleaning up audio directory: ${clean_up_audio_directory_result}.";
+        log ${log_message_type_error} "Error while cleaning up audio directory: ${command_result}.";
+        return ${generic_error};
+    fi;
+
+    # Remove the latest audio record file.
+    mv "${latest_audio_record_file_name_file}" "${trash_directory}";
+    command_result=${?};
+    if [ ${command_result} -ne 0 ];
+    then
+        log ${log_message_type_error} "Error while removing latest audio file name file: ${command_result}.";
         return ${generic_error};
     fi;
 

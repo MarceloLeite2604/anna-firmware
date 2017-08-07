@@ -1,5 +1,6 @@
 [Unit]
 Description=Anna - Clean up system directories
+After=ntp
 
 [Service]
 Type=oneshot

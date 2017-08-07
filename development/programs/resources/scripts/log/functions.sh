@@ -420,8 +420,6 @@ log() {
     local log_message;
     local _log_write_log_message_result;
 
-    set +x;
-
     # Check function parameters.
     if [ ${#} -lt 1 -o ${#} -gt 2 ];
     then
